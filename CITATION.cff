@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this formalization in your work, please cite it as the software artifact and cite the paper it formalizes."
+title: "FCC: a Lean 4 + mathlib formalization of Function-Correcting Codes With Data Protection"
+abstract: >-
+  A Lean 4 + mathlib formalization of the definitions, numbered results and
+  proofs of Rajput, Rajan, Freij-Hollanti and Hollanti, "Function-Correcting
+  Codes With Data Protection" (IEEE Trans. Inform. Theory 72(7), 2026),
+  following the layout, documentation and verification conventions of Shenghao
+  Yang's n4code_lean_dev project.  Includes a paper-to-Lean notation dictionary
+  and consistency checkers.
+authors:
+  - family-names: Liu
+    given-names: ""
+    # TODO: fill in your full name as it should appear in citations
+keywords:
+  - Lean 4
+  - mathlib
+  - formal verification
+  - interactive theorem proving
+  - coding theory
+  - function-correcting codes
+license: Apache-2.0
+date-released: "2026-09-14"
+preferred-citation:
+  type: article
+  title: "Function-Correcting Codes With Data Protection"
+  authors:
+    - family-names: Rajput
+      given-names: Charul
+    - family-names: Rajan
+      given-names: Sundar
+    - family-names: Freij-Hollanti
+      given-names: Ragnar
+    - family-names: Hollanti
+      given-names: Camilla
+  journal: "IEEE Transactions on Information Theory"
+  volume: 72
+  issue: 7
+  start: 4860
+  end: 4880
+  year: 2026
+  doi: "10.1109/TIT.2026.3692458"

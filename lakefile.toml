@@ -1,0 +1,15 @@
+name = "FCC"
+version = "0.1.0"
+defaultTargets = ["FCC"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+# Pinned to the revision recorded in lake-manifest.json (the same revision the
+# guide repository `lean-formalization-study` uses).  The Lean version in
+# `lean-toolchain` must match the one mathlib pins, otherwise lake warns about
+# conflicting toolchains and the prebuilt mathlib oleans are not usable.
+rev = "70f3f13433ba3d82a15a7cae679abac9128f102b"
+
+[[lean_lib]]
+name = "FCC"

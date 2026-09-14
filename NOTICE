@@ -1,0 +1,34 @@
+NOTICE
+======
+
+This project is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+The paper being formalized
+-------------------------
+
+    C. Rajput, B. S. Rajan, R. Freij-Hollanti, C. Hollanti,
+    "Function-Correcting Codes With Data Protection",
+    IEEE Trans. Inform. Theory 72(7):4860-4880, July 2026.
+    DOI 10.1109/TIT.2026.3692458.  Open Access, CC BY 4.0.
+
+The paper itself is not distributed with this repository (it is git-ignored and
+kept locally under paper/).  The theorem statements formalized here are the
+paper's; the Lean statements, proofs and documentation are original work.
+
+Third-party material
+-------------------
+
+The repository layout, the documentation set (PLAN.md, Notation.md,
+CONSISTENCY.md, VERIFICATION.md, AGENTS.md, ONBOARDING.md), the verification
+scripts and the CI workflow are adapted from
+
+    Shenghao Yang, "n4code_lean_dev": a Lean 4 + mathlib formalization of
+    Dong & Yang, "On Optimal Finite-Length Block Codes of Size Four for Binary
+    Symmetric Channels", IEEE Trans. Inf. Theory 71(1):138-166, 2025.
+    https://github.com/shhyang/n4code_lean_dev
+
+which is distributed under the Apache License, Version 2.0.  No Lean source file
+from that project is copied here: this development is written against mathlib's
+own Hamming API (Mathlib.InformationTheory.Hamming), and only the project
+conventions (module layout, labelling scheme, phase plan, check scripts) are
+reused.

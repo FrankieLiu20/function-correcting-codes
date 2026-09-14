@@ -1,0 +1,11 @@
+# Headline results of the FCC development.
+#
+# Every name in this manifest must have a `#print axioms` declaration in
+# FCC/AxiomCheck.lean, and every `#print axioms` there must be listed here (both
+# directions are enforced by scripts/axioms_check.ps1).  Adding or removing a
+# headline theorem therefore requires an explicit change here.
+#
+# Phase 0 (paper-independent base layer):
+mem_ball_self
+wt_le_wt_add_hammingDist
+wt_zero

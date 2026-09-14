@@ -1,0 +1,64 @@
+# Verification status
+
+What has been checked, by which command, and with which trusted base.  This file
+is updated at every phase boundary and is the release record (`PLAN.md` §6,
+milestone M5).
+
+## Trusted base
+
+* **Lean** `leanprover/lean4:v4.34.0-rc2` (`lean-toolchain`), **mathlib** at the
+  revision pinned in `lake-manifest.json` (`70f3f134…`, the revision mathlib's
+  prebuilt cache is available for).
+* Axioms allowed in headline results: `propext`, `Quot.sound`,
+  `Classical.choice`.  `scripts/axioms_check.ps1` fails on anything else,
+  including `sorryAx` and the `native_decide` trust axioms.
+* `decide`/`native_decide` are used only on small, concrete instances (the
+  paper's examples) and never in a headline result.
+
+## Reproduce
+
+```bash
+lake exe cache get      # once: restore prebuilt mathlib oleans
+lake build              # kernel check of every module
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\consistency_check.ps1
+powershell -ExecutionPolicy Bypass -File scripts\axioms_check.ps1
+```
+
+CI runs exactly these commands on every push (`.github/workflows/ci.yml`).
+
+## Phase 0 — infrastructure and base layer (2026-09-14)
+
+Verified:
+
+| Check | Result |
+| --- | --- |
+| `lake build` | green |
+| `scripts/consistency_check.ps1` | green (no paper labels referenced yet) |
+| `scripts/axioms_check.ps1` | green — `wt_zero`, `wt_le_wt_add_hammingDist`, `mem_ball_self` depend only on the allowed axioms |
+| GitHub Actions | green (see the badge in `README.md`) |
+
+Formalized in phase 0: `Word F n`, `wt`, `ball` (`FCC/Definitions.lean`);
+`wt_zero`, `wt_le_wt_add_hammingDist`, `mem_ball_self` (`FCC/Basic.lean`).
+No statement of the paper is formalized yet.
+
+## Not formalized (and why)
+
+Nothing yet; this section is filled in as results are classified.
+
+Planned to appear here: the paper's numbered **examples**
+(`PLAN.md` §1.2 — they are illustrations, not theorems; some are used as
+`decide` regression tests) and the **external** rows of `PLAN.md` §1.1
+(`lem:1`, `lem:4`, `lem:12`, `cor:3`, `cor:5`), which are quoted from other
+papers and will be used as explicit hypotheses rather than assumed as axioms.
+
+## Statement-level caveats
+
+None yet.  `Notation.md` §5 lists the places where the paper's printed statement
+needs care (the direction of `thm:15`/`thm:16`, the constants of `lem:1`, the
+missing `max(·,0)` in `def:11`, the "similar proof" of `thm:4` Case 2, the
+covering argument of `thm:10`, and the systematicity step in `lem:6`); each entry
+stays there until the corresponding phase resolves it, and the resolution is
+recorded in `DEVLOG.md`.

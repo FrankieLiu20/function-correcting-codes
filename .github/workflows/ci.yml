@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Installs the toolchain pinned in lean-toolchain, restores the mathlib
+      # olean cache, and runs `lake build`.
+      - name: Build (toolchain + mathlib cache + lake build)
+        uses: leanprover/lean-action@v1
+        with:
+          build: true
+          test: false
+          lint: false
+
+      - name: Paper/Lean consistency check
+        run: pwsh scripts/consistency_check.ps1
+
+      - name: Axiom audit (fails on sorryAx)
+        run: pwsh scripts/axioms_check.ps1
