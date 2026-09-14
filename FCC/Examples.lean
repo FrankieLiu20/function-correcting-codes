@@ -50,7 +50,8 @@ namespace FCC
 
 namespace Examples
 
-/-- `(internal)` — `F₂` for the regression tests (see the module docstring). -/
+/-- `(internal, test scaffolding — no paper item)` — `F₂` for the regression
+tests (see the module docstring). -/
 abbrev F₂ := Bool
 
 section RegressionTests
@@ -77,7 +78,7 @@ theorem ball_fin3_2_one : (ball (0 : Word (Fin 3) 2) 1).card = 5 := by decide
 /-- `(paper notation, §I-E)` — the sphere of radius 1 in `F₂³` has `3` elements. -/
 theorem sphere_f2_3_one : (sphere (0 : Word F₂ 3) 1).card = 3 := by decide
 
-/-- `(internal)` — the message space `F₂³` has `q^k = 8` elements. -/
+/-- `(internal, §IV)` — the message space `F₂³` has `q^k = 8` elements. -/
 theorem card_word_f2_3 : Fintype.card (Word F₂ 3) = 8 := by decide
 
 /-! ## 2. Example 6: the `[6,3,3]` code, its CDRM and its `D`-code -/

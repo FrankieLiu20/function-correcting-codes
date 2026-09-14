@@ -129,3 +129,29 @@ scheme was therefore unified to the paper's numbering:
   example inside `Statements.lean` and was counted as a stated result;
 * `Notation.md` §1, `AGENTS.md` rule 13 and `FCC/Statements.lean` document the
   scheme, which is now the only label notation in the repository.
+
+### Refinement the same day: no bare `(internal)`
+
+The first pass left some helpers tagged with a bare `(internal)`, which reads as
+"no connection to the paper" — the project owner opened `FCC/Balls.lean`, saw
+`(internal)`, and reasonably concluded that the change had not been applied
+there at all.  Every tag now carries an anchor:
+
+| Tag | Meaning |
+| --- | --- |
+| `(paper notation, §I-E)` | the paper's own notation (a word, `wt`, `B(u,t)`) |
+| `(internal, §I-E)` | a helper serving the §I-E layer |
+| `(internal, §IV)` | a helper serving the `q^k` bookkeeping of §IV |
+| `(internal, §VI-C — used by `#lemma 6#`)` | a helper whose consumer is known |
+| `(internal, §VIII + App. — used by `#theorem 17#`–`#theorem 19#`)` | idem |
+| `(internal, test scaffolding — no paper item)` | `decide` scaffolding only |
+
+A helper whose anchor cannot be named is a smell: either it serves a numbered
+item we can point at, or it does not belong in the library yet.
+
+`scripts/consistency_check.ps1` now enforces this in step [5/5]: it fails if any
+`/--` docstring opens with neither a paper marker nor an `(internal …)` /
+`(paper notation …)` tag.  Two fixes went in with it: the script is ASCII-only
+again (it had picked up `§`/`…` in its messages, which Windows PowerShell 5.1
+mangles when reading a BOM-less `.ps1`), and it reads the Lean sources with
+`-Encoding UTF8` so that non-ASCII text in docstrings is not mangled either.

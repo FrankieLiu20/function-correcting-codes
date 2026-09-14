@@ -7,7 +7,7 @@
     a numbered item of the paper opens its docstring with that item's number,
     written as
 
-        /-- `#theorem 2#` (§IV): r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u_1,...,u_{q^k})). -/
+        /-- `#theorem 2#` (section IV): r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u_1,...,u_{q^k})). -/
         theorem optimalRedundancyData_eq_N_drmData : ... := by sorry
 
     (the full table: `#definition N#`, `#theorem N#`, `#lemma N#`,
@@ -97,7 +97,7 @@ if (-not (Test-Path $planPath)) {
 }
 $rows = @()
 $knownKeys = @{}
-foreach ($line in Get-Content $planPath) {
+foreach ($line in Get-Content $planPath -Encoding UTF8) {
   if ($line -notmatch '^\s*\|') { continue }
   $cells = @($line -split '\|' | ForEach-Object { $_.Trim() })
   $allKeys = @()
@@ -151,7 +151,7 @@ Write-Host "== [2/5] inventory: $($rows.Count) row(s) with a paper marker, $($kn
 Write-Host '== [3/5] Lean -> plan: every marker used in FCC/ must be an inventory row =='
 $usedKeys = @{}
 foreach ($f in $leanFiles) {
-  $text = Get-Content -LiteralPath $f.FullName -Raw
+  $text = Get-Content -LiteralPath $f.FullName -Raw -Encoding UTF8
   foreach ($k in (Get-MarkerKeys $text)) {
     if (-not $usedKeys.ContainsKey($k)) { $usedKeys[$k] = $f.Name }
   }
@@ -171,7 +171,7 @@ else { Write-Host "  ok: all $($usedKeys.Count) marker(s) used in FCC/ are inven
 Write-Host '== [4/5] plan -> Lean: each row must be stated by its Lean name =='
 $stated = @{}
 foreach ($f in $leanFiles) {
-  $lines = @(Get-Content -LiteralPath $f.FullName)
+  $lines = @(Get-Content -LiteralPath $f.FullName -Encoding UTF8)
   for ($i = 0; $i -lt $lines.Count; $i++) {
     foreach ($row in $rows) {
       if ($row.External -or $row.DeclRegex.Count -eq 0) { continue }
@@ -206,7 +206,26 @@ if ($unchecked.Count -gt 0) {
 }
 
 # ------------------------------------------ 5. orphans, module graph, sorry
-Write-Host '== [5/5] module graph and sorry count =='
+Write-Host '== [5/5] docstring convention, module graph and sorry count =='
+$badDocs = 0
+foreach ($f in $leanFiles) {
+  foreach ($line in Get-Content -LiteralPath $f.FullName -Encoding UTF8) {
+    if ($line -notmatch '^\s*/--') { continue }
+    # Every declaration docstring opens with a paper marker, or declares itself
+    # an internal helper / paper notation (and then names the paper part).
+    if ($line -match '^\s*/--\s*`?(?:#(definition|theorem|lemma|corollary|example|remark)\s*[0-9]+#|\(internal|\(paper notation)') { continue }
+    Write-Host "  docstring without a paper reference: $($f.Name): $($line.Trim())"
+    $badDocs = 1
+  }
+}
+if ($badDocs -ne 0) {
+  Write-Host '  FAIL: every docstring must open with a paper marker (#definition N#, ...)'
+  Write-Host '        or with an (internal, ...) / (paper notation, ...) tag; see Notation.md section 1'
+  $failed = 1
+} else {
+  Write-Host '  ok: every docstring opens with a paper marker or an (internal ...)/(paper notation ...) tag'
+}
+
 $orphans = 0
 foreach ($f in $leanFiles) {
   $importLine = "import FCC.$($f.BaseName)"
@@ -224,7 +243,7 @@ if ($orphans -eq 1) { $failed = 1 } else { Write-Host '  ok: all FCC modules are
 
 $sorryCount = 0
 foreach ($f in $leanFiles) {
-  foreach ($line in Get-Content -LiteralPath $f.FullName) {
+  foreach ($line in Get-Content -LiteralPath $f.FullName -Encoding UTF8) {
     if ($line -match '^\s*(\u00B7\s*)?sorry(\s|$)') { $sorryCount++ }
   }
 }

@@ -95,10 +95,14 @@ The rules below are adapted from `AGENTS.md` in Shenghao Yang's
     and never tex line numbers.
 
     Helpers that are *not* a numbered item of the paper open their docstring
-    with `(internal)` or `(paper notation, §I-E)` instead of a marker, and name
-    the numbered item that consumes them (e.g. "used by `#lemma 6#`").  Keep the
-    text after the marker close to the paper's own wording: a reader must be
-    able to compare the docstring with the PDF without translating.
+    with `(internal, §… )` or `(paper notation, §…)` instead of a marker, and
+    must name the paper part they serve — `(internal, §VI-C — used by
+    `#lemma 6#`)` — so a bare `(internal)` never stands on its own.  Keep the
+    text after the tag close to the paper's own wording: a reader must be able
+    to compare the docstring with the PDF without translating.  The checker
+    enforces this (a docstring with no marker and no tag fails the build gate),
+    and `(internal, test scaffolding — no paper item)` is the only tag without
+    a section, used for the `decide` scaffolding in `FCC/Examples.lean`.
 
 14. **Never leave the build broken.**  `sorry` stubs are allowed while a phase
     is in progress, but every `sorry` must carry a comment naming the paper

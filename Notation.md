@@ -44,10 +44,19 @@ count as a stated result.
 
 Declarations that are **not** a numbered item of the paper — helpers,
 restatements of mathlib lemmas, notation — open their docstring with
-`(internal)` or `(paper notation, §I-E)` instead, and name the paper item that
-consumes them (e.g. "used by `#lemma 6#`").  The text after the marker stays
-close to the paper's wording, so that a reader can compare docstring and PDF
-without translating.
+`(internal, §… )` or `(paper notation, §…)` instead, and they must name the
+paper part they serve, so that a bare `(internal)` never stands on its own:
+
+```lean
+/-- `(internal, §VI-C — used by `#lemma 6#`)` — `wt(u) ≤ wt(v) + d(u,v)`, the step
+where the paper writes "Since `d(u,v) ≥ wt(u) − wt(v)`, …". -/
+theorem wt_le_wt_add_hammingDist ...
+```
+
+The text after the marker stays close to the paper's wording, so that a reader
+can compare docstring and PDF without translating.  The checker enforces the
+convention mechanically: a docstring that opens with neither a paper marker nor
+one of these two tags fails `scripts/consistency_check.ps1`.
 
 ---
 
