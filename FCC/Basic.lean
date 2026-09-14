@@ -66,4 +66,30 @@ theorem mem_ball_self (u : Word F n) (t : ℕ) : u ∈ ball u t := by
 
 end Ball
 
+section Systematic
+
+/-- `(internal, §II — the hypothesis of `#definition 1#`)` — a *systematic*
+encoding: the first `k` coordinates of `C u` are the message `u` itself.  The
+paper's Definition 1 calls its encoding systematic and every construction in the
+paper is of this shape. -/
+def IsSystematic {F : Type*} {k r : ℕ} (C : Word F k → Word F (k + r)) : Prop :=
+  ∀ u i, C u (Fin.castAdd r i) = u i
+
+/-- `(internal, §VII)` — the message part of a length-`k + r` word: its first `k`
+coordinates.  Used to read off `u` from a codeword `(u,p)`. -/
+def msgPart {F : Type*} {k r : ℕ} (c : Word F (k + r)) : Word F k :=
+  fun i => c (Fin.castAdd r i)
+
+end Systematic
+
+section MinDist
+
+/-- `(internal, §V — used by `#definition 12#`)` — the minimum distance `d_min(C)`
+of a code: the smallest Hamming distance between two distinct codewords, and `0`
+when `C` has fewer than two words. -/
+noncomputable def minDist {F : Type*} [DecidableEq F] {n : ℕ} (C : Finset (Word F n)) : ℕ :=
+  sInf {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d}
+
+end MinDist
+
 end FCC

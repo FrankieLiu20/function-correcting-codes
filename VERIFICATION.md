@@ -68,6 +68,38 @@ Not yet formalized in this step: the closed form
 `|B(u,t)| = Σ_{i≤t} C(n,i)(q-1)^i`.  The `decide` tests check its first values
 (`F₂³`: 4, 7, 8; `F₃²`: 5) but not the general identity — see `TODO.md`.
 
+## Phase 1 (definitions) — Definitions 1–18 (2026-09-14)
+
+Verified:
+
+| Check | Result |
+| --- | --- |
+| `lake build` | green (1799 jobs) |
+| `scripts/consistency_check.ps1` | green — the 18 definition rows of `PLAN.md` §1.1 are `stated`; 43 rows (theorems, lemmas, corollaries, the remaining examples) still pending |
+| `scripts/axioms_check.ps1` | green — 13 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+| docstring convention | green — every docstring opens with a paper marker or an `(internal, …)` tag |
+| `sorry` in the library | 0 |
+
+Formalized in `FCC/Paper.lean`, in the paper's order: `IsFCC`/`optimalRedundancy`
+(`#definition 1#`), `drm` (`#definition 2#`), `IsDCode`/`N`/`Nconst`
+(`#definition 3#`), `fDist` (`#definition 4#`), `fdm` (`#definition 5#`),
+`IsFCCData` (`#definition 6#`), `cdrm` (`#definition 7#`), `codedFDist`
+(`#definition 8#`), `cfdm` (`#definition 9#`), `optimalRedundancyData`
+(`#definition 10#`), `drmData` (`#definition 11#`), `minDistGraph`
+(`#definition 12#`), `functionBall` (`#definition 13#`), `IsLocallyBinary`
+(`#definition 14#`), `IsLocallyBounded` (`#definition 15#`), `IsLinearFCC`
+(`#definition 16#`), `CosetCode`/`cosetDist`/`cosetCodeMinDist`
+(`#definition 17#`), `kernelSubcode`/`IsLinearFCCKernel` (`#definition 18#`).
+Helpers they need: `IsSystematic`, `msgPart`, `minDist` (`FCC/Basic.lean`),
+`msgPartLinear` (`FCC/Paper.lean`, §VII).
+
+The three example checks of phase 1a now call the real `cdrm`/`drmData`; the
+temporary transcriptions were deleted and `FCC/Internal.lean` holds only the
+test alphabet `F₂`.
+
+Known gaps, recorded in `PLAN.md` §1.2: examples 1–5, 8, 9 and 12–17 are not
+formalized yet; 11, 15, 16 and 17 additionally need the §VIII bounds.
+
 ## Not formalized (and why)
 
 Nothing yet; this section is filled in as results are classified.

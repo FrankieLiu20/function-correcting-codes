@@ -43,12 +43,12 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
-| `#definition 1#` | II | `(f,t)`-FCC: systematic `C : F_q^k → F_q^{k+r}` with `d(C(u₁),C(u₂)) ≥ 2t+1` whenever `f(u₁) ≠ f(u₂)`; `r_f(k,t)` = optimal redundancy | `IsFCC`, `optimalRedundancy` | todo |
-| `#definition 2#` | II | Distance requirement matrix `D_f(t,u₁,…,u_M)`, entries `max(2t+1−d(uᵢ,uⱼ),0)` if `f(uᵢ) ≠ f(uⱼ)`, else `0` | `drm` | todo |
-| `#definition 3#` | II | Irregular-distance code (`D`-code) for `D ∈ ℕ^{M×M}`; `N(D)` = minimal length; `N(M,D)` for a constant matrix | `IsDCode`, `N`, `Nconst` | todo |
+| `#definition 1#` | II | `(f,t)`-FCC: systematic `C : F_q^k → F_q^{k+r}` with `d(C(u₁),C(u₂)) ≥ 2t+1` whenever `f(u₁) ≠ f(u₂)`; `r_f(k,t)` = optimal redundancy | `IsFCC`, `optimalRedundancy` | stated |
+| `#definition 2#` | II | Distance requirement matrix `D_f(t,u₁,…,u_M)`, entries `max(2t+1−d(uᵢ,uⱼ),0)` if `f(uᵢ) ≠ f(uⱼ)`, else `0` | `drm` | stated |
+| `#definition 3#` | II | Irregular-distance code (`D`-code) for `D ∈ ℕ^{M×M}`; `N(D)` = minimal length; `N(M,D)` for a constant matrix | `IsDCode`, `N`, `Nconst` | stated |
 | `#lemma 1#` | II | `N(M,D) ≤ 2(D−2)/(1−2/q)·ln D/D` for `D ≥ 10`, `M ≤ D²` | — | external ([10, Lem. 2]) |
-| `#definition 4#` | II | `d(fᵢ,fⱼ) = min{d(u₁,u₂) | f(u₁)=fᵢ, f(u₂)=fⱼ}` | `fDist` | todo |
-| `#definition 5#` | II | Function distance matrix (FDM), entries `max(2t+1−d(fᵢ,fⱼ),0)` off the diagonal | `fdm` | todo |
+| `#definition 4#` | II | `d(fᵢ,fⱼ) = min{d(u₁,u₂) | f(u₁)=fᵢ, f(u₂)=fⱼ}` | `fDist` | stated |
+| `#definition 5#` | II | Function distance matrix (FDM), entries `max(2t+1−d(fᵢ,fⱼ),0)` off the diagonal | `fdm` | stated |
 | `#corollary 1#` | II | `r_f(k,t) ≥ N(D_f(t,u₁,…,u_m))` for any subset; and `≥ 2t` when `|Im f| ≥ 2` | `optimalRedundancy_ge_drm`, `two_mul_le_optimalRedundancy` | todo |
 | `#theorem 1#` | II | `r_f(k,t) ≤ N(FDM)` | `optimalRedundancy_le_fdm` | todo |
 | `#corollary 2#` | II | equality in `#theorem 1#` when a representative set realises the FDM | `optimalRedundancy_eq_fdm` | todo |
@@ -58,18 +58,18 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
-| `#definition 6#` | III | `(f:d_d,d_f)`-FCC: `d(C(u₁),C(u₂)) ≥ d_d` for `u₁ ≠ u₂` **and** `≥ d_f` for `f(u₁) ≠ f(u₂)`, with `d_d ≤ d_f` | `IsFCCData` | todo |
-| `#definition 7#` | III | Coded DRM `D_{C,f}(t_f:u₁,…,u_M)`: like `#definition 2#` with `d(c_{uᵢ},c_{uⱼ})` | `cdrm` | todo |
-| `#definition 8#` | III | coded distance `d_C(fᵢ,fⱼ)` | `codedFDist` | todo |
-| `#definition 9#` | III | Coded FDM (CFDM) | `cfdm` | todo |
+| `#definition 6#` | III | `(f:d_d,d_f)`-FCC: `d(C(u₁),C(u₂)) ≥ d_d` for `u₁ ≠ u₂` **and** `≥ d_f` for `f(u₁) ≠ f(u₂)`, with `d_d ≤ d_f` | `IsFCCData` | stated |
+| `#definition 7#` | III | Coded DRM `D_{C,f}(t_f:u₁,…,u_M)`: like `#definition 2#` with `d(c_{uᵢ},c_{uⱼ})` | `cdrm` | stated |
+| `#definition 8#` | III | coded distance `d_C(fᵢ,fⱼ)` | `codedFDist` | stated |
+| `#definition 9#` | III | Coded FDM (CFDM) | `cfdm` | stated |
 | — | III-A | Two-step construction: `[n,k,d_d]` code `C`, then an FCC on the codewords `c_u = uG`, giving `C_f(u) = C'_f(c_u)` by `r_s = n−k+r'` | (proved via `#theorem 5#`, `#corollary 4#` and the concrete constructions of §VI–VII) | todo |
 
 #### §IV Bounds for optimal redundancy with data protection
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
-| `#definition 10#` | IV | optimal redundancy `r_f(k:d_d,d_f) = r_f(k,t_d,t_f)` | `optimalRedundancyData` | todo |
-| `#definition 11#` | IV | DRM `D_f(t_d,t_f:u₁,…,u_M)`: `max(2t_d+1−d,0)` if `f(uᵢ)=f(uⱼ)`, `max(2t_f+1−d,0)` if `f(uᵢ)≠f(uⱼ)`, `0` on the diagonal | `drmData` | todo |
+| `#definition 10#` | IV | optimal redundancy `r_f(k:d_d,d_f) = r_f(k,t_d,t_f)` | `optimalRedundancyData` | stated |
+| `#definition 11#` | IV | DRM `D_f(t_d,t_f:u₁,…,u_M)`: `max(2t_d+1−d,0)` if `f(uᵢ)=f(uⱼ)`, `max(2t_f+1−d,0)` if `f(uᵢ)≠f(uⱼ)`, `0` on the diagonal | `drmData` | stated |
 | `#theorem 2#` | IV | `r_f(k,t_d,t_f) = N(D_f(t_d,t_f:u₁,…,u_{q^k}))` — **the central identity** | `optimalRedundancyData_eq_N_drmData` | todo |
 | `#theorem 3#` | IV | `r_f ≥ N(D_f(t_d,t_f:u₁,…,u_m))` for any subset; `r_f ≥ 2t_f` if `|Im f| ≥ 2`; `r_f ≥ N(q^k,2t_d+1)−k` | `optimalRedundancyData_ge_N_subset`, `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub` | todo |
 | `#theorem 4#` | IV | over `F₂`, if `2 ≤ |Im f| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d` | `binary_optimalRedundancyData_ge` | todo |
@@ -85,7 +85,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
-| `#definition 12#` | V | minimum-distance graph `G(C)`: vertices `C`, edges between codewords at distance `d_min(C)` | `minDistGraph` | todo |
+| `#definition 12#` | V | minimum-distance graph `G(C)`: vertices `C`, edges between codewords at distance `d_min(C)` | `minDistGraph` | stated |
 | `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with `|Im f| ≥ 2`, `d_f > d` | `not_isFCCData_of_connected` | todo |
 | `#theorem 9#` | V | if `G(C)` has `Q` components then no `f` with `|Im f| ≥ Q+1` and `d_f > d` works | `not_isFCCData_of_components` | todo |
 | `#theorem 10#` | V | `G(C)` is connected for every perfect `t`-error-correcting code | `isConnected_minDistGraph_of_perfect` | todo |
@@ -98,14 +98,14 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
-| `#definition 13#` | VI-A | function ball `B_f(u,ρ) = {f(u') | d(u,u') ≤ ρ}` | `functionBall` | todo |
-| `#definition 14#` | VI-A | `ρ`-locally binary function: `|B_f(u,ρ)| ≤ 2` for all `u` | `IsLocallyBinary` | todo |
+| `#definition 13#` | VI-A | function ball `B_f(u,ρ) = {f(u') | d(u,u') ≤ ρ}` | `functionBall` | stated |
+| `#definition 14#` | VI-A | `ρ`-locally binary function: `|B_f(u,ρ)| ≤ 2` for all `u` | `IsLocallyBinary` | stated |
 | `#lemma 3#` | VI-A | for `(d_f−1)`-locally binary `f` and a systematic `[n,k,d_d]` code: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d` (and `= 2(t_f−t_d)` in `t`-form) | `locallyBinary_redundancy_le` | todo |
 | `#corollary 9#` | VI-A | the same with a perfect linear code in step 1 | `locallyBinary_perfect_redundancy_le` | todo |
 | `#corollary 10#` | VI-A | optimality of the construction for `d_f = d_d+1` given a perfect code | `locallyBinary_perfect_optimal` | todo |
 | `#corollary 11#` | VI-A | with an MDS `(n,q^k,d_d = n−k+1)` code in step 1: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d = d_f−1` | `locallyBinary_mds_redundancy_le` | todo |
 | `#corollary 12#` | VI-A | optimality of the construction for `d_f = d_d+1` given an MDS code | `locallyBinary_mds_optimal` | todo |
-| `#definition 15#` | VI-B | `(ρ,λ)`-bounded function: `|B_f(u,ρ)| ≤ λ` for all `u` | `IsLocallyBounded` | todo |
+| `#definition 15#` | VI-B | `(ρ,λ)`-bounded function: `|B_f(u,ρ)| ≤ λ` for all `u` | `IsLocallyBounded` | stated |
 | `#lemma 4#` | VI-B | contiguous-block condition ⇒ a colouring `Col_f : F₂^k → [λ]` separating `f`-values at distance `≤ ρ` | — | external ([14]): hypothesis of `#theorem 12#` |
 | `#lemma 5#` | VI-B | `N(4,2t) = 3t` | `Nconst_four_two` | todo |
 | `#theorem 12#` | VI-B | for `(2t_f,λ)`-bounded `f` (with the `#lemma 4#` colouring): `r_f ≤ n−k+N(λ,2(t_f−t_d))`; for `q=2, λ=4`: `≤ n−k+3(t_f−t_d)` | `locallyBounded_redundancy_le` | todo |
@@ -115,12 +115,12 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
-| `#definition 16#` | VII | linear FCC: a `k`-dimensional subspace of `F_q^n` satisfying the two distance conditions (standard-form generator matrix) | `IsLinearFCC` | todo |
+| `#definition 16#` | VII | linear FCC: a `k`-dimensional subspace of `F_q^n` satisfying the two distance conditions (standard-form generator matrix) | `IsLinearFCC` | stated |
 | `#lemma 7#` | VII | `D_f = {(u,p) ∈ C | u ∈ ker f}` is a subspace of `C` of dimension `dim ker f` | `kernelSubcode` | todo |
 | `#lemma 8#` | VII | `min{wt(c₁−c₂) | c₁ ∈ vᵢ+D, c₂ ∈ vⱼ+D} = min_{d∈D} wt(vᵢ−vⱼ+d)` | `cosetDist_eq` | todo |
 | `#lemma 9#` | VII | in a linear `(f:d_d,d_f)`-FCC of a linear `f`: `wt v ≥ d_f` for all `v ∈ C \ D_f` | `wt_ge_of_not_mem_kernel` | todo |
-| `#definition 17#` | VII | coset code `C/D` and its minimum distance `d(C/D)` | `CosetCode`, `cosetCodeMinDist` | todo |
-| `#definition 18#` | VII | equivalent definition: `d(C) ≥ d_d` and `d(C/D_f) ≥ d_f` | `IsLinearFCCKernel` | todo |
+| `#definition 17#` | VII | coset code `C/D` and its minimum distance `d(C/D)` | `CosetCode`, `cosetCodeMinDist` | stated |
+| `#definition 18#` | VII | equivalent definition: `d(C) ≥ d_d` and `d(C/D_f) ≥ d_f` | `IsLinearFCCKernel` | stated |
 | `#lemma 10#` | VII | `C_cat = {(C(u), D(f(u)))}` is a linear code of dimension `k` for linear `C`, `D`, `f` | `image_linear_concat` | todo |
 | `#theorem 13#` | VII | correctness: `C_cat` is a linear `(f:d_d,d_f)`-FCC of dimension `k`, total redundancy `(n−k)+r'` | `isLinearFCC_concat` | todo |
 
@@ -160,6 +160,14 @@ of the same example are listed in `FCC/Examples.lean`.
 | `#example 6#` | IV | the `[6,3,3]` code of the two-step construction, its coded distance requirement matrix (`#definition 7#`), the `D`-code `{000,110,101,011}`, and `N(D) = 3` | `ex6_cdrm_matches` | tested |
 | `#example 7#` | IV | the 8×8 distance requirement matrix (`#definition 11#`) for `f = wt` on `F₂³`, `t_d = 1`, `t_f = 2` | `ex7_drm_matches` | tested |
 | `#example 10#` | VI-A | the `[7,4,3]` Hamming code used in the locally binary construction | `ex10_min_dist` | tested |
+
+Still to be formalized: `#example 1#`–`#example 5#`, `#example 8#`,
+`#example 9#`, `#example 12#`–`#example 17#`.  Most of them are decidable data
+checks now that the definitions of §II–§VII exist (that is the next session's
+work).  Four of them, `#example 11#`, `#example 15#`, `#example 16#` and
+`#example 17#`, also depend on the §VIII bounds (`#theorem 14#`–`#theorem 16#`)
+or on a numerical value quoted from [1], so they are completed together with
+those.
 
 Three of them are already transcribed by hand (phase 1a):
 

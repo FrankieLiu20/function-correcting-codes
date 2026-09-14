@@ -2,6 +2,10 @@ import FCC.Definitions
 import FCC.Basic
 import FCC.Balls
 import FCC.Internal
+import Mathlib.Algebra.Module.LinearMap.Basic
+import Mathlib.Combinatorics.SimpleGraph.Basic
+import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+import Mathlib.Order.Lattice.Nat
 
 /-!
 # `FCC/Paper.lean` — the paper, in paper order
@@ -65,11 +69,99 @@ The full dictionary is `Notation.md` §2.
 
 /-! ## §II — Preliminaries
 
-TODO (phase 1 for the definitions, phase 2 for the statements):
-`#definition 1#`, `#definition 2#`, `#definition 3#`, `#lemma 1#` (external),
-`#definition 4#`, `#definition 5#`, `#corollary 1#`, `#theorem 1#`,
-`#corollary 2#`, `#corollary 3#` (external).
+Definitions 1–5 are below (phase 1, done).  The numbered *results* of this
+section are still to come: `#lemma 1#` (external), `#corollary 1#`,
+`#theorem 1#`, `#corollary 2#`, `#corollary 3#` (external).
 -/
+
+section Combinatorial
+
+variable {F : Type*} [Fintype F] [DecidableEq F] {α : Type*} [DecidableEq α]
+
+/-- `#definition 1#` (§II) — an `(f,t)`-function correcting code: "a systematic
+encoding `C : F_q^k → F_q^{k+r}` is defined as an `(f,t)`-FCC if, for any
+`u₁, u₂ ∈ F_q^k` such that `f(u₁) ≠ f(u₂)`, the following condition holds:
+`d(C(u₁), C(u₂)) ≥ 2t + 1`". -/
+def IsFCC {k r : ℕ} (f : Word F k → α) (C : Word F k → Word F (k + r)) (t : ℕ) : Prop :=
+  IsSystematic C ∧ ∀ u v, f u ≠ f v → 2 * t + 1 ≤ hammingDist (C u) (C v)
+
+/-- `#definition 1#` (§II) — the optimal redundancy `r_f(k,t)`: "the minimum of
+`r` for which there exists an `(f,t)`-FCC with an encoding function
+`C : F_q^k → F_q^{k+r}`". -/
+noncomputable def optimalRedundancy {k : ℕ} (f : Word F k → α) (t : ℕ) : ℕ :=
+  sInf {r : ℕ | ∃ C : Word F k → Word F (k + r), IsFCC f C t}
+
+/-- `#definition 2#` (§II) — the distance requirement matrix (DRM):
+`[D_f(t, u₁,…,u_M)]_{i,j} = max(2t+1 − d(u_i,u_j), 0)` if `f(u_i) ≠ f(u_j)`, and
+`0` otherwise. -/
+def drm {k M : ℕ} (f : Word F k → α) (t : ℕ) (u : Fin M → Word F k) : Fin M → Fin M → ℕ :=
+  fun i j => if f (u i) = f (u j) then 0
+    else max (2 * t + 1 - hammingDist (u i) (u j)) 0
+
+/-- `#definition 3#` (§II) — an irregular-distance code (`D`-code): a family
+`p₁,…,p_M` of words such that `d(p_i, p_j) ≥ [D]_{i,j}` for all `i ≠ j` (the
+paper's "there is an ordering of `P`" is the indexing of this family). -/
+def IsDCode {M : ℕ} (D : Fin M → Fin M → ℕ) (r : ℕ) : Prop :=
+  ∃ p : Fin M → Word F r, ∀ i j, i ≠ j → D i j ≤ hammingDist (p i) (p j)
+
+/-- `#definition 3#` (§II) — `N(D)`: "the smallest integer `r` such that there
+exists a `D`-code of length `r`" (`0` if no `D`-code exists at all; the `N`-API,
+including existence, is phase 3.0). -/
+noncomputable def N {M : ℕ} (D : Fin M → Fin M → ℕ) : ℕ :=
+  sInf {r : ℕ | IsDCode (F := F) D r}
+
+/-- `#definition 3#` (§II) — `N(M,D)`: the minimum length of an error-correcting
+code with `M` codewords and minimum distance at least `D`, i.e. `N` of the
+constant matrix. -/
+noncomputable def Nconst (M D : ℕ) : ℕ := N (F := F) (fun _ _ : Fin M => D)
+
+/-- `#definition 4#` (§II) — the distance between function values:
+`d(fᵢ, fⱼ) = min{d(u₁,u₂) | f(u₁) = fᵢ, f(u₂) = fⱼ}`.  The minimum over an empty
+family (an empty preimage) is `0`; every use below is for values in `Im(f)`. -/
+noncomputable def fDist {k : ℕ} (f : Word F k → α) (a b : α) : ℕ :=
+  sInf {d : ℕ | ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = d}
+
+/-- `#definition 5#` (§II) — the function distance matrix (FDM): the `E × E`
+matrix (`E = |Im(f)|`) with entries `max(2t+1 − d(fᵢ,fⱼ), 0)` off the diagonal
+and `0` on it.  We index it by the image values themselves. -/
+noncomputable def fdm {k : ℕ} (f : Word F k → α) (t : ℕ) : α → α → ℕ :=
+  fun a b => if a = b then 0 else max (2 * t + 1 - fDist f a b) 0
+
+/-! ### §III — A construction procedure for FCCs with data protection -/
+
+/-- `#definition 6#` (§III) — an `(f : d_d, d_f)`-FCC: "an encoding
+`C_f : F_q^k → F_q^{k+r}` ... if, for any `u₁, u₂` with `u₁ ≠ u₂`,
+`d(C_f(u₁), C_f(u₂)) ≥ d_d`, and for any `u₁, u₂` with `f(u₁) ≠ f(u₂)`,
+`d(C_f(u₁), C_f(u₂)) ≥ d_f`, where `d_d ≤ d_f`".
+
+The encoding is systematic, as in `#definition 1#` and throughout §III-A; the
+paper's statement of this definition does not repeat that word, so the choice is
+recorded in `Notation.md` §3.5 — it is what `#theorem 2#`'s proof uses. -/
+def IsFCCData {k r : ℕ} (f : Word F k → α) (C : Word F k → Word F (k + r))
+    (dd df : ℕ) : Prop :=
+  IsSystematic C ∧ (∀ u v, u ≠ v → dd ≤ hammingDist (C u) (C v)) ∧
+    ∀ u v, f u ≠ f v → df ≤ hammingDist (C u) (C v)
+
+/-- `#definition 7#` (§III) — the coded distance requirement matrix (CDRM):
+like the DRM of `#definition 2#`, but the distances are taken between the
+*codewords* `c_u = uG` rather than between the messages. -/
+def cdrm {k ℓ M : ℕ} (f : Word F k → α) (C : Word F k → Word F ℓ) (tf : ℕ)
+    (u : Fin M → Word F k) : Fin M → Fin M → ℕ :=
+  fun i j => if f (u i) = f (u j) then 0
+    else max (2 * tf + 1 - hammingDist (C (u i)) (C (u j))) 0
+
+/-- `#definition 8#` (§III) — the coded distance between function values:
+`d_C(fᵢ, fⱼ) = min{d(c_{u₁}, c_{u₂}) | f(u₁) = fᵢ, f(u₂) = fⱼ}`. -/
+noncomputable def codedFDist {k ℓ : ℕ} (f : Word F k → α) (C : Word F k → Word F ℓ)
+    (a b : α) : ℕ :=
+  sInf {d : ℕ | ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist (C u) (C v) = d}
+
+/-- `#definition 9#` (§III) — the coded function distance matrix (CFDM): the
+`E × E` matrix with entries `max(2t_f+1 − d_C(fᵢ,fⱼ), 0)` off the diagonal and
+`0` on it, indexed here by the image values. -/
+noncomputable def cfdm {k ℓ : ℕ} (f : Word F k → α) (C : Word F k → Word F ℓ) (tf : ℕ) :
+    α → α → ℕ :=
+  fun a b => if a = b then 0 else max (2 * tf + 1 - codedFDist f C a b) 0
 
 /-! ## §III — A construction procedure for FCCs with data protection
 
@@ -82,10 +174,28 @@ constructions of §VI–§VII.
 
 /-! ## §IV — Bounds for optimal redundancy for FCCs with data protection
 
-TODO: `#definition 10#`, `#definition 11#`, `#theorem 2#` (the central identity
+Definitions 10–11 are below.  Still to come: `#theorem 2#` (the central identity
 `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁,…,u_{q^k}))`), `#theorem 3#`–`#theorem 7#`,
 `#remark 1#`.
 -/
+
+/-- `#definition 10#` (§IV) — the optimal redundancy with data protection
+`r_f(k : d_d, d_f)` = `r_f(k, t_d, t_f)`: "the minimum value of `r` for which
+there exists an `(f : d_d, d_f)`-FCC with an encoding function
+`C_f : F_q^k → F_q^{k+r}`". -/
+noncomputable def optimalRedundancyData {k : ℕ} (f : Word F k → α) (dd df : ℕ) : ℕ :=
+  sInf {r : ℕ | ∃ C : Word F k → Word F (k + r), IsFCCData f C dd df}
+
+/-- `#definition 11#` (§IV) — the distance requirement matrix for an
+`(f, t_d, t_f)`-FCC: entries `max(2t_d+1 − d(u_i,u_j), 0)` when `u_i ≠ u_j` and
+`f(u_i) = f(u_j)`, entries `max(2t_f+1 − d(u_i,u_j), 0)` when `f(u_i) ≠ f(u_j)`,
+and `0` otherwise (in particular on the diagonal). -/
+def drmData {k M : ℕ} (f : Word F k → α) (td tf : ℕ) (u : Fin M → Word F k) :
+    Fin M → Fin M → ℕ :=
+  fun i j =>
+    if u i = u j then 0
+    else if f (u i) = f (u j) then max (2 * td + 1 - hammingDist (u i) (u j)) 0
+    else max (2 * tf + 1 - hammingDist (u i) (u j)) 0
 
 /-! ### Example 6 (`#example 6#`) — the `[6,3,3]` two-step construction -/
 
@@ -119,7 +229,7 @@ theorem ex6_min_dist : ∀ u : Word F₂ 3, u ≠ 0 → 3 ≤ wt (ex6Enc u) := b
 matrix printed in the example.  This is the check that pins our reading of the
 CDRM against the paper. -/
 theorem ex6_cdrm_matches :
-    ∀ i j : Fin 4, cdrmPaper (fun u => wt u) ex6Enc 2 ex6Rep i j = ex6CDRM i j := by
+    ∀ i j : Fin 4, cdrm (fun u => wt u) ex6Enc 2 ex6Rep i j = ex6CDRM i j := by
   decide
 
 /-- `#example 6#` (§IV) — the `D`-code `{000,110,101,011}`. -/
@@ -163,22 +273,52 @@ def ex7DRM : Fin 8 → Fin 8 → ℕ :=
 8×8 matrix printed in the example.  This is the check that pins "equal function
 value ⇒ the `2t_d+1` row, different ⇒ the `2t_f+1` row, diagonal `0`". -/
 theorem ex7_drm_matches :
-    ∀ i j : Fin 8, drmDataPaper (fun u => wt u) 1 2 ex7Vec i j = ex7DRM i j := by
+    ∀ i j : Fin 8, drmData (fun u => wt u) 1 2 ex7Vec i j = ex7DRM i j := by
   decide
 
 /-! ## §V — Non-existence of strict `(f : d_d, d_f)`-FCCs
 
-TODO: `#definition 12#` (the minimum-distance graph `G(C)`), `#theorem 8#`,
-`#theorem 9#`, `#theorem 10#`, `#corollary 7#`, `#lemma 2#`, `#theorem 11#`,
-`#corollary 8#`.
+Definition 12 is below.  Still to come: `#theorem 8#`, `#theorem 9#`,
+`#theorem 10#`, `#corollary 7#`, `#lemma 2#`, `#theorem 11#`, `#corollary 8#`.
 -/
+
+/-- `#definition 12#` (§V) — the minimum-distance graph `G(C)`: "the graph whose
+vertex set is `C` and two distinct vertices `c₁, c₂ ∈ C` are adjacent if and only
+if `d(c₁, c₂) = d_min(C)`, where `d_min(C)` denotes the minimum distance of the
+code `C`". -/
+def minDistGraph {n : ℕ} (C : Finset (Word F n)) : SimpleGraph (Word F n) where
+  Adj x y := x ≠ y ∧ x ∈ C ∧ y ∈ C ∧ hammingDist x y = minDist C
+  symm := ⟨fun x y ⟨hxy, hx, hy, hd⟩ =>
+    ⟨hxy.symm, hy, hx, by rwa [hammingDist_comm]⟩⟩
+  loopless := ⟨fun x ⟨hxx, _⟩ => hxx rfl⟩
 
 /-! ## §VI — Function-correcting codes for specific functions
 
-TODO: `#definition 13#`, `#definition 14#`, `#lemma 3#`, `#corollary 9#`–
-`#corollary 12#`, `#definition 15#`, `#lemma 4#` (external), `#lemma 5#`,
-`#theorem 12#`, `#lemma 6#`.
+Definitions 13–15 are below.  Still to come: `#lemma 3#`, `#corollary 9#`–
+`#corollary 12#`, `#lemma 4#` (external), `#lemma 5#`, `#theorem 12#`,
+`#lemma 6#`.
 -/
+
+/-- `#definition 13#` (§VI-A) — the function ball: "the function ball of a
+function `f : F_q^k → Im(f)` with radius `ρ` around `u ∈ F_q^k` is defined as
+`B_f(u,ρ) = {f(u') | u' ∈ F_q^k and d(u,u') ≤ ρ}`". -/
+def functionBall {k : ℕ} (f : Word F k → α) (u : Word F k) (ρ : ℕ) : Finset α :=
+  (ball u ρ).image f
+
+/-- `#definition 14#` (§VI-A) — a `ρ`-locally binary function: "a function `f` is
+said to be a `ρ`-locally binary function if `|B_f(u,ρ)| ≤ 2` for all
+`u ∈ F_q^k`". -/
+def IsLocallyBinary {k : ℕ} (f : Word F k → α) (ρ : ℕ) : Prop :=
+  ∀ u, (functionBall f u ρ).card ≤ 2
+
+/-- `#definition 15#` (§VI-B) — a `(ρ,λ)`-bounded function: "a function `f` is
+said to be a `(ρ,λ)`-bounded function if `|B_f(u,ρ)| ≤ λ` for all
+`u ∈ F_q^k`".  (The paper's `λ` is called `lam` in Lean, where `λ` is the lambda
+binder.) -/
+def IsLocallyBounded {k : ℕ} (f : Word F k → α) (ρ lam : ℕ) : Prop :=
+  ∀ u, (functionBall f u ρ).card ≤ lam
+
+end Combinatorial
 
 /-! ### Example 10 (`#example 10#`) — the `[7,4,3]` Hamming code -/
 
@@ -197,9 +337,67 @@ theorem ex10_card_codewords : (Finset.univ.image ex10Enc).card = 16 := by decide
 
 /-! ## §VII — Linear `(f : d_d, d_f)`-FCC
 
-TODO: `#definition 16#`, `#lemma 7#`, `#lemma 8#`, `#lemma 9#`, `#definition 17#`,
-`#definition 18#`, `#lemma 10#`, `#theorem 13#`.
+Definitions 16–18 are below.  Still to come: `#lemma 7#`, `#lemma 8#`,
+`#lemma 9#`, `#lemma 10#`, `#theorem 13#`.
 -/
+
+section Linear
+
+variable {F : Type*} [Field F] [Fintype F] [DecidableEq F] {α : Type*} [DecidableEq α]
+
+/-- `#definition 16#` (§VII) — a linear `(f : d_d, d_f)`-FCC: "a subspace `C` of
+the vector space `F_q^n` with dimension `k` is called a linear
+`(f : d_d, d_f)`-FCC if (1) weight of any non-zero codeword in `C` is at least
+`d_d`, (2) for any `c₁ = (u₁,p₁), c₂ = (u₂,p₂) ∈ C` such that `f(u₁) ≠ f(u₂)`, we
+have `d(c₁,c₂) ≥ d_f`". -/
+def IsLinearFCC {k r : ℕ} (f : Word F k → α) (C : Submodule F (Word F (k + r)))
+    (dd df : ℕ) : Prop :=
+  Module.finrank F C = k ∧ (∀ c ∈ C, c ≠ 0 → dd ≤ wt c) ∧
+    ∀ c₁ ∈ C, ∀ c₂ ∈ C, f (msgPart c₁) ≠ f (msgPart c₂) → df ≤ hammingDist c₁ c₂
+
+/-- `(internal, §VII)` — the message part of a codeword of `C`, as a linear map;
+`D_f` in `#definition 18#` is the kernel of `f` composed with this map. -/
+def msgPartLinear {k r : ℕ} (C : Submodule F (Word F (k + r))) : C →ₗ[F] Word F k where
+  toFun c := msgPart (c : Word F (k + r))
+  map_add' x y := by funext i; rfl
+  map_smul' a x := by funext i; rfl
+
+/-- `#definition 17#` (§VII) — the coset code `C/D`: "the coset code `C/D` is the
+collection of all cosets of `D` in `C`", `C/D = {v + D | v ∈ C}`.  (We keep the
+cosets as subsets of `C` rather than passing to the quotient `C ⧸ D`.) -/
+abbrev CosetCode {F : Type*} [Field F] {n : ℕ} (C : Submodule F (Word F n))
+    (D : Submodule F C) : Set (Set C) :=
+  Set.range (fun x : C => {y : C | x - y ∈ D})
+
+/-- `#definition 17#` (§VII) — the coset distance of `z` modulo `D`:
+`min{d(c₁,c₂) | c₁ ∈ z + D, c₂ ∈ D}`.  By `#lemma 8#` this equals
+`min_{d ∈ D} wt(z + d)`, which is the form used here. -/
+noncomputable def cosetDist (D : Submodule F (Word F n)) (z : Word F n) : ℕ :=
+  sInf {w : ℕ | ∃ d ∈ D, w = wt (z + d)}
+
+/-- `#definition 17#` (§VII) — the minimum distance of the coset code:
+`d(C/D) = min{d(c₁,c₂) | c₁ ∈ u+D, c₂ ∈ v+D}` over pairs `u,v ∈ C` with
+`u − v ∉ D`, i.e. over pairs of distinct cosets. -/
+noncomputable def cosetCodeMinDist (C : Submodule F (Word F n)) (D : Submodule F C) : ℕ :=
+  sInf {w : ℕ |
+    ∃ x : C, ∃ y : C, (x - y) ∉ D ∧
+      w = cosetDist (D.map C.subtype) ((x - y : C) : Word F n)}
+
+/-- `#definition 18#` (§VII) — the subcode `D_f = {c = (u,p) ∈ C | u ∈ ker f}` of a
+linear `(f : d_d, d_f)`-FCC for a *linear* function `f`, i.e. the kernel of
+`f ∘ (message part)` restricted to `C`. -/
+def kernelSubcode {k r : ℕ} (f : Word F k →ₗ[F] Word F r)
+    (C : Submodule F (Word F (k + r))) : Submodule F C :=
+  (LinearMap.ker f).comap (msgPartLinear C)
+
+/-- `#definition 18#` (§VII) — the equivalent form of a linear
+`(f : d_d, d_f)`-FCC for a linear function: "`d(C) ≥ d_d` and `d(C/D_f) ≥ d_f`,
+where `D_f = {c = (u,p) ∈ C | u ∈ ker f}`". -/
+def IsLinearFCCKernel {k r : ℕ} (f : Word F k →ₗ[F] Word F r)
+    (C : Submodule F (Word F (k + r))) (dd df : ℕ) : Prop :=
+  (∀ c ∈ C, c ≠ 0 → dd ≤ wt c) ∧ df ≤ cosetCodeMinDist C (kernelSubcode f C)
+
+end Linear
 
 /-! ## §VIII — Extension of bounds from error-correcting codes to FCCs
 

@@ -188,3 +188,39 @@ proofs are easiest to do (the appendix counts, for instance, need no earlier
 phase).  That is fine — an item may sit in `FCC/Paper.lean` as a stated theorem
 whose proof is still `sorry` while its helper lemmas are being proved in
 `FCC/Balls.lean`.
+
+## 2026-09-14 — Phase 1: all 18 definitions formalized
+
+`FCC/Paper.lean` now carries **every definition of the paper, in paper order**:
+1–5 (§II), 6–9 (§III), 10–11 (§IV), 12 (§V), 13–15 (§VI), 16–18 (§VII).  Each
+docstring opens with the paper's number and quotes the paper's own wording.
+`PLAN.md` §1.1 marks those 18 rows `stated`; the checker confirms it.
+
+Design decisions worth recording:
+
+* **The combinatorial layer needs no field.**  Definitions 1–15 are stated for
+  an arbitrary finite alphabet `[Fintype F] [DecidableEq F]` (plus `[Zero F]`
+  for weights) and a codomain `[DecidableEq α]`; only §VII's linear layer takes
+  `[Field F]`.  This is what lets the `decide` checks run with `Bool` (whose
+  `DecidableEq` the kernel reduces) while the statements stay faithful.
+* **`N`, `r_f`, `d(fᵢ,fⱼ)`, `d_min` are `sInf`s over `ℕ`** — the paper defines
+  them as minima, and the *attained/minimal* API is phase 3.0.  Consequence for
+  the examples: "`N(D) = 3`" is checked as the decidable pair "a `D`-code of
+  length 3 exists" **and** "none of length 2 exists", and the equality follows
+  once that API lands.
+* **`IsFCC`/`IsFCCData` include systematicity.**  `#definition 6#` does not print
+  the word, but the framework of §III-A and the proof of `#theorem 2#` use it;
+  recorded in `Notation.md` §3.5 as a deliberate modelling decision.
+* **The paper's `λ` is `lam` in Lean** (`λ` is the lambda binder) — as in
+  `IsLocallyBounded f ρ lam`.
+* Helpers added for these definitions: `IsSystematic`, `msgPart` and `minDist`
+  (`FCC/Basic.lean`), `msgPartLinear` (§VII in the main file).
+* `FCC/Internal.lean` shrank to just the test alphabet `F₂`: the example checks
+  now call the real `cdrm` and `drmData`, so the temporary transcriptions are
+  gone.
+* `CosetCode` is kept as a set of cosets (`Set (Set C)`) rather than the
+  quotient `C ⧸ D`, so that `#definition 17#` needs no quotient API.
+
+**Still to do** (next sessions): the paper's examples (only 6, 7 and 10 are
+formalized; `PLAN.md` §1.2 lists the rest, and 11/15/16/17 need the §VIII bounds
+too), then phase 2 (all remaining statements with `sorry`) and phase 3 (proofs).

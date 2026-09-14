@@ -43,7 +43,7 @@ labelling conventions follow Shenghao Yang's
 
 | Module | Contents | Status |
 | --- | --- | --- |
-| `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | §IV's Examples 6 and 7 and §VI-A's Example 10 are formalized; the remaining items are listed as `TODO`s under their section |
+| `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | Definitions 1–18 and Examples 6, 7, 10 are formalized; the paper's theorems, lemmas and corollaries are listed as `TODO`s under their section |
 | `FCC/Definitions.lean` | §I-E notation: `Word F n` (= `F_q^n`), `wt`, `ball` | Phase 0 — complete |
 | `FCC/Basic.lean` | internal: `wt_le_wt_add_hammingDist`, `wt_zero`, `mem_ball_self` | Phase 0 — complete |
 | `FCC/Balls.lean` | internal: `card_word`, `diffSet`, `sphere`, `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`, `ball_eq_univ_of_le`, `card_ball_univ` | Phase 1a — partly done (the closed form `Σ_{i≤t} C(n,i)(q-1)^i` is next) |

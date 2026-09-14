@@ -23,18 +23,36 @@ in the same commit that does the work.
       (`card_sphere`, `ball_card`); the proof goes through the equivalence
       "word at distance `i` from `u` ↔ (set of `i` changed coordinates, values
       on it)".  Needed by `#theorem 15#`–`#theorem 19#` and `#corollary 13#`/`#corollary 14#`.
-- [ ] 1b. `IsSystematic`, `minDist`; Definition 1 (`IsFCC`,
+- [x] 1b. `IsSystematic`, `minDist`; Definition 1 (`IsFCC`,
       `optimalRedundancy`) and Definition 6 (`IsFCCData`).
       Every paper item written from here on goes into `FCC/Paper.lean`, in paper
       order (see `PLAN.md` §2 and `AGENTS.md` rule 2a); helpers stay in the
       `(internal, …)` modules.
-- [ ] 1c. `drm` (`#definition 2#`), `drmData` (`#definition 11#`), `fDist`/`fdm` (`#definition 4#`,
-      `#definition 5#`), `IsDCode`/`N`/`Nconst` (`#definition 3#`) and the `N` API.
-- [ ] 1d. `cdrm` (`#definition 7#`), `codedFDist` (`#definition 8#`), `cfdm` (`#definition 9#`).
-- [ ] 1e. `minDistGraph` (`#definition 12#`), `functionBall` (`#definition 13#`),
+- [x] 1c. `drm` (`#definition 2#`), `drmData` (`#definition 11#`), `fDist`/`fdm`
+      (`#definition 4#`, `#definition 5#`), `IsDCode`/`N`/`Nconst`
+      (`#definition 3#`).  (The `N` API — existence, attainment, monotonicity —
+      is phase 3.0.)
+- [x] 1d. `cdrm` (`#definition 7#`), `codedFDist` (`#definition 8#`), `cfdm`
+      (`#definition 9#`).
+- [x] 1e. `minDistGraph` (`#definition 12#`), `functionBall` (`#definition 13#`),
       `IsLocallyBinary` (`#definition 14#`), `IsLocallyBounded` (`#definition 15#`).
-- [ ] 1f. `IsLinearFCC` (`#definition 16#`), `CosetCode`/`cosetCodeMinDist` (`#definition 17#`),
-      `IsLinearFCCKernel` (`#definition 18#`).
+- [x] 1f. `IsLinearFCC` (`#definition 16#`), `CosetCode`/`cosetDist`/
+      `cosetCodeMinDist` (`#definition 17#`), `kernelSubcode`/`IsLinearFCCKernel`
+      (`#definition 18#`).
+
+## Phase 1b — the paper's examples
+
+- [ ] Examples 1, 2, 3, 4, 5 (the `F₂²`/`F₂³` worked examples of §II–§IV): the
+      DRM, the FDM, the quoted `D`-codes and the printed matrices, as `decide`
+      checks in `FCC/Paper.lean`.  (An `N(D) = k` claim needs the phase-3.0
+      `N`-API; until then it is checked as the decidable pair "a `D`-code of
+      length `k` exists / none of length `k−1` exists".)
+- [ ] Examples 8, 9 (a `D`-code for the 8×8 DRM; the 4-cycle minimum-distance
+      graph of `{0000,0011,1100,1111}`).
+- [ ] Examples 12, 13, 14 (§VII: the non-linear `f`, the `(f:2,3)`-FCC, the
+      `[10,3,4]` construction).
+- [ ] Examples 11, 15, 16, 17 — these need the §VIII bounds (`#theorem 14#`–
+      `#theorem 16#`) or a value quoted from [1]; do them together with those.
 
 ## Phase 2 — statement catalogue
 
