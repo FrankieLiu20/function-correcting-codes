@@ -269,8 +269,13 @@ Repository scaffold, toolchain pin, CI, the documentation set, and
 ### Phase 1 — Modelling the paper (`FCC/Definitions.lean` + `Notation.md`)
 All Definitions 1–18, in six sub-steps, each one commit:
 
-1. **1a** words and distance algebra: `hammingDist` API re-exports, `ball_card`,
-   `Fintype.card (Word F n) = q^n` (needed by every counting bound);
+1. **1a** words and distance algebra — **in progress** (`FCC/Balls.lean`,
+   `FCC/Examples.lean`).  Done: `Fintype.card (Word F n) = q^n` (`card_word`),
+   `hammingDist_eq_card_diffSet`, the sphere/ball API (`sphere`, `mem_sphere`,
+   `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`,
+   `ball_eq_univ_of_le`, `card_ball_univ`), and the `decide` regression tests
+   for the paper's Examples 6, 7, 10 in `FCC/Examples.lean`.  Still to do: the
+   closed form `|B(u,t)| = Σ_{i≤t} C(n,i)(q-1)^i` (`card_sphere`, `ball_card`);
 2. **1b** codes: `IsCode`/minimum distance, `IsSystematic`, then Definition 1
    (`IsFCC`, `optimalRedundancy`) and Definition 6 (`IsFCCData`) — Definition 6 is
    the general one, Definition 1 its `t_d = 0` case;

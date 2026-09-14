@@ -45,6 +45,8 @@ labelling conventions follow Shenghao Yang's
 | --- | --- | --- |
 | `FCC/Definitions.lean` | `Word F n` (= `F_q^n`), `wt`, `ball` | Phase 0 — complete |
 | `FCC/Basic.lean` | `wt_le_wt_add_hammingDist`, `wt_zero`, `mem_ball_self` | Phase 0 — complete |
+| `FCC/Balls.lean` | `card_word`, `diffSet`, `sphere`, `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`, `ball_eq_univ_of_le`, `card_ball_univ` | Phase 1a — partly done (the closed form `Σ_{i≤t} C(n,i)(q-1)^i` is next) |
+| `FCC/Examples.lean` | `decide` regression tests: the paper's Examples 6, 7, 10 (CDRM/DRM transcription, `N(D) = 3`, minimum distances) and ball sizes | Phase 1a — complete |
 | `FCC/Statements.lean` | paper-numbered catalogue (Definitions 1–18 are phase 1, the statements are phase 2) | empty on purpose |
 | `FCC/AxiomCheck.lean` | `#print axioms` audit of the headline results | complete |
 

@@ -13,8 +13,16 @@ in the same commit that does the work.
 
 ## Phase 1 — model the paper (one commit per sub-step)
 
-- [ ] 1a. Words and distance algebra: `ball_card`, `card (Word F n) = q^n`,
-      small `decide` sanity checks.
+- [x] 1a (part 1). `card_word`, `diffSet`/`hammingDist_eq_card_diffSet`,
+      `sphere`, `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`,
+      `ball_eq_univ_of_le`, `card_ball_univ`.
+- [x] 1a (part 2). `decide` regression tests (`FCC/Examples.lean`): the paper's
+      Examples 6, 7 and 10 — the CDRM and DRM transcriptions, `N(D) = 3` for
+      Example 6, the `[6,3,3]` and `[7,4,3]` minimum distances — plus ball sizes.
+- [ ] 1a (part 3). The closed form `|B(u,t)| = Σ_{i≤t} C(n,i)(q-1)^i`
+      (`card_sphere`, `ball_card`); the proof goes through the equivalence
+      "word at distance `i` from `u` ↔ (set of `i` changed coordinates, values
+      on it)".  Needed by `thm:15`–`thm:19` and `cor:13`/`cor:14`.
 - [ ] 1b. `IsSystematic`, `minDist`; Definition 1 (`IsFCC`,
       `optimalRedundancy`) and Definition 6 (`IsFCCData`).
 - [ ] 1c. `drm` (`def:2`), `drmData` (`def:11`), `fDist`/`fdm` (`def:4`,

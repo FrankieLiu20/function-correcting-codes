@@ -9,3 +9,17 @@
 mem_ball_self
 wt_le_wt_add_hammingDist
 wt_zero
+#
+# Phase 1a (counting API):
+ball_eq_biUnion_sphere
+ball_eq_univ_of_le
+card_ball_univ
+card_word
+disjoint_sphere
+hammingDist_eq_card_diffSet
+#
+# Phase 1a (paper-example regression tests, FCC/Examples.lean):
+ex6_cdrm_matches
+ex6_length_three
+ex6_no_length_two
+ex7_drm_matches

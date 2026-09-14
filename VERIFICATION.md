@@ -44,6 +44,26 @@ Formalized in phase 0: `Word F n`, `wt`, `ball` (`FCC/Definitions.lean`);
 `wt_zero`, `wt_le_wt_add_hammingDist`, `mem_ball_self` (`FCC/Basic.lean`).
 No statement of the paper is formalized yet.
 
+## Phase 1a (part 1) — counting API and paper-example tests (2026-09-14)
+
+Verified:
+
+| Check | Result |
+| --- | --- |
+| `lake build` | green (1487 jobs) |
+| `scripts/consistency_check.ps1` | green (no paper label referenced; 62 catalogue rows still to be stated in phase 2) |
+| `scripts/axioms_check.ps1` | green — 13 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 0 |
+| regression tests (`FCC/Examples.lean`) | green — the paper's Examples 6, 7 and 10 reproduce exactly, including `N(D) = 3` for Example 6 |
+
+Formalized: `card_word`, `hammingDist_eq_card_diffSet`, `sphere`,
+`ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`,
+`ball_eq_univ_of_le`, `card_ball_univ` (`FCC/Balls.lean`).
+
+Not yet formalized in this step: the closed form
+`|B(u,t)| = Σ_{i≤t} C(n,i)(q-1)^i`.  The `decide` tests check its first values
+(`F₂³`: 4, 7, 8; `F₃²`: 5) but not the general identity — see `TODO.md`.
+
 ## Not formalized (and why)
 
 Nothing yet; this section is filled in as results are classified.

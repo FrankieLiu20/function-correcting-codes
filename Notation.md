@@ -166,6 +166,18 @@ Minimum distance, `G(C)`, coset codes and so on are stated for
 machinery.  The generator matrix `G` and the standard form `[I_k | P]` appear
 only where the paper actually uses them (§VII, via `LinearMap`/`Matrix`).
 
+### 3.7 The *tests* use `Bool` as `F₂`, the library does not
+
+The paper's examples are formalized as `decide` tests (`FCC/Examples.lean`), and
+`decide` needs an alphabet whose `DecidableEq` the kernel can reduce.  `ZMod 2`
+fails on that (the tactic gets stuck on `ZMod.decidableEq`), while `Bool` is
+exactly `F₂` in mathlib's sense — `Mathlib.Algebra.Ring.BooleanRing` gives
+`false = 0`, `true = 1`, `+` = xor — and reduces.  So the *tests* use `Bool`
+(and `Fin 3` for the `q = 3` ball size), while every *statement of the paper*
+stays over a general `[Field F]`, with `F = ZMod 2` available for the binary
+corollaries of §IV.  This distinction is only about how a proof is discharged,
+not about what is being claimed.
+
 ---
 
 ## 4. Open questions (to confirm before Phase 1 is frozen)
@@ -208,6 +220,10 @@ its phase is done, in `DEVLOG.md`.
    `max(⋯,0)` only in its first line, while `def:7` and the `ex:7` matrix show
    `max` in every off-diagonal entry.  We use `max(⋯,0)` everywhere (the only
    version consistent with `ex:7`).
+   *Resolved 2026-09-14:* the `ex:7` test also settles the diagonal — the
+   printed matrix has zeros there, so the definition definitely carries the
+   third case "`0` if `u_i = u_j`"; an earlier transcription of ours that
+   omitted it failed the test.  See `DEVLOG.md`, phase 1a.
 4. **`thm:4`'s "similar proof" for Case 2.**  The paper states Case 2's matrix
    `D_f(t_d,t_f : u₂,u₁,u₃)` and says "a similar proof will follow"; the
    displayed matrix differs from Case 1's in two entries.  Both cases must give

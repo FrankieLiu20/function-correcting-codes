@@ -50,3 +50,54 @@ and the axiom audit passes.  The first lemma is not decoration: `lem:6` uses
 **Next.**  Phase 1a: `ball_card`, `card (Word F n) = q^n`, and the `decide`
 regression tests pinned by `PLAN.md` §1.2 (`ex:6`, `ex:7`), which lock the
 indexing conventions down before any theorem is stated.
+
+## 2026-09-14 — Phase 1a (part 1): counting API and paper-example regression tests
+
+**Added.**  `FCC/Balls.lean`: `diffSet`, `hammingDist_eq_card_diffSet`,
+`card_word` (`|F_q^n| = q^n`), `sphere`, `mem_sphere`,
+`ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`, `ball_eq_univ_of_le`,
+`card_ball_univ`.  `FCC/Examples.lean`: `decide` regression tests built from the
+paper's own worked examples (ball and sphere sizes; Example 6 — the `[6,3,3]`
+code, its CDRM, the `D`-code `{000,110,101,011}` and `N(D) = 3`; Example 7 —
+the 8×8 DRM; Example 10 — the `[7,4,3]` Hamming code).  All of them pass, the
+`sorry` count is 0 and the axiom audit is green (13 audited results, only
+`propext`, `Classical.choice`, `Quot.sound`).
+
+**Why the examples are worth the space.**  They are the only check that our
+*transcription* of a definition agrees with the paper, and they paid for
+themselves twice in this session:
+
+1. My first transcription of Definition 11 omitted the `i = j` case (`0`), using
+   the `2t_d+1` row on the diagonal instead.  The `ex7` test failed immediately
+   and the printed matrix (diagonal all zeros) settled it.  This is precisely
+   the silent-statement-drift failure mode that `Notation.md` warns about, and
+   the paper's Example 7 matrix — not the prose of Definition 11 — is the
+   evidence.  `Notation.md` §5.3 and §2.3.5 now record the resolution.
+2. The same tests confirmed the rest of the convention: `ex6`'s CDRM, its
+   `D`-code and the value `N(D) = 3` (no length-2 `D`-code exists: a `decide`
+   search over the 256 candidates), and both Hamming codes' minimum distance 3.
+
+**Implementation lessons (they will recur).**
+
+* **`decide` needs a kernel-reducible alphabet.**  Over `ZMod 2` the tactic gets
+  stuck (`ZMod.decidableEq` is not reducible by the kernel), so `hammingDist`
+  never computes.  The regression tests therefore use `Bool`, which is `F₂` in
+  mathlib's sense (`Mathlib.Algebra.Ring.BooleanRing`: `false = 0`, `true = 1`,
+  `+` = xor) and whose `DecidableEq` *is* reducible; the `q = 3` ball test uses
+  `Fin 3`.  The library itself keeps general-field statements, where proofs use
+  mathlib lemmas instead of `decide`.
+* **`decide` on an equality of functions is a trap.**  The `DecidableEq`
+  instance for a nested function type (nested `Fintype`, `Multiset` machinery)
+  blows the recursion depth.  State such checks pointwise
+  (`∀ i j, f i j = g i j`), and raise `set_option maxRecDepth 100000` in a
+  section when a search over a function space is involved (the 256-candidate
+  `D`-code search).
+* The `!![...]` matrix notation is not in scope by default; nested `![![…], …]`
+  vector notation is, and is enough for these tests.
+
+**Next.**  Finish phase 1a with the closed form `|B(u,t)| = Σ_{i≤t} C(n,i)(q-1)^i`
+(`card_sphere`, then `ball_card` via `ball_eq_biUnion_sphere`); the proof builds
+an equivalence between "word at distance `i` from `u`" and "set of the `i`
+changed coordinates + the values taken on it", and `Finset.card_powersetCard`
+plus `Fintype.card_ne_eq` supply the count.  It is needed by
+`thm:15`–`thm:19` and `cor:13`/`cor:14`.
