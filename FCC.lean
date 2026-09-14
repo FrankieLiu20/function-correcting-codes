@@ -1,8 +1,8 @@
 import FCC.Definitions
 import FCC.Basic
 import FCC.Balls
-import FCC.Examples
-import FCC.Statements
+import FCC.Internal
+import FCC.Paper
 import FCC.AxiomCheck
 
 /-!
@@ -24,9 +24,9 @@ Layout:
   Hamming balls; the code-theoretic definitions land here too).
 * `FCC/Basic.lean` — paper-independent lemmas about that universe.
 * `FCC/Balls.lean` — counting: `|F_q^n| = q^n`, spheres and balls.
-* `FCC/Examples.lean` — `decide` regression tests from the paper's examples.
-* `FCC/Statements.lean` — the paper-numbered statement catalogue (see
-  `PLAN.md` §1.1).
+* `FCC/Internal.lean` — helpers that are not part of the paper.
+* `FCC/Paper.lean` — **the main file**: every numbered item of the paper, in
+  paper order (see `PLAN.md` §1.1).
 * `FCC/AxiomCheck.lean` — `#print axioms` audit of the headline results.
 
 Add one module per proof phase (see `PLAN.md` §4) and import it here, otherwise

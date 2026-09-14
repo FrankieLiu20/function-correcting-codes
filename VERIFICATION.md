@@ -60,6 +60,10 @@ Formalized: `card_word`, `hammingDist_eq_card_diffSet`, `sphere`,
 `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`,
 `ball_eq_univ_of_le`, `card_ball_univ` (`FCC/Balls.lean`).
 
+`FCC/Examples.lean` from that step was split in the next commit: the example
+checks now live in `FCC/Paper.lean` (the main file, in paper order) and the
+scaffolding they need in `FCC/Internal.lean`.
+
 Not yet formalized in this step: the closed form
 `|B(u,t)| = Σ_{i≤t} C(n,i)(q-1)^i`.  The `decide` tests check its first values
 (`F₂³`: 4, 7, 8; `F₃²`: 5) but not the general identity — see `TODO.md`.

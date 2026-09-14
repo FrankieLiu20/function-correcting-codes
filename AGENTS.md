@@ -22,6 +22,17 @@ The rules below are adapted from `AGENTS.md` in Shenghao Yang's
    `Notation.md` if it introduces notation.  The inventory is the source of
    truth; code follows it.
 
+2a. **Paper items live in `FCC/Paper.lean`, in paper order.**  Every numbered
+    item of the paper — definition, example, theorem, lemma, corollary — is
+    declared exactly once, in that file, under its section heading, with the
+    paper's number at the head of its docstring; that file is the deliverable
+    (reading it top to bottom is reading the paper's formalization).  Everything
+    that is not a numbered item is a helper and belongs in `FCC/Definitions.lean`
+    (the §I-E notation), `FCC/Basic.lean`, `FCC/Balls.lean` or
+    `FCC/Internal.lean`, with an `(internal, §…)` docstring; helpers may be
+    reorganised freely, and a helper that turns out to be a paper item is moved
+    into `FCC/Paper.lean`.
+
 3. **State the paper's hypothesis literally.**  If a hypothesis can be
    weakened, state the paper's version as the catalogue entry and record the
    stronger version where it is used.  Never silently generalise a statement

@@ -43,17 +43,22 @@ labelling conventions follow Shenghao Yang's
 
 | Module | Contents | Status |
 | --- | --- | --- |
-| `FCC/Definitions.lean` | `Word F n` (= `F_q^n`), `wt`, `ball` | Phase 0 — complete |
-| `FCC/Basic.lean` | `wt_le_wt_add_hammingDist`, `wt_zero`, `mem_ball_self` | Phase 0 — complete |
-| `FCC/Balls.lean` | `card_word`, `diffSet`, `sphere`, `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`, `ball_eq_univ_of_le`, `card_ball_univ` | Phase 1a — partly done (the closed form `Σ_{i≤t} C(n,i)(q-1)^i` is next) |
-| `FCC/Examples.lean` | `decide` regression tests: the paper's Examples 6, 7, 10 (CDRM/DRM transcription, `N(D) = 3`, minimum distances) and ball sizes | Phase 1a — complete |
-| `FCC/Statements.lean` | paper-numbered catalogue (Definitions 1–18 are phase 1, the statements are phase 2) | empty on purpose |
+| `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | §IV's Examples 6 and 7 and §VI-A's Example 10 are formalized; the remaining items are listed as `TODO`s under their section |
+| `FCC/Definitions.lean` | §I-E notation: `Word F n` (= `F_q^n`), `wt`, `ball` | Phase 0 — complete |
+| `FCC/Basic.lean` | internal: `wt_le_wt_add_hammingDist`, `wt_zero`, `mem_ball_self` | Phase 0 — complete |
+| `FCC/Balls.lean` | internal: `card_word`, `diffSet`, `sphere`, `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`, `ball_eq_univ_of_le`, `card_ball_univ` | Phase 1a — partly done (the closed form `Σ_{i≤t} C(n,i)(q-1)^i` is next) |
+| `FCC/Internal.lean` | internal scaffolding for the example checks | Phase 1a |
 | `FCC/AxiomCheck.lean` | `#print axioms` audit of the headline results | complete |
 
 Phase 0 (infrastructure) is done; the paper-specific definitions are phase 1.
 `PLAN.md` §4 lists the phases and `PLAN.md` §1.1 is the table of *all* 65
 numbered items of the paper (18 definitions, 19 theorems, 14 lemmas and 14
 corollaries) with their status — that table is the project's checklist.
+
+**Where to read the formalization.**  `FCC/Paper.lean` is the deliverable:
+every numbered item of the paper appears there, once, in the paper's order, with
+the paper's number at the head of its docstring.  Helpers that are not paper
+items live in the other modules listed above and are free to be reorganised.
 
 ## Build
 

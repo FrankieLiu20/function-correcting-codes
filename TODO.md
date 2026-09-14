@@ -25,6 +25,9 @@ in the same commit that does the work.
       on it)".  Needed by `#theorem 15#`–`#theorem 19#` and `#corollary 13#`/`#corollary 14#`.
 - [ ] 1b. `IsSystematic`, `minDist`; Definition 1 (`IsFCC`,
       `optimalRedundancy`) and Definition 6 (`IsFCCData`).
+      Every paper item written from here on goes into `FCC/Paper.lean`, in paper
+      order (see `PLAN.md` §2 and `AGENTS.md` rule 2a); helpers stay in the
+      `(internal, …)` modules.
 - [ ] 1c. `drm` (`#definition 2#`), `drmData` (`#definition 11#`), `fDist`/`fdm` (`#definition 4#`,
       `#definition 5#`), `IsDCode`/`N`/`Nconst` (`#definition 3#`) and the `N` API.
 - [ ] 1d. `cdrm` (`#definition 7#`), `codedFDist` (`#definition 8#`), `cfdm` (`#definition 9#`).

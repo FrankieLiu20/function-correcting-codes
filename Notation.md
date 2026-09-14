@@ -47,6 +47,15 @@ restatements of mathlib lemmas, notation — open their docstring with
 `(internal, §… )` or `(paper notation, §…)` instead, and they must name the
 paper part they serve, so that a bare `(internal)` never stands on its own:
 
+**Where an item lives.**  Every paper-numbered item goes into `FCC/Paper.lean`
+and nowhere else, in the paper's order, under a `/-! ## §… /-! ### …` heading
+that follows the paper's own sections; that file is the deliverable and reading
+it top to bottom is reading the paper's formalization.  Everything that is not a
+numbered item lives in the helper modules (`FCC/Definitions.lean`,
+`FCC/Basic.lean`, `FCC/Balls.lean`, `FCC/Internal.lean`), is free to be
+reorganised, renamed and renumbered, and is imported by the main file.  A helper
+that turns out to *be* a paper item is moved into `FCC/Paper.lean`.
+
 ```lean
 /-- `(internal, §VI-C — used by `#lemma 6#`)` — `wt(u) ≤ wt(v) + d(u,v)`, the step
 where the paper writes "Since `d(u,v) ≥ wt(u) − wt(v)`, …". -/

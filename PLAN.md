@@ -207,11 +207,12 @@ lakefile.toml             # library FCC; requires mathlib
 lean-toolchain            # leanprover/lean4:v4.34.0-rc2 (must match mathlib)
 lake-manifest.json        # dependency revisions
 FCC/
-  Definitions.lean        # Phase 0 DONE: Word, wt, ball; Phase 1: Definitions 1-18
-  Basic.lean              # Phase 0 DONE: wt_le_wt_add_hammingDist, wt_zero, mem_ball_self
-  Statements.lean         # Phase 2: the paper-numbered catalogue
+  Paper.lean              # THE MAIN FILE: every numbered item, in paper order
+  Definitions.lean        # §I-E notation: Word, wt, ball
+  Basic.lean              # internal lemmas about words
+  Balls.lean              # internal counting lemmas (spheres, balls)
+  Internal.lean           # internal scaffolding for the example checks
   AxiomCheck.lean         # `#print axioms` audit
-  <Phase>.lean            # one module per proof phase, added as work proceeds
 scripts/
   consistency_check.ps1   # build + PLAN/Lean label coverage + orphan modules + sorry count
   axioms_check.ps1        # per-theorem axiom audit
@@ -226,6 +227,21 @@ ONBOARDING.md             # from-zero guide (Chinese)
 AGENTS.md                 # rules for agents and contributors
 paper/                    # the paper (local-only, gitignored)
 ```
+
+**The main file is `FCC/Paper.lean`.**  Every numbered item of the paper —
+definition, example, theorem, lemma, corollary — appears there exactly once, in
+the paper's own order, with the paper's number at the head of its docstring; the
+file's section headings follow the paper's sections, and each item still to be
+written is listed as a `TODO` under its section.  Reading that one file from top
+to bottom is reading the paper's formalization, and it is the artifact the
+project delivers.
+
+Declarations that are *not* numbered items of the paper (the notation layer, the
+counting and weight lemmas, the temporary example transcriptions) live in
+`FCC/Definitions.lean`, `FCC/Basic.lean`, `FCC/Balls.lean` and
+`FCC/Internal.lean`; they carry `(internal, §…)` docstrings, may be reorganised
+freely, and are imported by the main file.  `scripts/consistency_check.ps1`
+enforces the inventory ↔ main-file mapping in both directions.
 
 **Agents working in this repository must follow `AGENTS.md`.**
 

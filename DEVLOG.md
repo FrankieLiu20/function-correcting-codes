@@ -155,3 +155,36 @@ item we can point at, or it does not belong in the library yet.
 again (it had picked up `§`/`…` in its messages, which Windows PowerShell 5.1
 mangles when reading a BOM-less `.ps1`), and it reads the Lean sources with
 `-Encoding UTF8` so that non-ASCII text in docstrings is not mangled either.
+
+## 2026-09-14 — Restructure: one paper-order main file
+
+The project owner asked for a single file holding the paper's numbered items in
+paper order, with the internal lemmas kept elsewhere, so that the finished
+formalization can be read in one place.  Done:
+
+* **`FCC/Paper.lean` is now the main file.**  It opens with the citation, a
+  statement of what lives where, and then follows the paper section by section:
+  §I-E notation, §II, §III, §IV (with Examples 6 and 7), §V, §VI (with
+  Example 10), §VII, §VIII, §IX, Appendix.  Each numbered item is declared there
+  exactly once, in paper order, and the items not yet written appear as `TODO`
+  lists under their section — so the file always shows the whole paper and the
+  remaining work at a glance.  Reading it top to bottom is reading the paper's
+  formalization, and it is the artifact the project delivers.
+* the example checks (`ex6_*`, `ex7_*`, `ex10_*`) moved out of
+  `FCC/Examples.lean` into their paper sections of `FCC/Paper.lean`; the
+  scaffolding they need (`F₂`, `cdrmPaper`, `drmDataPaper`) moved to the new
+  `FCC/Internal.lean`.
+* `FCC/Statements.lean` is gone: the statement catalogue *is* `FCC/Paper.lean`.
+  Phase 2 fills that file with `sorry`-stubbed statements in paper order, phase 3
+  replaces the `sorry`s by proofs, item by item.
+* `FCC/Examples.lean` is gone (split between the main file and `Internal.lean`).
+* `AGENTS.md` (new rule 2a), `PLAN.md` §2, `README.md`, `Notation.md` §1 and
+  `CONSISTENCY.md` state the layout.  The checker needed no change — it scans
+  `FCC/*.lean` — and confirms: 63 markers used, all inventory rows; the three
+  example rows stated; everything else still pending; no orphan modules.
+
+A consequence worth recording: the paper's order is *not* the order in which the
+proofs are easiest to do (the appendix counts, for instance, need no earlier
+phase).  That is fine — an item may sit in `FCC/Paper.lean` as a stated theorem
+whose proof is still `sorry` while its helper lemmas are being proved in
+`FCC/Balls.lean`.

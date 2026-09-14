@@ -8,8 +8,9 @@ written — first when it is `stated` (phase 2), again when it is `proved`.
 The paper is available only as a PDF (`paper/…OA.pdf`, git-ignored), so unlike the
 guide repository there is **no `\label`-level automatic comparison with the
 paper**.  The automatic check (`scripts/consistency_check.ps1`) compares the
-Lean docstrings with the inventory table in `PLAN.md` §1.1, in both directions;
-the paper → inventory step is what this file describes.
+docstrings in `FCC/Paper.lean` (the main file, which holds every numbered item in
+paper order) with the inventory table in `PLAN.md` §1.1, in both directions; the
+paper → inventory step is what this file describes.
 
 ## Checklist per result
 
