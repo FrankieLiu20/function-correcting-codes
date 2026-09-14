@@ -17,12 +17,11 @@ section Weight
 
 variable {F : Type*} [Zero F] [DecidableEq F] {n : ℕ}
 
-/-- The weight difference of two words is at most their Hamming distance:
-`wt(u) ≤ wt(v) + d(u,v)`.
+/-- `(internal)` — the weight difference of two words is at most their Hamming
+distance: `wt(u) ≤ wt(v) + d(u,v)`, i.e. `d(u,v) ≥ wt(u) − wt(v)`.
 
-Equivalently `d(u,v) ≥ wt(u) − wt(v)`; for binary words this is the inequality
-`d(u,v) ≥ |wt(u) − wt(v)|` used in the proof of `` `lem:6` `` (Lemma 6, §VI-C)
-to handle the case `|f(u) − f(v)| > 2t_f`. -/
+Used by `#lemma 6#` (§VI-C) in the case `|f(u) − f(v)| > 2t_f`, where the paper
+writes "Since `d(u,v) ≥ wt(u) − wt(v)`, we have `d(u,v) ≥ 2t_f + 1`". -/
 theorem wt_le_wt_add_hammingDist (u v : Word F n) :
     wt u ≤ wt v + hammingDist u v := by
   classical
@@ -49,7 +48,7 @@ theorem wt_le_wt_add_hammingDist (u v : Word F n) :
           Nat.add_comm _ _
   simpa only [wt, hammingNorm, hammingDist] using h
 
-/-- The zero word has weight `0`. -/
+/-- `(internal)` — the zero word has weight `0`. -/
 @[simp]
 theorem wt_zero : wt (0 : Word F n) = 0 := by
   simp [wt]
@@ -60,7 +59,7 @@ section Ball
 
 variable {F : Type*} [Fintype F] [DecidableEq F] {n : ℕ}
 
-/-- Every word lies in its own Hamming ball. -/
+/-- `(internal)` — every word lies in its own Hamming ball: `d(u,u) = 0 ≤ t`. -/
 @[simp]
 theorem mem_ball_self (u : Word F n) (t : ℕ) : u ∈ ball u t := by
   simp [ball]

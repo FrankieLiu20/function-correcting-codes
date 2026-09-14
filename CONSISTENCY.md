@@ -32,8 +32,8 @@ the paper → inventory step is what this file describes.
    to differ from the printed words, say so explicitly in `DEVLOG.md` and keep
    both readings.
 5. **Check the constants** against the paper's displayed formula, and against a
-   small instance when one exists (e.g. `cor:3` at `t = 2` gives `5.25`, quoted
-   in `ex:8`; the printed `thm:4` matrices can be checked against `ex:7`).
+   small instance when one exists (e.g. `#corollary 3#` at `t = 2` gives `5.25`, quoted
+   in `#example 8#`; the printed `#theorem 4#` matrices can be checked against `#example 7#`).
 6. **Re-derive one small case by hand** (or by `decide`) whenever the result is
    concrete enough.
 7. **Record the outcome** in `Notation.md` §7 (review log) and, if anything was

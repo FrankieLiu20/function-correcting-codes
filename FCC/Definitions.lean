@@ -29,16 +29,18 @@ work — see `PLAN.md` §4.
 
 namespace FCC
 
-/-- `Word F n` is the paper's `F_q^n`: a word of length `n` over the alphabet
-`F`.  Vectors are `Fin n`-indexed, i.e. 0-based, while the paper's coordinates
-are 1-based; the dictionary is in `Notation.md` §2. -/
+/-- `(paper notation, §I-E)` — the paper's `F_q^n`: a word of length `n` over the
+alphabet `F`.  Vectors are `Fin n`-indexed, i.e. 0-based, while the paper's
+coordinates are 1-based; the dictionary is in `Notation.md` §2. -/
 abbrev Word (F : Type*) (n : ℕ) := Fin n → F
 
-/-- The Hamming weight `wt(u)` (§I-E): the number of non-zero entries of `u`. -/
+/-- `(paper notation, §I-E)` — `wt(u)`, in the paper's words: "the number of
+non-zero entries in the vector `u`".  Used by `#corollary 3#` and `#lemma 6#`. -/
 abbrev wt [Zero F] [DecidableEq F] {n : ℕ} (u : Word F n) : ℕ := hammingNorm u
 
-/-- The Hamming ball `B(u,t) = {x ∈ F_q^n | d(x,u) ≤ t}` centred at `u` with
-radius `t` (§I-E). -/
+/-- `(paper notation, §I-E)` — the Hamming ball: "the Hamming ball of radius `t`
+centered at `u` is defined as `B(u,t) = {x ∈ F_q^n | d(x,u) ≤ t}`".  Used by
+`#theorem 15#`–`#theorem 19#`. -/
 def ball [Fintype F] [DecidableEq F] {n : ℕ} (u : Word F n) (t : ℕ) :
     Finset (Word F n) :=
   Finset.univ.filter fun x => hammingDist x u ≤ t

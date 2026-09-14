@@ -37,8 +37,8 @@ The rules below are adapted from `AGENTS.md` in Shenghao Yang's
    mathlib.  Search with `rg "def <name>" .lake/packages/mathlib/Mathlib/`
    before writing anything new.
 
-6. **Cited results are hypotheses, never `axiom`s.**  `lem:1`, `lem:4`,
-   `lem:12`, `cor:3`, `cor:5` are quoted from [1], [10], [14] (see
+6. **Cited results are hypotheses, never `axiom`s.**  `#lemma 1#`, `#lemma 4#`,
+   `#lemma 12#`, `#corollary 3#`, `#corollary 5#` are quoted from [1], [10], [14] (see
    `Notation.md` §6).  Where a result is needed, add it as an explicit
    hypothesis of the statement, so `scripts/axioms_check.ps1` stays meaningful.
 
@@ -86,13 +86,19 @@ The rules below are adapted from `AGENTS.md` in Shenghao Yang's
     **opens with the backticked label**, e.g.
 
     ```lean
-    /-- `thm:2` (Theorem 2, §IV): `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁,…,u_{q^k}))`. -/
+    /-- `#theorem 2#` (Theorem 2, §IV): `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁,…,u_{q^k}))`. -/
     ```
 
     `scripts/consistency_check.ps1` uses exactly this convention to decide
     whether a row of `PLAN.md` §1.1 is stated; a label mentioned only inside
     prose does not count.  Use section numbers, never PDF page numbers in code
     and never tex line numbers.
+
+    Helpers that are *not* a numbered item of the paper open their docstring
+    with `(internal)` or `(paper notation, §I-E)` instead of a marker, and name
+    the numbered item that consumes them (e.g. "used by `#lemma 6#`").  Keep the
+    text after the marker close to the paper's own wording: a reader must be
+    able to compare the docstring with the PDF without translating.
 
 14. **Never leave the build broken.**  `sorry` stubs are allowed while a phase
     is in progress, but every `sorry` must carry a comment naming the paper

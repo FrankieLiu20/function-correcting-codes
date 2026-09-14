@@ -11,11 +11,11 @@ corollary and proposition of
 > "Function-Correcting Codes With Data Protection", IEEE TIT **72**(7), 2026
 
 gets exactly one Lean declaration here (or in the phase module that owns its
-proof).  The docstring of that declaration **opens with the backticked label**,
-e.g.
+proof).  The docstring of that declaration **opens with the paper's own
+number**, e.g.
 
 ```lean
-    /-- `thm:2` (Theorem 2, §IV): the redundant-length identity. -/
+    /-- `#theorem 2#` (§IV): `r_f(k, t_d, t_f) = N(D_f(t_d, t_f : u₁, …, u_{q^k}))`. -/
     theorem optimalRedundancyData_eq_N_drmData : … := by sorry
 ```
 
@@ -23,14 +23,13 @@ e.g.
 the statement it documents.)
 
 so that `scripts/consistency_check.ps1` can check the paper ↔ Lean
-correspondence in both directions (a label mentioned only inside prose does not
-count as a stated result).
+correspondence in both directions: a marker mentioned only in the middle of a
+docstring does not count as a stated result, and a helper that is not a paper
+item opens its docstring with `(internal)` instead.
 
-Label scheme (this paper has no LaTeX labels, only numbers):
-
-* `def:N`, `thm:N`, `lem:N`, `cor:N`, `ex:N`, `rem:N` where `N` is the number
-  the paper prints (definitions/theorems/lemmas/corollaries share a single
-  counter, so `thm:10` is Theorem 10 and `lem:10` is Lemma 10).
+Label scheme (the paper has no LaTeX labels, only numbers): `#definition N#`,
+`#theorem N#`, `#lemma N#`, `#corollary N#`, `#example N#`, `#remark N#`, all
+sharing the paper's single counter; `Notation.md` §1 has the full table.
 
 Conventions:
 * state the paper's hypotheses literally; when they can be weakened, keep the

@@ -22,16 +22,16 @@ in the same commit that does the work.
 - [ ] 1a (part 3). The closed form `|B(u,t)| = Σ_{i≤t} C(n,i)(q-1)^i`
       (`card_sphere`, `ball_card`); the proof goes through the equivalence
       "word at distance `i` from `u` ↔ (set of `i` changed coordinates, values
-      on it)".  Needed by `thm:15`–`thm:19` and `cor:13`/`cor:14`.
+      on it)".  Needed by `#theorem 15#`–`#theorem 19#` and `#corollary 13#`/`#corollary 14#`.
 - [ ] 1b. `IsSystematic`, `minDist`; Definition 1 (`IsFCC`,
       `optimalRedundancy`) and Definition 6 (`IsFCCData`).
-- [ ] 1c. `drm` (`def:2`), `drmData` (`def:11`), `fDist`/`fdm` (`def:4`,
-      `def:5`), `IsDCode`/`N`/`Nconst` (`def:3`) and the `N` API.
-- [ ] 1d. `cdrm` (`def:7`), `codedFDist` (`def:8`), `cfdm` (`def:9`).
-- [ ] 1e. `minDistGraph` (`def:12`), `functionBall` (`def:13`),
-      `IsLocallyBinary` (`def:14`), `IsLocallyBounded` (`def:15`).
-- [ ] 1f. `IsLinearFCC` (`def:16`), `CosetCode`/`cosetCodeMinDist` (`def:17`),
-      `IsLinearFCCKernel` (`def:18`).
+- [ ] 1c. `drm` (`#definition 2#`), `drmData` (`#definition 11#`), `fDist`/`fdm` (`#definition 4#`,
+      `#definition 5#`), `IsDCode`/`N`/`Nconst` (`#definition 3#`) and the `N` API.
+- [ ] 1d. `cdrm` (`#definition 7#`), `codedFDist` (`#definition 8#`), `cfdm` (`#definition 9#`).
+- [ ] 1e. `minDistGraph` (`#definition 12#`), `functionBall` (`#definition 13#`),
+      `IsLocallyBinary` (`#definition 14#`), `IsLocallyBounded` (`#definition 15#`).
+- [ ] 1f. `IsLinearFCC` (`#definition 16#`), `CosetCode`/`cosetCodeMinDist` (`#definition 17#`),
+      `IsLinearFCCKernel` (`#definition 18#`).
 
 ## Phase 2 — statement catalogue
 

@@ -71,14 +71,14 @@ Nothing yet; this section is filled in as results are classified.
 Planned to appear here: the paper's numbered **examples**
 (`PLAN.md` §1.2 — they are illustrations, not theorems; some are used as
 `decide` regression tests) and the **external** rows of `PLAN.md` §1.1
-(`lem:1`, `lem:4`, `lem:12`, `cor:3`, `cor:5`), which are quoted from other
+(`#lemma 1#`, `#lemma 4#`, `#lemma 12#`, `#corollary 3#`, `#corollary 5#`), which are quoted from other
 papers and will be used as explicit hypotheses rather than assumed as axioms.
 
 ## Statement-level caveats
 
 None yet.  `Notation.md` §5 lists the places where the paper's printed statement
-needs care (the direction of `thm:15`/`thm:16`, the constants of `lem:1`, the
-missing `max(·,0)` in `def:11`, the "similar proof" of `thm:4` Case 2, the
-covering argument of `thm:10`, and the systematicity step in `lem:6`); each entry
+needs care (the direction of `#theorem 15#`/`#theorem 16#`, the constants of `#lemma 1#`, the
+missing `max(·,0)` in `#definition 11#`, the "similar proof" of `#theorem 4#` Case 2, the
+covering argument of `#theorem 10#`, and the systematicity step in `#lemma 6#`); each entry
 stays there until the corresponding phase resolves it, and the resolution is
 recorded in `DEVLOG.md`.

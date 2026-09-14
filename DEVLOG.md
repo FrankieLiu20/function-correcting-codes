@@ -15,20 +15,20 @@ the prebuilt mathlib cache and CI stay valid.
 **Read the paper.**  All 21 pages; the dictionary in `Notation.md` §2 and the
 inventory in `PLAN.md` §1.1 come from that reading.  Checked by hand:
 
-* `ex:6`'s CDRM (six pairwise distances `3,4,3,3,4,3` → entries `2,1,2,2,1,2`)
+* `#example 6#`'s CDRM (six pairwise distances `3,4,3,3,4,3` → entries `2,1,2,2,1,2`)
   agrees with the printed matrix, and the quoted `D`-code `{000,110,101,011}`
   satisfies every entry of it;
-* `ex:7`'s 8×8 DRM was recomputed entry by entry for a non-trivial sample
+* `#example 7#`'s 8×8 DRM was recomputed entry by entry for a non-trivial sample
   (`(u₁,u₂) = 4`, `(u₂,u₃) = 1`, `(u₁,u₅) = 3`, `(u₂,u₈) = 3`, `(u₅,u₈) = 4`)
   and agrees with the printed matrix — so the equal-function-value row really is
   the `2t_d+1` row;
-* `cor:3` at `t = 2` gives `252/48 = 5.25`, matching the value quoted in `ex:8`.
+* `#corollary 3#` at `t = 2` gives `252/48 = 5.25`, matching the value quoted in `#example 8#`.
 
 **Suspected paper issues.**  Six recorded in `Notation.md` §5.  The most
-substantive: `thm:15`/`thm:16` are printed as existence statements
+substantive: `#theorem 15#`/`#theorem 16#` are printed as existence statements
 ("there exists an FCC … if `E ≤ q^n/|∪B|`") while their proofs and all their uses
-(`ex:16` concluding `n ≥ 9`, `ex:17` concluding "must have length `n ≥ 9`",
-`cor:13` reducing to the classical Hamming bound) are in the converse direction.
+(`#example 16#` concluding `n ≥ 9`, `#example 17#` concluding "must have length `n ≥ 9`",
+`#corollary 13#` reducing to the classical Hamming bound) are in the converse direction.
 We will state them as bounds ("if an FCC of length `n` exists then …") and flag
 the printed wording rather than silently "fixing" it.
 
@@ -44,11 +44,11 @@ everything else:
 
 **Base layer.**  `FCC/Definitions.lean` (`Word`, `wt`, `ball`) and
 `FCC/Basic.lean` (`wt_le_wt_add_hammingDist`, `wt_zero`, `mem_ball_self`) build,
-and the axiom audit passes.  The first lemma is not decoration: `lem:6` uses
+and the axiom audit passes.  The first lemma is not decoration: `#lemma 6#` uses
 `d(u,v) ≥ wt(u) − wt(v)` explicitly.
 
 **Next.**  Phase 1a: `ball_card`, `card (Word F n) = q^n`, and the `decide`
-regression tests pinned by `PLAN.md` §1.2 (`ex:6`, `ex:7`), which lock the
+regression tests pinned by `PLAN.md` §1.2 (`#example 6#`, `#example 7#`), which lock the
 indexing conventions down before any theorem is stated.
 
 ## 2026-09-14 — Phase 1a (part 1): counting API and paper-example regression tests
@@ -100,4 +100,32 @@ themselves twice in this session:
 an equivalence between "word at distance `i` from `u`" and "set of the `i`
 changed coordinates + the values taken on it", and `Finset.card_powersetCard`
 plus `Fintype.card_ne_eq` supply the count.  It is needed by
-`thm:15`–`thm:19` and `cor:13`/`cor:14`.
+`#theorem 15#`–`#theorem 19#` and `#corollary 13#`/`#corollary 14#`.
+
+## 2026-09-14 — Labelling: paper markers at the head of every docstring
+
+At the project owner's request, one must be able to see *at a glance* which item
+of the paper a declaration formalizes, in the paper's own words.  The labelling
+scheme was therefore unified to the paper's numbering:
+
+* a declaration that formalizes a numbered item opens its docstring with
+  `#definition N#`, `#theorem N#`, `#lemma N#`, `#corollary N#`, `#example N#` or
+  `#remark N#`, followed by a paraphrase that stays close to the paper's text and
+  the section number — e.g.
+  ``/-- `#definition 7#` (§III) — the coded distance requirement matrix … -/``;
+* a declaration that is *not* a paper item (helper, restatement of a mathlib
+  lemma, notation) opens with `(internal)` or `(paper notation, §I-E)` instead,
+  and names the paper item that consumes it;
+* `PLAN.md` §1.1 and §1.2 use the identical strings, so a docstring and its
+  inventory row can be compared character by character; the examples used as
+  regression tests got their own rows (`#example 6#`, `#example 7#`,
+  `#example 10#`) naming the test that owns them;
+* `scripts/consistency_check.ps1` was rewritten accordingly.  It now
+  (a) rejects any marker that is not an inventory row, and (b) requires each
+  inventory row to be *stated*: the declaration listed in the row's "Lean name"
+  column must exist **and** the docstring directly above it must carry the
+  marker.  The old version accepted a marker mentioned anywhere in the file,
+  which prose could satisfy by accident — and did: `#theorem 2#` appeared in an
+  example inside `Statements.lean` and was counted as a stated result;
+* `Notation.md` §1, `AGENTS.md` rule 13 and `FCC/Statements.lean` document the
+  scheme, which is now the only label notation in the repository.
