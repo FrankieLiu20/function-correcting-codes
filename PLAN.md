@@ -49,9 +49,9 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#lemma 1#` | II | `N(M,D) ≤ 2(D−2)/(1−2/q)·ln D/D` for `D ≥ 10`, `M ≤ D²` | — | external ([10, Lem. 2]) |
 | `#definition 4#` | II | `d(fᵢ,fⱼ) = min{d(u₁,u₂) | f(u₁)=fᵢ, f(u₂)=fⱼ}` | `fDist` | stated |
 | `#definition 5#` | II | Function distance matrix (FDM), entries `max(2t+1−d(fᵢ,fⱼ),0)` off the diagonal | `fdm` | stated |
-| `#corollary 1#` | II | `r_f(k,t) ≥ N(D_f(t,u₁,…,u_m))` for any subset; and `≥ 2t` when `|Im f| ≥ 2` | `optimalRedundancy_ge_drm`, `two_mul_le_optimalRedundancy` | todo |
-| `#theorem 1#` | II | `r_f(k,t) ≤ N(FDM)` | `optimalRedundancy_le_fdm` | todo |
-| `#corollary 2#` | II | equality in `#theorem 1#` when a representative set realises the FDM | `optimalRedundancy_eq_fdm` | todo |
+| `#corollary 1#` | II | `r_f(k,t) ≥ N(D_f(t,u₁,…,u_m))` for any subset; and `≥ 2t` when `|Im f| ≥ 2` | `optimalRedundancy_ge_drm`, `two_mul_le_optimalRedundancy` | stated |
+| `#theorem 1#` | II | `r_f(k,t) ≤ N(FDM)` | `optimalRedundancy_le_fdm` | stated |
+| `#corollary 2#` | II | equality in `#theorem 1#` when a representative set realises the FDM | `optimalRedundancy_eq_fdm` | stated |
 | `#corollary 3#` | II | `r_wt(k,t) ≥ (10t³+30t²+20t+12)/(3t²+12t+12)` | — | external ([1, Cor. 3]) |
 
 #### §III A construction procedure for FCCs with data protection

@@ -100,14 +100,16 @@ def drm {k M : ℕ} (f : Word F k → α) (t : ℕ) (u : Fin M → Word F k) : F
 
 /-- `#definition 3#` (§II) — an irregular-distance code (`D`-code): a family
 `p₁,…,p_M` of words such that `d(p_i, p_j) ≥ [D]_{i,j}` for all `i ≠ j` (the
-paper's "there is an ordering of `P`" is the indexing of this family). -/
-def IsDCode {M : ℕ} (D : Fin M → Fin M → ℕ) (r : ℕ) : Prop :=
-  ∃ p : Fin M → Word F r, ∀ i j, i ≠ j → D i j ≤ hammingDist (p i) (p j)
+paper's "there is an ordering of `P`" is the indexing of this family).  The
+index type is an arbitrary `ι`; the DRM is indexed by `Fin M` and the FDM by the
+image values, and `#theorem 1#` relates the two, so `N` must accept both. -/
+def IsDCode {ι : Type*} (D : ι → ι → ℕ) (r : ℕ) : Prop :=
+  ∃ p : ι → Word F r, ∀ i j, i ≠ j → D i j ≤ hammingDist (p i) (p j)
 
 /-- `#definition 3#` (§II) — `N(D)`: "the smallest integer `r` such that there
 exists a `D`-code of length `r`" (`0` if no `D`-code exists at all; the `N`-API,
 including existence, is phase 3.0). -/
-noncomputable def N {M : ℕ} (D : Fin M → Fin M → ℕ) : ℕ :=
+noncomputable def N {ι : Type*} (D : ι → ι → ℕ) : ℕ :=
   sInf {r : ℕ | IsDCode (F := F) D r}
 
 /-- `#definition 3#` (§II) — `N(M,D)`: the minimum length of an error-correcting
@@ -126,6 +128,49 @@ matrix (`E = |Im(f)|`) with entries `max(2t+1 − d(fᵢ,fⱼ), 0)` off the diag
 and `0` on it.  We index it by the image values themselves. -/
 noncomputable def fdm {k : ℕ} (f : Word F k → α) (t : ℕ) : α → α → ℕ :=
   fun a b => if a = b then 0 else max (2 * t + 1 - fDist f a b) 0
+
+/-! ### §II results — the `(f,t)`-FCC bounds of [1]
+
+Statements only, in the paper's order (the proofs are phase 3.2).  `N`'s index
+type is explicit in each statement, because the DRM is indexed by `Fin m` and
+the FDM by the image values. -/
+
+/-- `#corollary 1#` (§II, quoted from [1, Cor. 1]) — "for any function
+`f : F_q^k → Im(f)` and `{u₁, u₂, …, u_m} ⊆ F_q^k`:
+`r_f(k,t) ≥ N(D_f(t, u₁, u₂, …, u_m))`". -/
+theorem optimalRedundancy_ge_drm {k m : ℕ} (f : Word F k → α) (t : ℕ)
+    (u : Fin m → Word F k) :
+    N (F := F) (ι := Fin m) (drm f t u) ≤ optimalRedundancy f t := by
+  sorry
+
+/-- `#corollary 1#` (§II, quoted from [1, Cor. 1]) — "and for `|Im(f)| ≥ 2`,
+`r_f(k,t) ≥ 2t`" (here `|Im(f)| ≥ 2` is stated as: two distinct values, each
+attained). -/
+theorem two_mul_le_optimalRedundancy {k : ℕ} (f : Word F k → α) (t : ℕ)
+    (h : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b) :
+    2 * t ≤ optimalRedundancy f t := by
+  sorry
+
+/-- `#theorem 1#` (§II, quoted from [1, Thm. 2]) — "for any function
+`f : F_q^k → Im(f) = {f₁, f₂, …, f_E}`, `r_f(k,t) ≤ N(D_f(t, f₁, f₂, …, f_E))`,
+where `D_f(t, f₁, …, f_E)` is a FDM" (`#definition 5#`). -/
+theorem optimalRedundancy_le_fdm {k : ℕ} (f : Word F k → α) (t : ℕ) :
+    optimalRedundancy f t ≤ N (F := F) (ι := α) (fdm f t) := by
+  sorry
+
+/-- `#corollary 2#` (§II, quoted from [1, Cor. 2]) — "if there exists a set of
+representative information vectors `u₁, u₂, …, u_E` with
+`{f(u₁), …, f(u_E)} = Im(f)` and `D_f(t, u₁, …, u_E) = D_f(t, f₁, …, f_E)`, then
+`r_f(k,t) = N(D_f(t, f₁, …, f_E))`".  The two hypotheses are stated as: the `u_i`
+attain the pairwise minimum distances of `#definition 4#`, and they hit every
+value of `f`. -/
+theorem optimalRedundancy_eq_fdm {k E : ℕ} (f : Word F k → α) (t : ℕ)
+    (u : Fin E → Word F k)
+    (hattain : ∀ i j, f (u i) ≠ f (u j) →
+      hammingDist (u i) (u j) = fDist f (f (u i)) (f (u j)))
+    (hsurj : ∀ v : Word F k, ∃ i : Fin E, f (u i) = f v) :
+    optimalRedundancy f t = N (F := F) (ι := Fin E) (drm f t u) := by
+  sorry
 
 /-! ### Example 1 (`#example 1#`) — the DRM of a function on `F₂²` -/
 
