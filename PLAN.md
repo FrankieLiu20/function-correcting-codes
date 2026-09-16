@@ -121,7 +121,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#lemma 9#` | VII | in a linear `(f:d_d,d_f)`-FCC of a linear `f`: `wt v ≥ d_f` for all `v ∈ C \ D_f` | `wt_ge_of_not_mem_kernel` | todo |
 | `#definition 17#` | VII | coset code `C/D` and its minimum distance `d(C/D)` | `CosetCode`, `cosetCodeMinDist` | stated |
 | `#definition 18#` | VII | equivalent definition: `d(C) ≥ d_d` and `d(C/D_f) ≥ d_f` | `IsLinearFCCKernel` | stated |
-| `#lemma 10#` | VII | `C_cat = {(C(u), D(f(u)))}` is a linear code of dimension `k` for linear `C`, `D`, `f` | `image_linear_concat` | todo |
+| `#lemma 10#` | VII | `C_cat = {(C(u), D(f(u)))}` is a linear code of dimension `k` for linear `C`, `D`, `f` | `image_linear_concat` | stated |
 | `#theorem 13#` | VII | correctness: `C_cat` is a linear `(f:d_d,d_f)`-FCC of dimension `k`, total redundancy `(n−k)+r'` | `isLinearFCC_concat` | todo |
 
 #### §VIII Classical bounds extended to FCCs + Appendix

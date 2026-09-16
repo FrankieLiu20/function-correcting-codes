@@ -907,6 +907,24 @@ theorem wt_ge_of_not_mem_kernel {k r dd df : ℕ} (f : Word F k →ₗ[F] Word F
     ∀ v : C, v ∉ kernelSubcode f C → df ≤ wt (v : Word F (k + r)) := by
   sorry
 
+/-- `(internal, §VII — used by `#lemma 10#`, `#theorem 13#`)` — the concatenation
+of a word of length `m` with one of length `n`, i.e. the paper's pair
+`(C(u), D(f(u)))` written as a single word of length `m + n`. -/
+def catWord {m n : ℕ} (x : Word F m) (y : Word F n) : Word F (m + n) :=
+  Fin.addCases x y
+
+/-- `#lemma 10#` (§VII) — "let `f : F_q^k → F_q^ℓ` be a linear function.  Further,
+let `C ⊆ F_q^n` and `D ⊆ F_q^{r'}` be linear codes of dimensions `k` and `ℓ`,
+respectively ... Then the concatenated code
+`C_cat = {(C(u), D(f(u))) : u ∈ F_q^k}` is a linear code in `F_q^{n+r'}` of
+dimension `k`."  Linearity is stated as `IsLinearMap` for the map
+`u ↦ (C(u), D(f(u)))` (with `catWord` spelling out the pair); the dimension claim
+is `#theorem 13#`. -/
+theorem image_linear_concat {k ℓ r r' : ℕ} (f : Word F k →ₗ[F] Word F ℓ)
+    (Cf : Word F k →ₗ[F] Word F r) (Df : Word F ℓ →ₗ[F] Word F r') :
+    IsLinearMap F (fun u : Word F k => catWord (Cf u) (Df (f u))) := by
+  sorry
+
 end SectionVIIStatements
 
 /-! ### Example 12 (`#example 12#`) — a linear FCC for a non-linear function -/
