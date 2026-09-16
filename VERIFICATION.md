@@ -97,8 +97,20 @@ The three example checks of phase 1a now call the real `cdrm`/`drmData`; the
 temporary transcriptions were deleted and `FCC/Internal.lean` holds only the
 test alphabet `F₂`.
 
-Known gaps, recorded in `PLAN.md` §1.2: examples 1–5, 8, 9 and 12–17 are not
-formalized yet; 11, 15, 16 and 17 additionally need the §VIII bounds.
+(The examples were formalized afterwards — see the section below.)
+
+## Phase 1b (examples) — 12 of the paper's 17 examples (2026-09-14)
+
+Formalized as `decide` checks in `FCC/Paper.lean`: `#example 1#`, `2`, `4`, `5`
+(DRM, `D`-code and the length-9 code), `6`, `7`, `8`, `9`, `10`, `12`, `13`,
+`14`.  Build, consistency check (72 markers, all inventory rows; docstring
+convention green) and the axiom audit are green; CI green in 2m14s.
+
+Not formalized, with the reason recorded in `PLAN.md` §1.2: `#example 3#` and
+the FDM part of `#example 5#` (the minimum over preimages is `sInf`-based until
+phase 3.0), `#example 5#`'s `N(D) = 6` (Plotkin, phase 3.11), and
+`#example 11#`, `#example 15#`, `#example 16#`, `#example 17#` (§VIII bounds or
+a value quoted from [1]).
 
 ## Not formalized (and why)
 

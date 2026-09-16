@@ -254,3 +254,39 @@ Build-time note: the file-level `set_option maxRecDepth 100000` (needed by the
 this batch of `decide` proofs pushed a full build to ~5 minutes.  If the CI
 wall-clock becomes a nuisance, the fix is to scope the option to the few
 declarations that need it rather than the whole file.
+
+## 2026-09-14 — Examples 5, 8, 9, 12, 13 and 14 formalized
+
+Second batch of examples, all `decide` checks in `FCC/Paper.lean` under their
+paper sections:
+
+* `#example 5#` (§III): the least-frequent-bit function `f` on `F₂³` — the
+  printed DRM (`drm ex5F 2 ex5Vec`), the `D`-code `{000000,111100,110011,001111}`
+  for it, and the length-9 code of the paper, whose minimum distance is exactly
+  `3`.
+* `#example 8#` (§IV): the `D`-code `{000000,110110,101110,011110,011101,101101,
+  110101,000011}` satisfies the 8×8 DRM of `#example 7#`.
+* `#example 9#` (§V-A): `d_min({0000,0011,1100,1111}) = 2` and each codeword has
+  exactly two codewords at that distance — the 4-cycle of the example.
+* `#example 12#` (§VII): the *non-linear* `f(x₁,x₂,x₃) = x₁x₂` with the `[9,3,5]`
+  code, including the paper's codeword table; `d_d = 3` and `d_f = 5`.
+* `#example 13#` (§VII): the linear `(f : 2, 3)`-FCC with `ker f = {00,11}`.
+* `#example 14#` (§VII-B): the `[10,3,4]` linear `(f : 4, 6)`-FCC of the §VII-B
+  construction, with the message order of the paper's table.
+
+Two things this batch clarified, both worth remembering for phase 2:
+
+* the encoders in `#example 12#`/`#example 14#` are *not* systematic (`u ↦ uG`
+  for a matrix that is not in standard form), so the checks are stated directly
+  on the code, not through `IsFCC`/`IsFCCData` (which carry systematicity);
+* `#example 13#` needed its message map spelled out (`ex13Msg`) because `f` is a
+  function of the *message*, while the code lives in the longer ambient space —
+  exactly the distinction that `#definition 18#`'s `kernelSubcode` formalizes.
+
+Examples 1, 2, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14 are now formalized: 12 of the
+paper's 17.  The remaining five are blocked on purpose, not forgotten:
+`#example 3#` and the FDM part of `#example 5#` need a computable form of the
+minimum over preimages (or the phase-3.0 `fDist` API), `#example 5#`'s
+`N(D) = 6` is the Plotkin bound of `#lemma 11#` (phase 3.11), and
+`#example 11#`, `#example 15#`, `#example 16#`, `#example 17#` need the §VIII
+bounds or a value quoted from [1].
