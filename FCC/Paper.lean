@@ -1056,6 +1056,47 @@ theorem hamming_bound_fcc_sphere {k r : ℕ} (f : Word F k → α) (t : ℕ)
       Fintype.card F ^ (k + r) := by
   sorry
 
+/-- `#theorem 15#` (§VIII-B) — "consider a function `f : F_q^k → Im(f)` with
+`Im(f) = {f₁,…,f_E}`.  Let `ℓ = min_{i∈[E]} |f⁻¹(fᵢ)|`, then there exists an
+`(f,t)`-FCC with length `n` if `E ≤ q^n/|∪_{j≤ℓ} B(v_j,t)|`, where `v₁,…,v_ℓ`
+are any distinct vectors in `F_q^n` for which `|∪_{j≤ℓ} B(v_j,t)|` is minimum."
+
+As `Notation.md` §5 records, the printed "there exists … if" runs opposite to the
+proof and to every later use (Examples 16–17, `#corollary 13#`), so we state the
+necessity direction and without division: an `(f,t)`-FCC of length `n` forces
+`|Im(f)| · |∪_{j<ℓ} B(v_j,t)| ≤ q^n` for a minimising family.  The minimum is the
+`(internal)` quantity `minUnionCard` (phase 1 has no argmin helper). -/
+theorem hamming_bound_fcc {k r : ℕ} (f : Word F k → α) (t : ℕ)
+    (C : Word F k → Word F (k + r)) (hC : IsFCC f C t) :
+    (Finset.univ.image f).card * minUnionCard (F := F) (minPreimageCard f) (k + r) t ≤
+      Fintype.card F ^ (k + r) := by
+  sorry
+
+/-- `#theorem 16#` (§VIII-C) — the same statement for an `(f : d_d, d_f)`-FCC:
+"let `ℓ = min_{i∈[E]} |f⁻¹(fᵢ)|` and `v₁, v₂, …, v_ℓ` be distinct vectors in
+`F_q^n` with `d(vᵢ,vⱼ) ≥ d_d`, for which `|∪_{j≤ℓ} B(v_j,t_f)|` is minimum.
+Then there exists an `(f : d_d, d_f)`-FCC with length `n` if
+`E ≤ q^n/|∪_{j≤ℓ} B(v_j,t_f)|`" — stated, for the same reason as `#theorem 15#`,
+in the necessity direction and without division; the minimising family here is
+`minUnionCardDist`, which carries the pairwise `d(vᵢ,vⱼ) ≥ d_d` condition. -/
+theorem hamming_bound_fcc_data {k r : ℕ} (f : Word F k → α) (dd df tf : ℕ)
+    (C : Word F k → Word F (k + r)) (hC : IsFCCData f C dd df) :
+    (Finset.univ.image f).card *
+        minUnionCardDist (F := F) (minPreimageCard f) dd (k + r) tf ≤
+      Fintype.card F ^ (k + r) := by
+  sorry
+
+/-- `#corollary 14#` (§VIII-C) — "consider a function `f : F_q^k → Im(f)` with
+`Im(f) = {f₁,…,f_E}`, and `ℓ = min_{i∈[E]} |f⁻¹(fᵢ)|`.  Then there exists an
+`(f : d_d, d_f)`-FCC with length `n` if
+`E ≤ q^n/(ℓ · Σ_{i≤t_d} C(n,i)(q−1)^i)`" — again in the necessity direction and
+without division: `E · ℓ · |B(0,t_d)| ≤ q^n`. -/
+theorem hamming_bound_fcc_data_sphere {k r : ℕ} (f : Word F k → α) (dd df td : ℕ)
+    (C : Word F k → Word F (k + r)) (hC : IsFCCData f C dd df) :
+    (Finset.univ.image f).card * minPreimageCard f *
+        (ball (0 : Word F (k + r)) td).card ≤ Fintype.card F ^ (k + r) := by
+  sorry
+
 end SectionVIIIStatements
 
 /-! ## §VIII — Extension of bounds from error-correcting codes to FCCs
