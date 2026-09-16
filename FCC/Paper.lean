@@ -1007,6 +1007,9 @@ def ex14Msg : Fin 8 → Word F₂ 3 :=
     ![false, true, false], ![false, false, true], ![true, true, true],
     ![true, false, true], ![false, true, true]]
 
+/-- `#example 14#` (§VII-B) — the construction gives an `(f : 4, 6)`-FCC: the
+minimum distance is at least 4, and codewords whose messages have different
+`f`-values are at distance at least 6. -/
 theorem ex14_is_fcc :
     (∀ i j : Fin 8, i ≠ j → 4 ≤ hammingDist (ex14Code i) (ex14Code j)) ∧
       ∀ i j : Fin 8, ex14F (ex14Msg i) ≠ ex14F (ex14Msg j) →
