@@ -715,6 +715,96 @@ theorem ex10_min_dist : ∀ u : Word F₂ 4, u ≠ 0 → 3 ≤ wt (ex10Enc u) :=
 the encoder). -/
 theorem ex10_card_codewords : (Finset.univ.image ex10Enc).card = 16 := by decide
 
+section SectionVIStatements
+
+variable {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {α : Type*} [DecidableEq α]
+
+/-! ### §VI results — FCCs for specific functions
+
+Statements only, in the paper's order (proofs are phases 3.8–3.9).  `#lemma 4#`
+is external ([14], the colouring of a locally bounded function), so it enters
+`#theorem 12#` as an explicit hypothesis `hcol`.  Two weakenings are recorded in
+the docstrings: the `[n,k,d_d]` codes are used only through their minimum
+distance, and the paper's `n` is our `k + r`. -/
+
+/-- `#lemma 3#` (§VI-A) — "for any `(d_f−1)`-locally binary function `f`, and a
+systematic `[n, k, d_d]` linear error-correcting code `C`, we have (from our
+construction in Subsection III-A) `r_f(k : d_d, d_f) ≤ n − k + d_f − d_d`". -/
+theorem locallyBinary_redundancy_le {k r dd df : ℕ} (f : Word F k → α)
+    (hf : IsLocallyBinary f (df - 1)) (C : Word F k → Word F (k + r))
+    (hC : ∀ v w : Word F k, v ≠ w → dd ≤ hammingDist (C v) (C w)) :
+    optimalRedundancyData f dd df ≤ r + (df - dd) := by
+  sorry
+
+/-- `#corollary 9#` (§VI-A) — "if there exists a perfect linear
+`(n, q^k, d_d = 2t_d+1)`-code, ... then for any `(d_f−1)`-locally binary
+function `f`, `r_f(k : d_d, d_f) ≤ n − k + d_f − d_d`". -/
+theorem locallyBinary_perfect_redundancy_le {k n dd df t : ℕ} (f : Word F k → α)
+    (hf : IsLocallyBinary f (df - 1)) (C : Finset (Word F n)) (hperf : IsPerfect C t)
+    (hdd : dd = 2 * t + 1) (hk : C.card = Fintype.card F ^ k) :
+    optimalRedundancyData f dd df ≤ n - k + (df - dd) := by
+  sorry
+
+/-- `#corollary 10#` (§VI-A) — "let `f` be a `(d_f−1)`-locally binary function.
+Then the construction described in the proof of `#lemma 3#` gives an optimal
+`(f : d_d, d_f)`-FCC for `d_f = d_d + 1` if there exists a perfect
+`(n, q^k, d_d)` code". -/
+theorem locallyBinary_perfect_optimal {k n dd t : ℕ} (f : Word F k → α)
+    (hf : IsLocallyBinary f dd) (C : Finset (Word F n)) (hperf : IsPerfect C t)
+    (hdd : dd = 2 * t + 1) (hk : C.card = Fintype.card F ^ k) :
+    optimalRedundancyData f dd (dd + 1) = n - k + 1 := by
+  sorry
+
+/-- `#corollary 11#` (§VI-A) — "if there exists an MDS `(n, q^k, d_d = n−k+1)` code,
+then for any `(d_f−1)`-locally binary function `f`,
+`r_f(k : d_d, d_f) ≤ n − k + d_f − d_d = d_f − 1`". -/
+theorem locallyBinary_mds_redundancy_le {k n dd df : ℕ} (f : Word F k → α)
+    (hf : IsLocallyBinary f (df - 1)) (C : Finset (Word F n)) (hC : IsMDS C dd)
+    (hk : C.card = Fintype.card F ^ k) (hn : n = k + dd - 1) :
+    optimalRedundancyData f dd df ≤ df - 1 := by
+  sorry
+
+/-- `#corollary 12#` (§VI-A) — "let `f` be a `(d_f−1)`-locally binary function.
+Then the construction described in the proof of `#lemma 3#` gives an optimal
+`(f : d_d, d_f)`-FCC for `d_f = d_d + 1`, if there exists an `(n, q^k, d_d)` MDS
+code". -/
+theorem locallyBinary_mds_optimal {k n dd : ℕ} (f : Word F k → α)
+    (hf : IsLocallyBinary f dd) (C : Finset (Word F n)) (hC : IsMDS C dd)
+    (hk : C.card = Fintype.card F ^ k) (hn : n = k + dd - 1) :
+    optimalRedundancyData f dd (dd + 1) = dd := by
+  sorry
+
+/-- `#lemma 5#` (§VI-B, quoted from [14]) — "let `N(λ, 2t)` be the minimum length
+of a binary error-correcting code with `λ` codewords and minimum distance `2t`.
+Then `N(4, 2t) = 3t`". -/
+theorem Nconst_four_two (t : ℕ) : Nconst (F := F) 4 (2 * t) = 3 * t := by
+  sorry
+
+/-- `#theorem 12#` (§VI-B) — "for any `(2t_f, λ)`-bounded function `f` satisfying
+the contiguous block condition given in `#lemma 4#`, and a systematic
+`[n, k, 2t_d+1]` linear error-correcting code `C`, we have
+`r_f(k, t_d, t_f) ≤ n − k + N(λ, 2(t_f − t_d))`".  The colouring whose existence
+`#lemma 4#` provides is the hypothesis `hcol`. -/
+theorem locallyBounded_redundancy_le {k r td tf lam : ℕ} (f : Word F k → α)
+    (hf : IsLocallyBounded f (2 * tf) lam) (C : Word F k → Word F (k + r))
+    (col : Word F k → Fin lam)
+    (hcol : ∀ u v : Word F k, hammingDist u v ≤ 2 * tf → f u ≠ f v → col u ≠ col v)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+    optimalRedundancyData f (2 * td + 1) (2 * tf + 1) ≤
+      r + Nconst (F := F) lam (2 * (tf - td)) := by
+  sorry
+
+/-- `#lemma 6#` (§VI-C) — "for the Hamming weight function `f : F_q^k → Im(f)`,
+and a systematic `[n, k, 2t_d+1]` linear error-correcting code `C`, we have
+`r_f(k, t_d, t_f) ≤ n − k + N(2t_f+1, 2(t_f − t_d))`". -/
+theorem hammingWeight_redundancy_le {k r td tf : ℕ} (C : Word F k → Word F (k + r))
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+    optimalRedundancyData (fun u : Word F k => wt u) (2 * td + 1) (2 * tf + 1) ≤
+      r + Nconst (F := F) (2 * tf + 1) (2 * (tf - td)) := by
+  sorry
+
+end SectionVIStatements
+
 /-! ## §VII — Linear `(f : d_d, d_f)`-FCC
 
 Definitions 16–18 are below.  Still to come: `#lemma 7#`, `#lemma 8#`,

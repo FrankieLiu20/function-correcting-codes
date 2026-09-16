@@ -86,13 +86,13 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
 | `#definition 12#` | V | minimum-distance graph `G(C)`: vertices `C`, edges between codewords at distance `d_min(C)` | `minDistGraph` | stated |
-| `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with `|Im f| ≥ 2`, `d_f > d` | `not_isFCCData_of_connected` | stated |
+| `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with `|Im f| ≥ 2`, `d_f > d` | `not_isFCCData_of_connected` | todo |
 | `#theorem 9#` | V | if `G(C)` has `Q` components then no `f` with `|Im f| ≥ Q+1` and `d_f > d` works | `not_isFCCData_of_components` | todo |
-| `#theorem 10#` | V | `G(C)` is connected for every perfect `t`-error-correcting code | `isConnected_minDistGraph_of_perfect` | stated |
-| `#corollary 7#` | V | `r_f(k:d_d,d_f) ≥ n−k+1` when a perfect code of length `n` exists | `perfect_optimalRedundancyData_ge` | stated |
-| `#lemma 2#` | V | MDS codes: for all `u,v` there is `u'` with `d(u,u') = d` and `d(u',v) ≤ d(u,v)−1` | `exists_mds_neighbor` | stated |
-| `#theorem 11#` | V | `G(C)` is connected for every MDS code | `isConnected_minDistGraph_of_mds` | stated |
-| `#corollary 8#` | V | `r_f(k:d_d,d_f) ≥ d` given an MDS `(n,q^k,d)` code | `mds_optimalRedundancyData_ge` | stated |
+| `#theorem 10#` | V | `G(C)` is connected for every perfect `t`-error-correcting code | `isConnected_minDistGraph_of_perfect` | todo |
+| `#corollary 7#` | V | `r_f(k:d_d,d_f) ≥ n−k+1` when a perfect code of length `n` exists | `perfect_optimalRedundancyData_ge` | todo |
+| `#lemma 2#` | V | MDS codes: for all `u,v` there is `u'` with `d(u,u') = d` and `d(u',v) ≤ d(u,v)−1` | `exists_mds_neighbor` | todo |
+| `#theorem 11#` | V | `G(C)` is connected for every MDS code | `isConnected_minDistGraph_of_mds` | todo |
+| `#corollary 8#` | V | `r_f(k:d_d,d_f) ≥ d` given an MDS `(n,q^k,d)` code | `mds_optimalRedundancyData_ge` | todo |
 
 #### §VI FCCs for specific functions
 
@@ -100,16 +100,16 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | --- | --- | --- | --- | --- |
 | `#definition 13#` | VI-A | function ball `B_f(u,ρ) = {f(u') | d(u,u') ≤ ρ}` | `functionBall` | stated |
 | `#definition 14#` | VI-A | `ρ`-locally binary function: `|B_f(u,ρ)| ≤ 2` for all `u` | `IsLocallyBinary` | stated |
-| `#lemma 3#` | VI-A | for `(d_f−1)`-locally binary `f` and a systematic `[n,k,d_d]` code: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d` (and `= 2(t_f−t_d)` in `t`-form) | `locallyBinary_redundancy_le` | todo |
-| `#corollary 9#` | VI-A | the same with a perfect linear code in step 1 | `locallyBinary_perfect_redundancy_le` | todo |
-| `#corollary 10#` | VI-A | optimality of the construction for `d_f = d_d+1` given a perfect code | `locallyBinary_perfect_optimal` | todo |
-| `#corollary 11#` | VI-A | with an MDS `(n,q^k,d_d = n−k+1)` code in step 1: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d = d_f−1` | `locallyBinary_mds_redundancy_le` | todo |
-| `#corollary 12#` | VI-A | optimality of the construction for `d_f = d_d+1` given an MDS code | `locallyBinary_mds_optimal` | todo |
+| `#lemma 3#` | VI-A | for `(d_f−1)`-locally binary `f` and a systematic `[n,k,d_d]` code: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d` (and `= 2(t_f−t_d)` in `t`-form) | `locallyBinary_redundancy_le` | stated |
+| `#corollary 9#` | VI-A | the same with a perfect linear code in step 1 | `locallyBinary_perfect_redundancy_le` | stated |
+| `#corollary 10#` | VI-A | optimality of the construction for `d_f = d_d+1` given a perfect code | `locallyBinary_perfect_optimal` | stated |
+| `#corollary 11#` | VI-A | with an MDS `(n,q^k,d_d = n−k+1)` code in step 1: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d = d_f−1` | `locallyBinary_mds_redundancy_le` | stated |
+| `#corollary 12#` | VI-A | optimality of the construction for `d_f = d_d+1` given an MDS code | `locallyBinary_mds_optimal` | stated |
 | `#definition 15#` | VI-B | `(ρ,λ)`-bounded function: `|B_f(u,ρ)| ≤ λ` for all `u` | `IsLocallyBounded` | stated |
 | `#lemma 4#` | VI-B | contiguous-block condition ⇒ a colouring `Col_f : F₂^k → [λ]` separating `f`-values at distance `≤ ρ` | — | external ([14]): hypothesis of `#theorem 12#` |
-| `#lemma 5#` | VI-B | `N(4,2t) = 3t` | `Nconst_four_two` | todo |
-| `#theorem 12#` | VI-B | for `(2t_f,λ)`-bounded `f` (with the `#lemma 4#` colouring): `r_f ≤ n−k+N(λ,2(t_f−t_d))`; for `q=2, λ=4`: `≤ n−k+3(t_f−t_d)` | `locallyBounded_redundancy_le` | todo |
-| `#lemma 6#` | VI-C | Hamming-weight function: `r_f ≤ n−k+N(2t_f+1,2(t_f−t_d))`, and `≤ N(q^k,2t_d+1)+N(2t_f+1,2(t_f−t_d))−k` | `hammingWeight_redundancy_le` | todo |
+| `#lemma 5#` | VI-B | `N(4,2t) = 3t` | `Nconst_four_two` | stated |
+| `#theorem 12#` | VI-B | for `(2t_f,λ)`-bounded `f` (with the `#lemma 4#` colouring): `r_f ≤ n−k+N(λ,2(t_f−t_d))`; for `q=2, λ=4`: `≤ n−k+3(t_f−t_d)` | `locallyBounded_redundancy_le` | stated |
+| `#lemma 6#` | VI-C | Hamming-weight function: `r_f ≤ n−k+N(2t_f+1,2(t_f−t_d))`, and `≤ N(q^k,2t_d+1)+N(2t_f+1,2(t_f−t_d))−k` | `hammingWeight_redundancy_le` | stated |
 
 #### §VII Linear `(f:d_d,d_f)`-FCCs
 
