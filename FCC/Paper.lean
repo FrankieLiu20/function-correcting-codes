@@ -94,7 +94,7 @@ noncomputable def optimalRedundancy {k : ℕ} (f : Word F k → α) (t : ℕ) : 
 /-- `#definition 2#` (§II) — the distance requirement matrix (DRM):
 `[D_f(t, u₁,…,u_M)]_{i,j} = max(2t+1 − d(u_i,u_j), 0)` if `f(u_i) ≠ f(u_j)`, and
 `0` otherwise. -/
-def drm {k M : ℕ} (f : Word F k → α) (t : ℕ) (u : Fin M → Word F k) : Fin M → Fin M → ℕ :=
+def drm {k : ℕ} {ι : Type*} (f : Word F k → α) (t : ℕ) (u : ι → Word F k) : ι → ι → ℕ :=
   fun i j => if f (u i) = f (u j) then 0
     else max (2 * t + 1 - hammingDist (u i) (u j)) 0
 
@@ -291,8 +291,8 @@ def IsFCCData {k r : ℕ} (f : Word F k → α) (C : Word F k → Word F (k + r)
 /-- `#definition 7#` (§III) — the coded distance requirement matrix (CDRM):
 like the DRM of `#definition 2#`, but the distances are taken between the
 *codewords* `c_u = uG` rather than between the messages. -/
-def cdrm {k ℓ M : ℕ} (f : Word F k → α) (C : Word F k → Word F ℓ) (tf : ℕ)
-    (u : Fin M → Word F k) : Fin M → Fin M → ℕ :=
+def cdrm {k ℓ : ℕ} {ι : Type*} (f : Word F k → α) (C : Word F k → Word F ℓ) (tf : ℕ)
+    (u : ι → Word F k) : ι → ι → ℕ :=
   fun i j => if f (u i) = f (u j) then 0
     else max (2 * tf + 1 - hammingDist (C (u i)) (C (u j))) 0
 
@@ -336,8 +336,8 @@ noncomputable def optimalRedundancyData {k : ℕ} (f : Word F k → α) (dd df :
 `(f, t_d, t_f)`-FCC: entries `max(2t_d+1 − d(u_i,u_j), 0)` when `u_i ≠ u_j` and
 `f(u_i) = f(u_j)`, entries `max(2t_f+1 − d(u_i,u_j), 0)` when `f(u_i) ≠ f(u_j)`,
 and `0` otherwise (in particular on the diagonal). -/
-def drmData {k M : ℕ} (f : Word F k → α) (td tf : ℕ) (u : Fin M → Word F k) :
-    Fin M → Fin M → ℕ :=
+def drmData {k : ℕ} {ι : Type*} (f : Word F k → α) (td tf : ℕ) (u : ι → Word F k) :
+    ι → ι → ℕ :=
   fun i j =>
     if u i = u j then 0
     else if f (u i) = f (u j) then max (2 * td + 1 - hammingDist (u i) (u j)) 0
@@ -499,6 +499,83 @@ def ex8Dcode : Fin 8 → Word F₂ 6 :=
 theorem ex8_dcode_valid :
     ∀ i j : Fin 8, i ≠ j → ex7DRM i j ≤ hammingDist (ex8Dcode i) (ex8Dcode j) := by
   decide
+
+/-! ### §IV results — bounds for the optimal redundancy with data protection
+
+Statements only, in the paper's order (`#theorem 2#`–`#theorem 6#`; proofs are
+phases 3.3–3.4).  `#theorem 7#`, `#corollary 5#`, `#corollary 6#` and
+`#remark 1#` are not written yet: `#theorem 7#` speaks about the redundancy `r_s`
+of the two-step *scheme* (a construction-level notion that phase 1 has not
+defined yet), and `#corollary 5#`/`#corollary 6#` rest on the external results
+`#lemma 1#` and [1, Appendix]. -/
+
+/-- `#theorem 2#` (§IV) — "for any function `f : F_q^k → Im(f)`,
+`r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))`": the optimal redundancy is
+exactly the minimum length of a `D`-code for the DRM of the whole message space. -/
+theorem optimalRedundancyData_eq_N_drmData {k : ℕ} (f : Word F k → α) (td tf : ℕ) :
+    optimalRedundancyData f (2 * td + 1) (2 * tf + 1) =
+      N (F := F) (ι := Word F k) (drmData f td tf fun v => v) := by
+  sorry
+
+/-- `#theorem 3#` (§IV) — "for any function `f : F_q^k → Im(f)` and
+`{u₁, u₂, …, u_m} ⊆ F_q^k`, we have
+`r_f(k,t_d,t_f) ≥ N(D_f(t_d,t_f : u₁, …, u_m))`". -/
+theorem optimalRedundancyData_ge_N_subset {k m : ℕ} (f : Word F k → α) (td tf : ℕ)
+    (u : Fin m → Word F k) :
+    N (F := F) (ι := Fin m) (drmData f td tf u) ≤
+      optimalRedundancyData f (2 * td + 1) (2 * tf + 1) := by
+  sorry
+
+/-- `#theorem 3#` (§IV) — "and `r_f(k,t_d,t_f) ≥ 2t_f` for `|Im(f)| ≥ 2`" (the
+hypothesis is stated as: two distinct values, each attained). -/
+theorem two_mul_le_optimalRedundancyData {k : ℕ} (f : Word F k → α) (td tf : ℕ)
+    (h : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b) :
+    2 * tf ≤ optimalRedundancyData f (2 * td + 1) (2 * tf + 1) := by
+  sorry
+
+/-- `#theorem 3#` (§IV) — "further, `r_f(k,t_d,t_f) ≥ N(q^k, 2t_d+1) − k`, where
+`N(M,d)` is the minimum length of an error-correcting code with `M` codewords
+and minimum distance `d`" (`#definition 3#`). -/
+theorem optimalRedundancyData_ge_Nconst_sub {k : ℕ} (f : Word F k → α) (td tf : ℕ) :
+    Nconst (F := F) (Fintype.card (Word F k)) (2 * td + 1) - k ≤
+      optimalRedundancyData f (2 * td + 1) (2 * tf + 1) := by
+  sorry
+
+/-- `#theorem 4#` (§IV) — over `F₂`: "for any function `f : F₂^k → Im(f)`, if
+`2 ≤ |Im(f)| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d`". -/
+theorem binary_optimalRedundancyData_ge {k : ℕ} (f : Word (ZMod 2) k → α) (td tf : ℕ)
+    (h2 : 2 ≤ (Finset.univ.image f).card) (hk : (Finset.univ.image f).card ≤ k) :
+    2 * tf + td ≤ optimalRedundancyData f (2 * td + 1) (2 * tf + 1) := by
+  sorry
+
+/-- `#theorem 5#` (§IV) — "let `C` be an `[n, k, 2t_d+1]` error-correcting code,
+and let `c_u` denote the codeword that corresponds to the message vector
+`u ∈ F_q^k`.  For any function `f`,
+`N(D_f(t_d,t_f : u₁,…,u_{q^k})) ≤ N(D_{C,f}(t_f : u₁,…,u_{q^k})) + n − k`". -/
+theorem N_drmData_le_N_cdrm_add {k r m : ℕ} (f : Word F k → α) (td tf : ℕ)
+    (C : Word F k → Word F (k + r)) (u : Fin m → Word F k)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+    N (F := F) (ι := Fin m) (drmData f td tf u) ≤
+      N (F := F) (ι := Fin m) (cdrm f C tf u) + r := by
+  sorry
+
+/-- `#corollary 4#` (§IV) — "for any function `f : F_q^k → Im(f)`,
+`r_f(k,t_d,t_f) ≤ N(D_{C,f}(t_f : u₁,…,u_{q^k})) + n − k`, where `C` is an
+`[n, k, 2t_d+1]` error-correcting code". -/
+theorem optimalRedundancyData_le_N_cdrm_add {k r : ℕ} (f : Word F k → α) (td tf : ℕ)
+    (C : Word F k → Word F (k + r))
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+    optimalRedundancyData f (2 * td + 1) (2 * tf + 1) ≤
+      N (F := F) (ι := Word F k) (cdrm f C tf fun v => v) + r := by
+  sorry
+
+/-- `#theorem 6#` (§IV) — "let `C` be an `[n, k, 2t_d+1]` code.  Then
+`N(D_{C,f}(t_f : u₁, u₂, …, u_M)) ≤ N(M, 2(t_f − t_d))`". -/
+theorem N_cdrm_le_Nconst {k r m : ℕ} (f : Word F k → α) (td tf : ℕ)
+    (C : Word F k → Word F (k + r)) (u : Fin m → Word F k)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+    N (F := F) (ι := Fin m) (cdrm f C tf u) ≤ Nconst (F := F) m (2 * (tf - td)) := by
+  sorry
 
 /-! ## §V — Non-existence of strict `(f : d_d, d_f)`-FCCs
 
