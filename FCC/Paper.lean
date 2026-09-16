@@ -995,6 +995,61 @@ theorem ex14_is_fcc :
         6 ≤ hammingDist (ex14Code i) (ex14Code j) := by
   decide
 
+section SectionVIIIStatements
+
+variable {F : Type*} [Fintype F] [DecidableEq F] {α : Type*} [DecidableEq α]
+
+/-! ### §VIII results — classical bounds extended to FCCs
+
+Statements only, in the paper's order (proofs are phases 3.11–3.12).  The
+inequalities are stated over `ℚ`, so that the paper's fractions
+(`4/M²`, `2q/(M²(q−1) − a(q−a))`, `1/(q^{k−1}(q−1))`) appear literally instead
+of being truncated by `ℕ`-division. -/
+
+/-- `#lemma 11#` (§VIII, quoted from [1]) — "for any distance matrix
+`D ∈ ℕ^{M×M}`, `N(D) ≥ 4/M² · Σ_{i<j} [D]_{i,j}` if `M` is even". -/
+theorem plotkin_bound_binary {M : ℕ} (D : Fin M → Fin M → ℕ) (hM : Even M) :
+    (4 : ℚ) / (M : ℚ) ^ 2 *
+        (∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), (D p.1 p.2 : ℚ))
+      ≤ (N (F := F) (ι := Fin M) D : ℚ) := by
+  sorry
+
+/-- `#lemma 11#` (§VIII, quoted from [1]) — "…, and
+`N(D) ≥ 4/(M²−1) · Σ_{i<j} [D]_{i,j}` if `M` is odd". -/
+theorem plotkin_bound_binary_odd {M : ℕ} (D : Fin M → Fin M → ℕ) (hM : Odd M) :
+    (4 : ℚ) / ((M : ℚ) ^ 2 - 1) *
+        (∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), (D p.1 p.2 : ℚ))
+      ≤ (N (F := F) (ι := Fin M) D : ℚ) := by
+  sorry
+
+/-- `#lemma 13#` (§VIII) — "for any distance matrix `D ∈ ℕ^{M×M}` and for
+irregular distance codes over `F_q`, we have
+`N(D) ≥ 2q/(M²(q−1) − a(q−a)) · Σ_{1≤i<j≤M} [D]_{i,j}`, where `a = M mod q`".
+Here `q = Fintype.card F` and `a` is `M % Fintype.card F`. -/
+theorem plotkin_bound {M : ℕ} (D : Fin M → Fin M → ℕ) :
+    (2 * (Fintype.card F : ℚ)) /
+        ((M : ℚ) ^ 2 * ((Fintype.card F : ℚ) - 1) -
+          ((M % Fintype.card F : ℕ) : ℚ) * ((Fintype.card F : ℚ) - ((M % Fintype.card F : ℕ) : ℚ))) *
+        (∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), (D p.1 p.2 : ℚ))
+      ≤ (N (F := F) (ι := Fin M) D : ℚ) := by
+  sorry
+
+/-- `#theorem 14#` (§VIII-A) — "for an `(f : d_d, d_f)`-FCC over `F_q`, where
+`f : F_q^k → Im(f)`,
+`r_f(k : d_d, d_f) ≥ ((L−1)d_d + (q^k − L)d_f)/(q^{k−1}(q−1)) − k`, where
+`L = max_{α ∈ Im(f)} |f⁻¹(α)|` and `d_f > d_d`".  `L` is supplied through the
+two hypotheses `hL`/`hL'` (it is a maximum of the preimage sizes). -/
+theorem plotkin_bound_fcc {k : ℕ} (f : Word F k → α) (dd df L : ℕ)
+    (hL : ∀ a : α, (Finset.univ.filter fun u : Word F k => f u = a).card ≤ L)
+    (hL' : ∃ a : α, (Finset.univ.filter fun u : Word F k => f u = a).card = L)
+    (hlt : dd < df) :
+    (((L - 1 : ℕ) : ℚ) * dd + ((Fintype.card F : ℚ) ^ k - L) * df) /
+        ((Fintype.card F : ℚ) ^ (k - 1) * ((Fintype.card F : ℚ) - 1)) - k
+      ≤ (optimalRedundancyData f dd df : ℚ) := by
+  sorry
+
+end SectionVIIIStatements
+
 /-! ## §VIII — Extension of bounds from error-correcting codes to FCCs
 
 TODO: `#lemma 11#`, `#lemma 12#` (external), `#lemma 13#`, `#theorem 14#`,

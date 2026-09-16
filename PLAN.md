@@ -116,9 +116,9 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
 | `#definition 16#` | VII | linear FCC: a `k`-dimensional subspace of `F_q^n` satisfying the two distance conditions (standard-form generator matrix) | `IsLinearFCC` | stated |
-| `#lemma 7#` | VII | `D_f = {(u,p) ∈ C | u ∈ ker f}` is a subspace of `C` of dimension `dim ker f` | `kernelSubcode` | stated |
-| `#lemma 8#` | VII | `min{wt(c₁−c₂) | c₁ ∈ vᵢ+D, c₂ ∈ vⱼ+D} = min_{d∈D} wt(vᵢ−vⱼ+d)` | `cosetDist_eq` | stated |
-| `#lemma 9#` | VII | in a linear `(f:d_d,d_f)`-FCC of a linear `f`: `wt v ≥ d_f` for all `v ∈ C \ D_f` | `wt_ge_of_not_mem_kernel` | stated |
+| `#lemma 7#` | VII | `D_f = {(u,p) ∈ C | u ∈ ker f}` is a subspace of `C` of dimension `dim ker f` | `kernelSubcode` | todo |
+| `#lemma 8#` | VII | `min{wt(c₁−c₂) | c₁ ∈ vᵢ+D, c₂ ∈ vⱼ+D} = min_{d∈D} wt(vᵢ−vⱼ+d)` | `cosetDist_eq` | todo |
+| `#lemma 9#` | VII | in a linear `(f:d_d,d_f)`-FCC of a linear `f`: `wt v ≥ d_f` for all `v ∈ C \ D_f` | `wt_ge_of_not_mem_kernel` | todo |
 | `#definition 17#` | VII | coset code `C/D` and its minimum distance `d(C/D)` | `CosetCode`, `cosetCodeMinDist` | stated |
 | `#definition 18#` | VII | equivalent definition: `d(C) ≥ d_d` and `d(C/D_f) ≥ d_f` | `IsLinearFCCKernel` | stated |
 | `#lemma 10#` | VII | `C_cat = {(C(u), D(f(u)))}` is a linear code of dimension `k` for linear `C`, `D`, `f` | `image_linear_concat` | todo |
@@ -128,10 +128,10 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
-| `#lemma 11#` | VIII | Plotkin bound `N(D) ≥ 4/(M²)·Σ[D]ᵢⱼ` (`M` even) resp. `4/(M²−1)·Σ` (`M` odd) | `plotkin_bound_binary` | todo |
+| `#lemma 11#` | VIII | Plotkin bound `N(D) ≥ 4/(M²)·Σ[D]ᵢⱼ` (`M` even) resp. `4/(M²−1)·Σ` (`M` odd) | `plotkin_bound_binary` | stated |
 | `#lemma 12#` | VIII | Gilbert–Varshamov-type upper bound `N(D) ≤ min{r : 2^r > max_j Σ_{i<j} V(r,[D]−1)}` | — | external ([1]): used as hypothesis if needed |
-| `#lemma 13#` | VIII | over `F_q`: `N(D) ≥ 2q/(M²(q−1)−a(q−a))·Σ_{i<j}[D]ᵢⱼ`, `a = M mod q` | `plotkin_bound` | todo |
-| `#theorem 14#` | VIII-A | `r_f(k:d_d,d_f) ≥ ((L−1)d_d+(q^k−L)d_f)/(q^{k−1}(q−1)) − k`, `L = max_α |f⁻¹(α)|`, for `d_f > d_d` | `plotkin_bound_fcc` | todo |
+| `#lemma 13#` | VIII | over `F_q`: `N(D) ≥ 2q/(M²(q−1)−a(q−a))·Σ_{i<j}[D]ᵢⱼ`, `a = M mod q` | `plotkin_bound` | stated |
+| `#theorem 14#` | VIII-A | `r_f(k:d_d,d_f) ≥ ((L−1)d_d+(q^k−L)d_f)/(q^{k−1}(q−1)) − k`, `L = max_α |f⁻¹(α)|`, for `d_f > d_d` | `plotkin_bound_fcc` | stated |
 | `#theorem 15#` | VIII-B | Hamming-type bound for `(f,t)`-FCCs: `E ≤ q^n/|∪_{j≤ℓ} B(v_j,t)|` (see the direction note in `Notation.md` §5) | `hamming_bound_fcc` | todo |
 | `#corollary 13#` | VIII-B | `E ≤ q^n/Σ_{i≤t} C(n,i)(q−1)^i` | `hamming_bound_fcc_sphere` | todo |
 | `#theorem 16#` | VIII-C | Hamming-type bound for `(f:d_d,d_f)`-FCCs, with `d(vᵢ,vⱼ) ≥ d_d` in the union | `hamming_bound_fcc_data` | todo |
