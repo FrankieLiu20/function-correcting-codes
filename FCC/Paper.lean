@@ -1064,6 +1064,58 @@ TODO: `#lemma 11#`, `#lemma 12#` (external), `#lemma 13#`, `#theorem 14#`,
 `#theorem 15#`, `#corollary 13#`, `#theorem 16#`, `#corollary 14#`.
 -/
 
+section AppendixStatements
+
+variable {F : Type*} [Zero F] [Fintype F] [DecidableEq F]
+
+/-! ### Appendix results — counting the number of vectors in the union of balls
+
+Statements only (proofs are phase 3.13).  All four are `Finset.card` identities
+about the balls of §I-E; the paper's `Σ_{i=0}^{t}` is `Finset.range (t + 1)`, and
+`q = Fintype.card F`. -/
+
+/-- `#theorem 17#` (Appendix) — "consider two Hamming balls `B(u,t)` and `B(v,t)`
+for `u, v ∈ F_q^n` such that `d(u,v) = 1`.  Then
+`|B(u,t) ∪ B(v,t)| = 2 Σ_{i≤t} C(n,i)(q−1)^i − q Σ_{i≤t−1} C(n−1,i)(q−1)^i`". -/
+theorem card_ball_union_dist_one {n t : ℕ} (u v : Word F n) (h : hammingDist u v = 1) :
+    (ball u t ∪ ball v t).card =
+      2 * (∑ i ∈ Finset.range (t + 1), n.choose i * (Fintype.card F - 1) ^ i) -
+        Fintype.card F *
+          (∑ i ∈ Finset.range t, (n - 1).choose i * (Fintype.card F - 1) ^ i) := by
+  sorry
+
+/-- `#lemma 14#` (Appendix) — over `F₂`: "consider two vectors `u₁, u₂ ∈ F₂^n` such
+that `d(u₁,u₂) = 2`.  Then `|B(u₁,t) ∩ B(u₂,t)| = 2 Σ_{i≤t−1} C(n−1,i)`". -/
+theorem card_ball_inter_dist_two {n t : ℕ} (u v : Word (ZMod 2) n)
+    (h : hammingDist u v = 2) :
+    (ball u t ∩ ball v t).card = 2 * (∑ i ∈ Finset.range t, (n - 1).choose i) := by
+  sorry
+
+/-- `#theorem 18#` (Appendix) — "consider three distinct vectors `u₁, u₂, u₃ ∈ F₂^n`
+with pairwise distances `1, 1, 2`.  Then
+`|B(u₁,t) ∪ B(u₂,t) ∪ B(u₃,t)| = 3 Σ_{i≤t} C(n,i) − 6 Σ_{i≤t−1} C(n−1,i)
++ C(n−2,t−1) + 4 Σ_{i≤t−2} C(n−2,i)`". -/
+theorem card_ball_union_three {n t : ℕ} (u₁ u₂ u₃ : Word (ZMod 2) n)
+    (h12 : hammingDist u₁ u₂ = 1) (h13 : hammingDist u₁ u₃ = 1)
+    (h23 : hammingDist u₂ u₃ = 2) :
+    (ball u₁ t ∪ ball u₂ t ∪ ball u₃ t).card =
+      3 * (∑ i ∈ Finset.range (t + 1), n.choose i) -
+        6 * (∑ i ∈ Finset.range t, (n - 1).choose i) + (n - 2).choose (t - 1) +
+        4 * (∑ i ∈ Finset.range (t - 1), (n - 2).choose i) := by
+  sorry
+
+/-- `#theorem 19#` (Appendix) — over `F₂`: "consider two vectors `u₁, u₂ ∈ F₂^n`
+such that `d(u₁,u₂) = 3`.  Then for `t ≥ 2`,
+`|B(u₁,t) ∪ B(u₂,t)| = 2 Σ_{i≤t} C(n,i) − 8 Σ_{i≤t−3} C(n−3,i) − 6 C(n−3,t−2)`". -/
+theorem card_ball_union_dist_three {n t : ℕ} (u v : Word (ZMod 2) n)
+    (h : hammingDist u v = 3) (ht : 2 ≤ t) :
+    (ball u t ∪ ball v t).card =
+      2 * (∑ i ∈ Finset.range (t + 1), n.choose i) -
+        8 * (∑ i ∈ Finset.range (t - 2), (n - 3).choose i) - 6 * ((n - 3).choose (t - 2)) := by
+  sorry
+
+end AppendixStatements
+
 /-! ## §IX — Conclusion
 
 Not formalized: §IX contains no definitions or theorems, only a summary and

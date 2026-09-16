@@ -133,13 +133,13 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#lemma 13#` | VIII | over `F_q`: `N(D) ≥ 2q/(M²(q−1)−a(q−a))·Σ_{i<j}[D]ᵢⱼ`, `a = M mod q` | `plotkin_bound` | stated |
 | `#theorem 14#` | VIII-A | `r_f(k:d_d,d_f) ≥ ((L−1)d_d+(q^k−L)d_f)/(q^{k−1}(q−1)) − k`, `L = max_α |f⁻¹(α)|`, for `d_f > d_d` | `plotkin_bound_fcc` | stated |
 | `#theorem 15#` | VIII-B | Hamming-type bound for `(f,t)`-FCCs: `E ≤ q^n/|∪_{j≤ℓ} B(v_j,t)|` (see the direction note in `Notation.md` §5) | `hamming_bound_fcc` | todo |
-| `#corollary 13#` | VIII-B | `E ≤ q^n/Σ_{i≤t} C(n,i)(q−1)^i` | `hamming_bound_fcc_sphere` | stated |
+| `#corollary 13#` | VIII-B | `E ≤ q^n/Σ_{i≤t} C(n,i)(q−1)^i` | `hamming_bound_fcc_sphere` | todo |
 | `#theorem 16#` | VIII-C | Hamming-type bound for `(f:d_d,d_f)`-FCCs, with `d(vᵢ,vⱼ) ≥ d_d` in the union | `hamming_bound_fcc_data` | todo |
 | `#corollary 14#` | VIII-C | `E ≤ q^n/(ℓ·Σ_{i≤t_d} C(n,i)(q−1)^i)` | `hamming_bound_fcc_data_sphere` | todo |
-| `#theorem 17#` | App. | `|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i≤t−1}C(n−1,i)(q−1)^i` for `d(u,v)=1` | `card_ball_union_dist_one` | todo |
-| `#lemma 14#` | App. | `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)` for `d(u₁,u₂)=2` over `F₂` | `card_ball_inter_dist_two` | todo |
-| `#theorem 18#` | App. | union of three balls at pairwise distances `1,1,2` | `card_ball_union_three` | todo |
-| `#theorem 19#` | App. | `|B(u₁,t) ∪ B(u₂,t)| = 2Σ_{i≤t}C(n,i) − 8Σ_{i≤t−3}C(n−3,i) − 6C(n−3,t−2)` for `d(u₁,u₂)=3`, `t ≥ 2` | `card_ball_union_dist_three` | todo |
+| `#theorem 17#` | App. | `|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i≤t−1}C(n−1,i)(q−1)^i` for `d(u,v)=1` | `card_ball_union_dist_one` | stated |
+| `#lemma 14#` | App. | `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)` for `d(u₁,u₂)=2` over `F₂` | `card_ball_inter_dist_two` | stated |
+| `#theorem 18#` | App. | union of three balls at pairwise distances `1,1,2` | `card_ball_union_three` | stated |
+| `#theorem 19#` | App. | `|B(u₁,t) ∪ B(u₂,t)| = 2Σ_{i≤t}C(n,i) − 8Σ_{i≤t−3}C(n−3,i) − 6C(n−3,t−2)` for `d(u₁,u₂)=3`, `t ≥ 2` | `card_ball_union_dist_three` | stated |
 
 ### 1.2 Numbered examples (optional, high value as regression tests)
 
