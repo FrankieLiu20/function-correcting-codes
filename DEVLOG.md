@@ -224,3 +224,33 @@ Design decisions worth recording:
 **Still to do** (next sessions): the paper's examples (only 6, 7 and 10 are
 formalized; `PLAN.md` §1.2 lists the rest, and 11/15/16/17 need the §VIII bounds
 too), then phase 2 (all remaining statements with `sorry`) and phase 3 (proofs).
+
+## 2026-09-14 — Examples 1, 2 and 4 formalized
+
+The §II/§III worked examples are now `decide` checks in `FCC/Paper.lean`, stated
+against the real definitions and placed under their paper sections:
+
+* `#example 1#`: `drm ex1F 1 ex1Vec` reproduces the printed 4×4 matrix;
+* `#example 2#`: the `D`-code `{000,110,110,101}` (the repeat is in the paper —
+  two messages with equal `f`-value may share a redundancy vector) satisfies the
+  DRM, no length-2 `D`-code exists, the codewords `{00000,01110,10110,11101}`
+  are as printed, and the code is an `(f,1)`-FCC;
+* `#example 4#`: one function `f`, two codes, the same `t_f = 1` but minimum
+  distances 1 and 2 — the example that motivates the `(f : d_d, d_f)` notation.
+
+Two conventions for the remaining examples, decided here:
+
+* **Min-distance and `N(D)` claims are stated as decidable facts** — "a bound
+  plus an attained value" for `d_min`, "exists at length `k` plus none at
+  `k − 1`" for `N` — because `minDist`, `N`, `r_f`, `fDist` are `sInf`-based
+  until the phase-3.0 API lands.  The equality `N(D) = k` then follows in one
+  line from that API.
+* **`fdm`/`cfdm` cannot be `decide`-checked yet** for the same reason, which is
+  why `#example 3#` (an FDM check) is deferred: it needs either the phase-3.0
+  API or a computable restatement of the minimum over preimages.
+
+Build-time note: the file-level `set_option maxRecDepth 100000` (needed by the
+256-candidate search in `ex6_no_length_two`) makes the kernel work harder, and
+this batch of `decide` proofs pushed a full build to ~5 minutes.  If the CI
+wall-clock becomes a nuisance, the fix is to scope the option to the few
+declarations that need it rather than the whole file.
