@@ -115,22 +115,4 @@ def IsMDS {F : Type*} [Fintype F] [DecidableEq F] {n : ℕ} (C : Finset (Word F 
 
 end PerfectAndMDS
 
-section PreimageSizes
-
-/-- `(internal, §VIII — used by `#theorem 14#`)` — `L = max_{α ∈ Im(f)} |f⁻¹(α)|`,
-the quantity "where `L = max_{α∈Im(f)} |f⁻¹(α)|`" of `#theorem 14#` (the largest
-preimage of the function `f`). -/
-noncomputable def maxPreimageCard {F : Type*} [Fintype F] [DecidableEq F] {α : Type*}
-    [DecidableEq α] {k : ℕ} (f : Word F k → α) : ℕ :=
-  sSup {c : ℕ | ∃ a : α, (Finset.univ.filter fun u => f u = a).card = c}
-
-/-- `(internal, §VIII — used by `#theorem 15#`)` — `ℓ = min_{i∈[E]} |f⁻¹(f_i)|`,
-the quantity "let `ℓ = min_{i∈[E]} |f⁻¹(f_i)|`" of `#theorem 15#` (the smallest
-preimage of the function `f`). -/
-noncomputable def minPreimageCard {F : Type*} [Fintype F] [DecidableEq F] {α : Type*}
-    [DecidableEq α] {k : ℕ} (f : Word F k → α) : ℕ :=
-  sInf {c : ℕ | ∃ a : α, (Finset.univ.filter fun u => f u = a).card = c}
-
-end PreimageSizes
-
 end FCC

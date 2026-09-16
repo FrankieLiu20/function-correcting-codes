@@ -997,7 +997,7 @@ theorem ex14_is_fcc :
 
 section SectionVIIIStatements
 
-variable {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {α : Type*} [DecidableEq α]
+variable {F : Type*} [Fintype F] [DecidableEq F] {α : Type*} [DecidableEq α]
 
 /-! ### §VIII results — classical bounds extended to FCCs
 
@@ -1039,21 +1039,13 @@ theorem plotkin_bound {M : ℕ} (D : Fin M → Fin M → ℕ) :
 `r_f(k : d_d, d_f) ≥ ((L−1)d_d + (q^k − L)d_f)/(q^{k−1}(q−1)) − k`, where
 `L = max_{α ∈ Im(f)} |f⁻¹(α)|` and `d_f > d_d`".  `L` is supplied through the
 two hypotheses `hL`/`hL'` (it is a maximum of the preimage sizes). -/
-theorem plotkin_bound_fcc {k : ℕ} (f : Word F k → α) (dd df : ℕ) (hlt : dd < df) :
-    (((maxPreimageCard f - 1 : ℕ) : ℚ) * dd +
-        ((Fintype.card F : ℚ) ^ k - maxPreimageCard f) * df) /
+theorem plotkin_bound_fcc {k : ℕ} (f : Word F k → α) (dd df L : ℕ)
+    (hL : ∀ a : α, (Finset.univ.filter fun u : Word F k => f u = a).card ≤ L)
+    (hL' : ∃ a : α, (Finset.univ.filter fun u : Word F k => f u = a).card = L)
+    (hlt : dd < df) :
+    (((L - 1 : ℕ) : ℚ) * dd + ((Fintype.card F : ℚ) ^ k - L) * df) /
         ((Fintype.card F : ℚ) ^ (k - 1) * ((Fintype.card F : ℚ) - 1)) - k
       ≤ (optimalRedundancyData f dd df : ℚ) := by
-  sorry
-
-/-- `#corollary 13#` (§VIII-B) — "since `|∪_{j≤ℓ} B(v_j,t)| ≥ |B(v,t)|` for any
-`v ∈ F_q^n` and `|B(v,t)| = Σ_{i≤t} C(n,i)(q−1)^i`, we have
-`E ≤ q^n/Σ_{i≤t} C(n,i)(q−1)^i`".  Written without division: an `(f,t)`-FCC of
-length `n` forces `|Im(f)| · |B(0,t)| ≤ q^n`. -/
-theorem hamming_bound_fcc_sphere {k r : ℕ} (f : Word F k → α) (t : ℕ)
-    (C : Word F k → Word F (k + r)) (hC : IsFCC f C t) :
-    (Finset.univ.image f).card * (ball (0 : Word F (k + r)) t).card ≤
-      Fintype.card F ^ (k + r) := by
   sorry
 
 end SectionVIIIStatements
