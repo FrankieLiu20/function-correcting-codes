@@ -100,25 +100,25 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | --- | --- | --- | --- | --- |
 | `#definition 13#` | VI-A | function ball `B_f(u,ρ) = {f(u') | d(u,u') ≤ ρ}` | `functionBall` | stated |
 | `#definition 14#` | VI-A | `ρ`-locally binary function: `|B_f(u,ρ)| ≤ 2` for all `u` | `IsLocallyBinary` | stated |
-| `#lemma 3#` | VI-A | for `(d_f−1)`-locally binary `f` and a systematic `[n,k,d_d]` code: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d` (and `= 2(t_f−t_d)` in `t`-form) | `locallyBinary_redundancy_le` | stated |
-| `#corollary 9#` | VI-A | the same with a perfect linear code in step 1 | `locallyBinary_perfect_redundancy_le` | stated |
-| `#corollary 10#` | VI-A | optimality of the construction for `d_f = d_d+1` given a perfect code | `locallyBinary_perfect_optimal` | stated |
-| `#corollary 11#` | VI-A | with an MDS `(n,q^k,d_d = n−k+1)` code in step 1: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d = d_f−1` | `locallyBinary_mds_redundancy_le` | stated |
-| `#corollary 12#` | VI-A | optimality of the construction for `d_f = d_d+1` given an MDS code | `locallyBinary_mds_optimal` | stated |
+| `#lemma 3#` | VI-A | for `(d_f−1)`-locally binary `f` and a systematic `[n,k,d_d]` code: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d` (and `= 2(t_f−t_d)` in `t`-form) | `locallyBinary_redundancy_le` | todo |
+| `#corollary 9#` | VI-A | the same with a perfect linear code in step 1 | `locallyBinary_perfect_redundancy_le` | todo |
+| `#corollary 10#` | VI-A | optimality of the construction for `d_f = d_d+1` given a perfect code | `locallyBinary_perfect_optimal` | todo |
+| `#corollary 11#` | VI-A | with an MDS `(n,q^k,d_d = n−k+1)` code in step 1: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d = d_f−1` | `locallyBinary_mds_redundancy_le` | todo |
+| `#corollary 12#` | VI-A | optimality of the construction for `d_f = d_d+1` given an MDS code | `locallyBinary_mds_optimal` | todo |
 | `#definition 15#` | VI-B | `(ρ,λ)`-bounded function: `|B_f(u,ρ)| ≤ λ` for all `u` | `IsLocallyBounded` | stated |
 | `#lemma 4#` | VI-B | contiguous-block condition ⇒ a colouring `Col_f : F₂^k → [λ]` separating `f`-values at distance `≤ ρ` | — | external ([14]): hypothesis of `#theorem 12#` |
-| `#lemma 5#` | VI-B | `N(4,2t) = 3t` | `Nconst_four_two` | stated |
-| `#theorem 12#` | VI-B | for `(2t_f,λ)`-bounded `f` (with the `#lemma 4#` colouring): `r_f ≤ n−k+N(λ,2(t_f−t_d))`; for `q=2, λ=4`: `≤ n−k+3(t_f−t_d)` | `locallyBounded_redundancy_le` | stated |
-| `#lemma 6#` | VI-C | Hamming-weight function: `r_f ≤ n−k+N(2t_f+1,2(t_f−t_d))`, and `≤ N(q^k,2t_d+1)+N(2t_f+1,2(t_f−t_d))−k` | `hammingWeight_redundancy_le` | stated |
+| `#lemma 5#` | VI-B | `N(4,2t) = 3t` | `Nconst_four_two` | todo |
+| `#theorem 12#` | VI-B | for `(2t_f,λ)`-bounded `f` (with the `#lemma 4#` colouring): `r_f ≤ n−k+N(λ,2(t_f−t_d))`; for `q=2, λ=4`: `≤ n−k+3(t_f−t_d)` | `locallyBounded_redundancy_le` | todo |
+| `#lemma 6#` | VI-C | Hamming-weight function: `r_f ≤ n−k+N(2t_f+1,2(t_f−t_d))`, and `≤ N(q^k,2t_d+1)+N(2t_f+1,2(t_f−t_d))−k` | `hammingWeight_redundancy_le` | todo |
 
 #### §VII Linear `(f:d_d,d_f)`-FCCs
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
 | `#definition 16#` | VII | linear FCC: a `k`-dimensional subspace of `F_q^n` satisfying the two distance conditions (standard-form generator matrix) | `IsLinearFCC` | stated |
-| `#lemma 7#` | VII | `D_f = {(u,p) ∈ C | u ∈ ker f}` is a subspace of `C` of dimension `dim ker f` | `kernelSubcode` | todo |
-| `#lemma 8#` | VII | `min{wt(c₁−c₂) | c₁ ∈ vᵢ+D, c₂ ∈ vⱼ+D} = min_{d∈D} wt(vᵢ−vⱼ+d)` | `cosetDist_eq` | todo |
-| `#lemma 9#` | VII | in a linear `(f:d_d,d_f)`-FCC of a linear `f`: `wt v ≥ d_f` for all `v ∈ C \ D_f` | `wt_ge_of_not_mem_kernel` | todo |
+| `#lemma 7#` | VII | `D_f = {(u,p) ∈ C | u ∈ ker f}` is a subspace of `C` of dimension `dim ker f` | `kernelSubcode` | stated |
+| `#lemma 8#` | VII | `min{wt(c₁−c₂) | c₁ ∈ vᵢ+D, c₂ ∈ vⱼ+D} = min_{d∈D} wt(vᵢ−vⱼ+d)` | `cosetDist_eq` | stated |
+| `#lemma 9#` | VII | in a linear `(f:d_d,d_f)`-FCC of a linear `f`: `wt v ≥ d_f` for all `v ∈ C \ D_f` | `wt_ge_of_not_mem_kernel` | stated |
 | `#definition 17#` | VII | coset code `C/D` and its minimum distance `d(C/D)` | `CosetCode`, `cosetCodeMinDist` | stated |
 | `#definition 18#` | VII | equivalent definition: `d(C) ≥ d_d` and `d(C/D_f) ≥ d_f` | `IsLinearFCCKernel` | stated |
 | `#lemma 10#` | VII | `C_cat = {(C(u), D(f(u)))}` is a linear code of dimension `k` for linear `C`, `D`, `f` | `image_linear_concat` | todo |

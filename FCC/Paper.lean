@@ -869,6 +869,46 @@ def IsLinearFCCKernel {k r : ℕ} (f : Word F k →ₗ[F] Word F r)
 
 end Linear
 
+section SectionVIIStatements
+
+variable {F : Type*} [Field F] [Fintype F] [DecidableEq F] {α : Type*} [DecidableEq α]
+
+/-! ### §VII results — linear `(f : d_d, d_f)`-FCCs
+
+Statements only, in the paper's order (proofs are phase 3.10).  `#theorem 13#`
+needs the concatenation `(C(u), D(f(u)))` as a single word, i.e. an
+append/`Matrix`-free plumbing step, and is the next slice. -/
+
+/-- `#lemma 7#` (§VII-A) — "if `f : F_q^k → Im(f)` is a linear function and `C`
+is a linear `(f : d_d, d_f)`-FCC of length `n` in standard form, then the subcode
+`D_f = {c = (u,p) ∈ C | u ∈ Ker(f)}` forms a subspace of `C`.  Furthermore, the
+dimension of `D_f` is the same as the dimension of `Ker(f)`."  (That `D_f` is a
+subspace is definitional in Lean — `kernelSubcode` is a kernel — so what is left
+to prove is the dimension statement.) -/
+theorem kernelSubcode_finrank {k r : ℕ} (f : Word F k →ₗ[F] Word F r)
+    (C : Submodule F (Word F (k + r))) :
+    Module.finrank F (kernelSubcode f C) = Module.finrank F (LinearMap.ker f) := by
+  sorry
+
+/-- `#lemma 8#` (§VII-A) — "let `C` be a subspace of `F_q^n` and `D` a subspace of
+`C`.  Then for any `v_i, v_j ∈ C`,
+`min{wt(c₁ − c₂) | c₁ ∈ v_i + D, c₂ ∈ v_j + D} = min_{d ∈ D} wt(v_i − v_j + d)`".
+The right-hand side is our `cosetDist`, so this lemma is the bridge between
+`#definition 17#`'s printed double minimum and the definition we compute with. -/
+theorem cosetDist_eq (D : Submodule F (Word F n)) (x y : Word F n) :
+    sInf {w : ℕ | ∃ c₁ : Word F n, c₁ - x ∈ D ∧ ∃ c₂ : Word F n, c₂ - y ∈ D ∧
+        w = wt (c₁ - c₂)} = cosetDist D (x - y) := by
+  sorry
+
+/-- `#lemma 9#` (§VII-A) — "let `C` be a linear `(f : d_d, d_f)`-FCC of a linear
+function `f`.  Then `wt(v) ≥ d_f` for all `v ∈ C \ D_f`." -/
+theorem wt_ge_of_not_mem_kernel {k r dd df : ℕ} (f : Word F k →ₗ[F] Word F r)
+    (C : Submodule F (Word F (k + r))) (hC : IsLinearFCCKernel f C dd df) :
+    ∀ v : C, v ∉ kernelSubcode f C → df ≤ wt (v : Word F (k + r)) := by
+  sorry
+
+end SectionVIIStatements
+
 /-! ### Example 12 (`#example 12#`) — a linear FCC for a non-linear function -/
 
 /-- `#example 12#` (§VII) — the non-linear function `f(x₁,x₂,x₃) = x₁x₂` on
