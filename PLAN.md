@@ -157,17 +157,22 @@ of the same example are listed in `FCC/Examples.lean`.
 
 | Label | § | What the test pins down | Test | Status |
 | --- | --- | --- | --- | --- |
+| `#example 1#` | II | the DRM of the paper's first worked example (`f` on `F₂²`, `t = 1`) against the printed 4×4 matrix | `ex1_drm_matches` | tested |
+| `#example 2#` | II | the `D`-code `{000,110,110,101}` for that DRM, `N(D) = 3` (no length-2 code; the length-3 one is valid), and the resulting `(f,1)`-FCC `{00000,01110,10110,11101}` | `ex2_dcode_valid`, `ex2_no_length_two`, `ex2_codewords`, `ex2_is_fcc` | tested |
+| `#example 4#` | III | two codes with the same function protection `t_f = 1` but minimum distances 1 and 2 — the example that motivates the `(f : d_d, d_f)` notation | `ex4_both_fcc`, `ex4_min_dists` | tested |
 | `#example 6#` | IV | the `[6,3,3]` code of the two-step construction, its coded distance requirement matrix (`#definition 7#`), the `D`-code `{000,110,101,011}`, and `N(D) = 3` | `ex6_cdrm_matches` | tested |
 | `#example 7#` | IV | the 8×8 distance requirement matrix (`#definition 11#`) for `f = wt` on `F₂³`, `t_d = 1`, `t_f = 2` | `ex7_drm_matches` | tested |
 | `#example 10#` | VI-A | the `[7,4,3]` Hamming code used in the locally binary construction | `ex10_min_dist` | tested |
 
-Still to be formalized: `#example 1#`–`#example 5#`, `#example 8#`,
-`#example 9#`, `#example 12#`–`#example 17#`.  Most of them are decidable data
-checks now that the definitions of §II–§VII exist (that is the next session's
-work).  Four of them, `#example 11#`, `#example 15#`, `#example 16#` and
-`#example 17#`, also depend on the §VIII bounds (`#theorem 14#`–`#theorem 16#`)
-or on a numerical value quoted from [1], so they are completed together with
-those.
+Still to be formalized: `#example 3#` (the FDM of `#example 1#` — `fdm` is
+defined through the minimal distance `fDist`, so the check needs the
+`fDist`/`N` API of phase 3.0, or a computable restatement of the minimum),
+`#example 5#` (the FDM/CDRM/D-code of the `F₂³` Hamming-weight example; its
+DRM/D-code parts are doable now, its `N(D) = 6` claim follows from
+`#lemma 11#` in phase 3.11), `#example 8#`, `#example 9#`, `#example 12#`,
+`#example 13#`, `#example 14#` (decidable data checks), and `#example 11#`,
+`#example 15#`, `#example 16#`, `#example 17#`, which also depend on the §VIII
+bounds (`#theorem 14#`–`#theorem 16#`) or on a numerical value quoted from [1].
 
 Three of them are already transcribed by hand (phase 1a):
 

@@ -127,6 +127,107 @@ and `0` on it.  We index it by the image values themselves. -/
 noncomputable def fdm {k : ℕ} (f : Word F k → α) (t : ℕ) : α → α → ℕ :=
   fun a b => if a = b then 0 else max (2 * t + 1 - fDist f a b) 0
 
+/-! ### Example 1 (`#example 1#`) — the DRM of a function on `F₂²` -/
+
+/-- `#example 1#` (§II) — the function `f : F₂² → {0,1,2}` with `f(00) = 0`,
+`f(01) = f(10) = 1`, `f(11) = 2`. -/
+def ex1F (u : Word F₂ 2) : Fin 3 :=
+  match u 0, u 1 with
+  | false, false => 0
+  | false, true => 1
+  | true, false => 1
+  | true, true => 2
+
+/-- `#example 1#` (§II) — the information vectors `u₁ = 00, u₂ = 01, u₃ = 10`,
+`u₄ = 11` in the paper's order.  (The same four messages, in the same order, are
+used by `#example 2#` and `#example 4#`.) -/
+def ex1Vec : Fin 4 → Word F₂ 2 :=
+  ![![false, false], ![false, true], ![true, false], ![true, true]]
+
+/-- `#example 1#` (§II) — the DRM printed in the paper. -/
+def ex1DRM : Fin 4 → Fin 4 → ℕ :=
+  ![![0, 2, 2, 1], ![2, 0, 0, 2], ![2, 0, 0, 2], ![1, 2, 2, 0]]
+
+/-- `#example 1#` (§II) — `drm` reproduces the printed matrix. -/
+theorem ex1_drm_matches : ∀ i j : Fin 4, drm ex1F 1 ex1Vec i j = ex1DRM i j := by
+  decide
+
+/-! ### Example 2 (`#example 2#`) — the `D`-code of `#example 1#` and its FCC -/
+
+/-- `#example 2#` (§II) — the `D`-code `{000, 110, 110, 101}` (the repeat is in the
+paper: two messages with the same `f`-value may share a redundancy vector). -/
+def ex2Dcode : Fin 4 → Word F₂ 3 :=
+  ![![false, false, false], ![true, true, false], ![true, true, false], ![true, false, true]]
+
+/-- `#example 2#` (§II) — that `D`-code satisfies the DRM of `#example 1#`. -/
+theorem ex2_dcode_valid :
+    ∀ i j : Fin 4, i ≠ j → ex1DRM i j ≤ hammingDist (ex2Dcode i) (ex2Dcode j) := by
+  decide
+
+/-- `#example 2#` (§II) — `N(D) = 3` for that DRM: no `D`-code of length 2 exists,
+while the one above has length 3 (so the two decidable facts below pin `N(D) = 3`
+once the `N`-API of phase 3.0 is available). -/
+theorem ex2_no_length_two :
+    ¬∃ p : Fin 4 → Word F₂ 2,
+      ∀ i j : Fin 4, i ≠ j → ex1DRM i j ≤ hammingDist (p i) (p j) := by
+  decide
+
+/-- `#example 2#` (§II) — the `(f,1)`-FCC `{(u_i, p_i)}` obtained from that
+`D`-code; it is systematic by construction. -/
+def ex2Enc (i : Fin 4) : Word F₂ 5 :=
+  ![ex1Vec i 0, ex1Vec i 1, ex2Dcode i 0, ex2Dcode i 1, ex2Dcode i 2]
+
+/-- `#example 2#` (§II) — the codewords are `{00000, 01110, 10110, 11101}`, with
+the message in the first two coordinates. -/
+theorem ex2_codewords :
+    ex2Enc 0 = ![false, false, false, false, false] ∧
+      ex2Enc 1 = ![false, true, true, true, false] ∧
+      ex2Enc 2 = ![true, false, true, true, false] ∧
+      ex2Enc 3 = ![true, true, true, false, true] := by
+  decide
+
+/-- `#example 2#` (§II) — the code is an `(f,1)`-FCC: codewords of messages with
+different `f`-values are at distance at least `2·1 + 1 = 3`. -/
+theorem ex2_is_fcc :
+    ∀ i j : Fin 4, ex1F (ex1Vec i) ≠ ex1F (ex1Vec j) →
+      3 ≤ hammingDist (ex2Enc i) (ex2Enc j) := by
+  decide
+
+/-! ### Example 4 (`#example 4#`) — the same function protection, two data
+protections -/
+
+/-- `#example 4#` (§III) — the function `f(00) = 0`, `f(u) = 1` for `u ≠ 00`. -/
+def ex4F (u : Word F₂ 2) : Bool := u 0 || u 1
+
+/-- `#example 4#` (§III) — the first code of the example, `{0000, 0111, 1011, 1111}`. -/
+def ex4Code₁ : Fin 4 → Word F₂ 4 :=
+  ![![false, false, false, false], ![false, true, true, true], ![true, false, true, true],
+    ![true, true, true, true]]
+
+/-- `#example 4#` (§III) — the second code, `{0000, 0111, 1011, 1101}`. -/
+def ex4Code₂ : Fin 4 → Word F₂ 4 :=
+  ![![false, false, false, false], ![false, true, true, true], ![true, false, true, true],
+    ![true, true, false, true]]
+
+/-- `#example 4#` (§III) — "both of the following codes achieve the same level of
+functional error correction" for `t_f = 1`. -/
+theorem ex4_both_fcc :
+    (∀ i j : Fin 4, ex4F (ex1Vec i) ≠ ex4F (ex1Vec j) →
+        3 ≤ hammingDist (ex4Code₁ i) (ex4Code₁ j)) ∧
+      ∀ i j : Fin 4, ex4F (ex1Vec i) ≠ ex4F (ex1Vec j) →
+        3 ≤ hammingDist (ex4Code₂ i) (ex4Code₂ j) := by
+  decide
+
+/-- `#example 4#` (§III) — "the first code has a minimum distance of 1, while the
+second code has a minimum distance of 2, allowing for single-error detection in
+the data". -/
+theorem ex4_min_dists :
+    (∀ i j : Fin 4, i ≠ j → 1 ≤ hammingDist (ex4Code₁ i) (ex4Code₁ j)) ∧
+      (∃ i j : Fin 4, i ≠ j ∧ hammingDist (ex4Code₁ i) (ex4Code₁ j) = 1) ∧
+      (∀ i j : Fin 4, i ≠ j → 2 ≤ hammingDist (ex4Code₂ i) (ex4Code₂ j)) ∧
+      ∃ i j : Fin 4, i ≠ j ∧ hammingDist (ex4Code₂ i) (ex4Code₂ j) = 2 := by
+  decide
+
 /-! ### §III — A construction procedure for FCCs with data protection -/
 
 /-- `#definition 6#` (§III) — an `(f : d_d, d_f)`-FCC: "an encoding
