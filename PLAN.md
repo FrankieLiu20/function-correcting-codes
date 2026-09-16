@@ -47,9 +47,9 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#definition 2#` | II | Distance requirement matrix `D_f(t,u₁,…,u_M)`, entries `max(2t+1−d(uᵢ,uⱼ),0)` if `f(uᵢ) ≠ f(uⱼ)`, else `0` | `drm` | stated |
 | `#definition 3#` | II | Irregular-distance code (`D`-code) for `D ∈ ℕ^{M×M}`; `N(D)` = minimal length; `N(M,D)` for a constant matrix | `IsDCode`, `N`, `Nconst` | stated |
 | `#lemma 1#` | II | `N(M,D) ≤ 2(D−2)/(1−2/q)·ln D/D` for `D ≥ 10`, `M ≤ D²` | — | external ([10, Lem. 2]) |
-| `#definition 4#` | II | `d(fᵢ,fⱼ) = min{d(u₁,u₂) | f(u₁)=fᵢ, f(u₂)=fⱼ}` | `fDist` | stated |
+| `#definition 4#` | II | `d(fᵢ,fⱼ) = min{d(u₁,u₂) : f(u₁)=fᵢ, f(u₂)=fⱼ}` | `fDist` | stated |
 | `#definition 5#` | II | Function distance matrix (FDM), entries `max(2t+1−d(fᵢ,fⱼ),0)` off the diagonal | `fdm` | stated |
-| `#corollary 1#` | II | `r_f(k,t) ≥ N(D_f(t,u₁,…,u_m))` for any subset; and `≥ 2t` when `|Im f| ≥ 2` | `optimalRedundancy_ge_drm`, `two_mul_le_optimalRedundancy` | stated |
+| `#corollary 1#` | II | `r_f(k,t) ≥ N(D_f(t,u₁,…,u_m))` for any subset; and `≥ 2t` when ` : Im f : ≥ 2` | `optimalRedundancy_ge_drm`, `two_mul_le_optimalRedundancy` | stated |
 | `#theorem 1#` | II | `r_f(k,t) ≤ N(FDM)` | `optimalRedundancy_le_fdm` | stated |
 | `#corollary 2#` | II | equality in `#theorem 1#` when a representative set realises the FDM | `optimalRedundancy_eq_fdm` | stated |
 | `#corollary 3#` | II | `r_wt(k,t) ≥ (10t³+30t²+20t+12)/(3t²+12t+12)` | — | external ([1, Cor. 3]) |
@@ -71,8 +71,8 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#definition 10#` | IV | optimal redundancy `r_f(k:d_d,d_f) = r_f(k,t_d,t_f)` | `optimalRedundancyData` | stated |
 | `#definition 11#` | IV | DRM `D_f(t_d,t_f:u₁,…,u_M)`: `max(2t_d+1−d,0)` if `f(uᵢ)=f(uⱼ)`, `max(2t_f+1−d,0)` if `f(uᵢ)≠f(uⱼ)`, `0` on the diagonal | `drmData` | stated |
 | `#theorem 2#` | IV | `r_f(k,t_d,t_f) = N(D_f(t_d,t_f:u₁,…,u_{q^k}))` — **the central identity** | `optimalRedundancyData_eq_N_drmData` | todo |
-| `#theorem 3#` | IV | `r_f ≥ N(D_f(t_d,t_f:u₁,…,u_m))` for any subset; `r_f ≥ 2t_f` if `|Im f| ≥ 2`; `r_f ≥ N(q^k,2t_d+1)−k` | `optimalRedundancyData_ge_N_subset`, `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub` | todo |
-| `#theorem 4#` | IV | over `F₂`, if `2 ≤ |Im f| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d` | `binary_optimalRedundancyData_ge` | todo |
+| `#theorem 3#` | IV | `r_f ≥ N(D_f(t_d,t_f:u₁,…,u_m))` for any subset; `r_f ≥ 2t_f` if ` : Im f : ≥ 2`; `r_f ≥ N(q^k,2t_d+1)−k` | `optimalRedundancyData_ge_N_subset`, `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub` | todo |
+| `#theorem 4#` | IV | over `F₂`, if `2 ≤ : Im f : ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d` | `binary_optimalRedundancyData_ge` | todo |
 | `#theorem 5#` | IV | for an `[n,k,2t_d+1]` code `C`: `N(DRM) ≤ N(CDRM) + n − k` | `N_drmData_le_N_cdrm_add` | todo |
 | `#corollary 4#` | IV | `r_f(k,t_d,t_f) ≤ N(D_{C,f}) + n − k` | `optimalRedundancyData_le_N_cdrm_add` | todo |
 | `#corollary 5#` | IV | binary version with the explicit `t_d log k` redundancy of `C` (carries the [1, App.] bound as a hypothesis) | `binary_optimalRedundancyData_le` | todo |
@@ -86,8 +86,8 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
 | `#definition 12#` | V | minimum-distance graph `G(C)`: vertices `C`, edges between codewords at distance `d_min(C)` | `minDistGraph` | stated |
-| `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with `|Im f| ≥ 2`, `d_f > d` | `not_isFCCData_of_connected` | todo |
-| `#theorem 9#` | V | if `G(C)` has `Q` components then no `f` with `|Im f| ≥ Q+1` and `d_f > d` works | `not_isFCCData_of_components` | todo |
+| `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with ` : Im f : ≥ 2`, `d_f > d` | `not_isFCCData_of_connected` | todo |
+| `#theorem 9#` | V | if `G(C)` has `Q` components then no `f` with ` : Im f : ≥ Q+1` and `d_f > d` works | `not_isFCCData_of_components` | todo |
 | `#theorem 10#` | V | `G(C)` is connected for every perfect `t`-error-correcting code | `isConnected_minDistGraph_of_perfect` | todo |
 | `#corollary 7#` | V | `r_f(k:d_d,d_f) ≥ n−k+1` when a perfect code of length `n` exists | `perfect_optimalRedundancyData_ge` | todo |
 | `#lemma 2#` | V | MDS codes: for all `u,v` there is `u'` with `d(u,u') = d` and `d(u',v) ≤ d(u,v)−1` | `exists_mds_neighbor` | todo |
@@ -98,14 +98,14 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
-| `#definition 13#` | VI-A | function ball `B_f(u,ρ) = {f(u') | d(u,u') ≤ ρ}` | `functionBall` | stated |
-| `#definition 14#` | VI-A | `ρ`-locally binary function: `|B_f(u,ρ)| ≤ 2` for all `u` | `IsLocallyBinary` | stated |
+| `#definition 13#` | VI-A | function ball `B_f(u,ρ) = {f(u') : d(u,u') ≤ ρ}` | `functionBall` | stated |
+| `#definition 14#` | VI-A | `ρ`-locally binary function: ` : B_f(u,ρ) : ≤ 2` for all `u` | `IsLocallyBinary` | stated |
 | `#lemma 3#` | VI-A | for `(d_f−1)`-locally binary `f` and a systematic `[n,k,d_d]` code: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d` (and `= 2(t_f−t_d)` in `t`-form) | `locallyBinary_redundancy_le` | todo |
 | `#corollary 9#` | VI-A | the same with a perfect linear code in step 1 | `locallyBinary_perfect_redundancy_le` | todo |
 | `#corollary 10#` | VI-A | optimality of the construction for `d_f = d_d+1` given a perfect code | `locallyBinary_perfect_optimal` | todo |
 | `#corollary 11#` | VI-A | with an MDS `(n,q^k,d_d = n−k+1)` code in step 1: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d = d_f−1` | `locallyBinary_mds_redundancy_le` | todo |
 | `#corollary 12#` | VI-A | optimality of the construction for `d_f = d_d+1` given an MDS code | `locallyBinary_mds_optimal` | todo |
-| `#definition 15#` | VI-B | `(ρ,λ)`-bounded function: `|B_f(u,ρ)| ≤ λ` for all `u` | `IsLocallyBounded` | stated |
+| `#definition 15#` | VI-B | `(ρ,λ)`-bounded function: ` : B_f(u,ρ) : ≤ λ` for all `u` | `IsLocallyBounded` | stated |
 | `#lemma 4#` | VI-B | contiguous-block condition ⇒ a colouring `Col_f : F₂^k → [λ]` separating `f`-values at distance `≤ ρ` | — | external ([14]): hypothesis of `#theorem 12#` |
 | `#lemma 5#` | VI-B | `N(4,2t) = 3t` | `Nconst_four_two` | todo |
 | `#theorem 12#` | VI-B | for `(2t_f,λ)`-bounded `f` (with the `#lemma 4#` colouring): `r_f ≤ n−k+N(λ,2(t_f−t_d))`; for `q=2, λ=4`: `≤ n−k+3(t_f−t_d)` | `locallyBounded_redundancy_le` | todo |
@@ -116,8 +116,8 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
 | `#definition 16#` | VII | linear FCC: a `k`-dimensional subspace of `F_q^n` satisfying the two distance conditions (standard-form generator matrix) | `IsLinearFCC` | stated |
-| `#lemma 7#` | VII | `D_f = {(u,p) ∈ C | u ∈ ker f}` is a subspace of `C` of dimension `dim ker f` | `kernelSubcode` | todo |
-| `#lemma 8#` | VII | `min{wt(c₁−c₂) | c₁ ∈ vᵢ+D, c₂ ∈ vⱼ+D} = min_{d∈D} wt(vᵢ−vⱼ+d)` | `cosetDist_eq` | todo |
+| `#lemma 7#` | VII | `D_f = {(u,p) ∈ C : u ∈ ker f}` is a subspace of `C` of dimension `dim ker f` | `kernelSubcode` | todo |
+| `#lemma 8#` | VII | `min{wt(c₁−c₂) : c₁ ∈ vᵢ+D, c₂ ∈ vⱼ+D} = min_{d∈D} wt(vᵢ−vⱼ+d)` | `cosetDist_eq` | todo |
 | `#lemma 9#` | VII | in a linear `(f:d_d,d_f)`-FCC of a linear `f`: `wt v ≥ d_f` for all `v ∈ C \ D_f` | `wt_ge_of_not_mem_kernel` | todo |
 | `#definition 17#` | VII | coset code `C/D` and its minimum distance `d(C/D)` | `CosetCode`, `cosetCodeMinDist` | stated |
 | `#definition 18#` | VII | equivalent definition: `d(C) ≥ d_d` and `d(C/D_f) ≥ d_f` | `IsLinearFCCKernel` | stated |
@@ -131,15 +131,15 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#lemma 11#` | VIII | Plotkin bound `N(D) ≥ 4/(M²)·Σ[D]ᵢⱼ` (`M` even) resp. `4/(M²−1)·Σ` (`M` odd) | `plotkin_bound_binary` | todo |
 | `#lemma 12#` | VIII | Gilbert–Varshamov-type upper bound `N(D) ≤ min{r : 2^r > max_j Σ_{i<j} V(r,[D]−1)}` | — | external ([1]): used as hypothesis if needed |
 | `#lemma 13#` | VIII | over `F_q`: `N(D) ≥ 2q/(M²(q−1)−a(q−a))·Σ_{i<j}[D]ᵢⱼ`, `a = M mod q` | `plotkin_bound` | todo |
-| `#theorem 14#` | VIII-A | `r_f(k:d_d,d_f) ≥ ((L−1)d_d+(q^k−L)d_f)/(q^{k−1}(q−1)) − k`, `L = max_α |f⁻¹(α)|`, for `d_f > d_d` | `plotkin_bound_fcc` | todo |
-| `#theorem 15#` | VIII-B | Hamming-type bound for `(f,t)`-FCCs: `E ≤ q^n/|∪_{j≤ℓ} B(v_j,t)|` (see the direction note in `Notation.md` §5) | `hamming_bound_fcc` | todo |
+| `#theorem 14#` | VIII-A | `r_f(k:d_d,d_f) ≥ ((L−1)d_d+(q^k−L)d_f)/(q^{k−1}(q−1)) − k`, `L = max_α : f⁻¹(α) : `, for `d_f > d_d` | `plotkin_bound_fcc` | todo |
+| `#theorem 15#` | VIII-B | Hamming-type bound for `(f,t)`-FCCs: `E ≤ q^n/ : ∪_{j≤ℓ} B(v_j,t) : ` (see the direction note in `Notation.md` §5) | `hamming_bound_fcc` | todo |
 | `#corollary 13#` | VIII-B | `E ≤ q^n/Σ_{i≤t} C(n,i)(q−1)^i` | `hamming_bound_fcc_sphere` | todo |
 | `#theorem 16#` | VIII-C | Hamming-type bound for `(f:d_d,d_f)`-FCCs, with `d(vᵢ,vⱼ) ≥ d_d` in the union | `hamming_bound_fcc_data` | todo |
 | `#corollary 14#` | VIII-C | `E ≤ q^n/(ℓ·Σ_{i≤t_d} C(n,i)(q−1)^i)` | `hamming_bound_fcc_data_sphere` | todo |
-| `#theorem 17#` | App. | `|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i≤t−1}C(n−1,i)(q−1)^i` for `d(u,v)=1` | `card_ball_union_dist_one` | todo |
-| `#lemma 14#` | App. | `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)` for `d(u₁,u₂)=2` over `F₂` | `card_ball_inter_dist_two` | todo |
+| `#theorem 17#` | App. | ` : B(u,t) ∪ B(v,t) : = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i≤t−1}C(n−1,i)(q−1)^i` for `d(u,v)=1` | `card_ball_union_dist_one` | todo |
+| `#lemma 14#` | App. | ` : B(u₁,t) ∩ B(u₂,t) : = 2Σ_{i≤t−1}C(n−1,i)` for `d(u₁,u₂)=2` over `F₂` | `card_ball_inter_dist_two` | todo |
 | `#theorem 18#` | App. | union of three balls at pairwise distances `1,1,2` | `card_ball_union_three` | todo |
-| `#theorem 19#` | App. | `|B(u₁,t) ∪ B(u₂,t)| = 2Σ_{i≤t}C(n,i) − 8Σ_{i≤t−3}C(n−3,i) − 6C(n−3,t−2)` for `d(u₁,u₂)=3`, `t ≥ 2` | `card_ball_union_dist_three` | todo |
+| `#theorem 19#` | App. | ` : B(u₁,t) ∪ B(u₂,t) : = 2Σ_{i≤t}C(n,i) − 8Σ_{i≤t−3}C(n−3,i) − 6C(n−3,t−2)` for `d(u₁,u₂)=3`, `t ≥ 2` | `card_ball_union_dist_three` | todo |
 
 ### 1.2 Numbered examples (optional, high value as regression tests)
 
