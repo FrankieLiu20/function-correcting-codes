@@ -925,6 +925,30 @@ theorem image_linear_concat {k ℓ r r' : ℕ} (f : Word F k →ₗ[F] Word F �
     IsLinearMap F (fun u : Word F k => catWord (Cf u) (Df (f u))) := by
   sorry
 
+/-- `(internal, §VII — used by `#theorem 13#`)` — concatenating coordinates adds
+the distances: `d(catWord x₁ y₁, catWord x₂ y₂) = d(x₁,x₂) + d(y₁,y₂)`, the step
+the proof of `#theorem 13#` takes for granted ("the Hamming distance between them
+is `d(C(u₁),C(u₂)) + d(D(f(u₁)),D(f(u₂)))`"). -/
+theorem hammingDist_catWord {m n : ℕ} (x₁ x₂ : Word F m) (y₁ y₂ : Word F n) :
+    hammingDist (catWord x₁ y₁) (catWord x₂ y₂) = hammingDist x₁ x₂ + hammingDist y₁ y₂ := by
+  sorry
+
+/-- `#theorem 13#` (§VII-B) — "the image `C_cat = {(C(u), D(f(u))) : u ∈ F_q^k}`
+`⊆ F_q^{n+r'}` is a linear `(f : d_d, d_f)`-FCC of dimension `k` and total
+redundancy `r_s = (n − k) + r'`".  Linearity is `#lemma 10#`; the two distance
+guarantees are stated here, with `catWord` spelling out the pair and the
+`d_f − d_d` slack of the second code taken from the construction of §VII-B. -/
+theorem isLinearFCC_concat {k ℓ r r' dd df : ℕ} (f : Word F k →ₗ[F] Word F ℓ)
+    (C : Word F k → Word F r) (D : Word F ℓ → Word F r')
+    (hC : ∀ u v : Word F k, u ≠ v → dd ≤ hammingDist (C u) (C v))
+    (hD : ∀ a b : Word F ℓ, a ≠ b → df - dd ≤ hammingDist (D a) (D b))
+    (hadd : dd ≤ df) :
+    (∀ u v : Word F k, u ≠ v →
+        dd ≤ hammingDist (catWord (C u) (D (f u))) (catWord (C v) (D (f v)))) ∧
+      ∀ u v : Word F k, f u ≠ f v →
+        df ≤ hammingDist (catWord (C u) (D (f u))) (catWord (C v) (D (f v))) := by
+  sorry
+
 end SectionVIIStatements
 
 /-! ### Example 12 (`#example 12#`) — a linear FCC for a non-linear function -/
