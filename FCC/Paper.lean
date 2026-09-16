@@ -298,6 +298,69 @@ def drmData {k M : ℕ} (f : Word F k → α) (td tf : ℕ) (u : Fin M → Word 
     else if f (u i) = f (u j) then max (2 * td + 1 - hammingDist (u i) (u j)) 0
     else max (2 * tf + 1 - hammingDist (u i) (u j)) 0
 
+/-! ### Example 5 (`#example 5#`) — the least-frequent-bit function on `F₂³` -/
+
+/-- `#example 5#` (§III) — the function "position of the least frequent bit" on
+`F₂³`: `f(000) = f(111) = 0`, `f(100) = f(011) = 1`, `f(010) = f(101) = 2`,
+`f(001) = f(110) = 3`. -/
+def ex5F (u : Word F₂ 3) : Fin 4 :=
+  match u 0, u 1, u 2 with
+  | false, false, false => 0
+  | true, false, false => 1
+  | false, true, false => 2
+  | false, false, true => 3
+  | true, true, false => 3
+  | true, false, true => 2
+  | false, true, true => 1
+  | true, true, true => 0
+
+/-- `#example 5#` (§III) — the information vectors `000, 100, 010, 001`. -/
+def ex5Vec : Fin 4 → Word F₂ 3 :=
+  ![![false, false, false], ![true, false, false], ![false, true, false],
+    ![false, false, true]]
+
+/-- `#example 5#` (§III) — the DRM printed in the paper (`t_f = 2`), which we
+denote by `D` there. -/
+def ex5DRM : Fin 4 → Fin 4 → ℕ :=
+  ![![0, 4, 4, 4], ![4, 0, 3, 3], ![4, 3, 0, 3], ![4, 3, 3, 0]]
+
+/-- `#example 5#` (§III) — `drm` reproduces that matrix. -/
+theorem ex5_drm_matches : ∀ i j : Fin 4, drm ex5F 2 ex5Vec i j = ex5DRM i j := by
+  decide
+
+/-- `#example 5#` (§III) — the `D`-code `{000000, 111100, 110011, 001111}` of the
+example ("one vector from the code is added as a parity to two message vectors
+that share the same function value"). -/
+def ex5Dcode : Fin 4 → Word F₂ 6 :=
+  ![![false, false, false, false, false, false], ![true, true, true, true, false, false],
+    ![true, true, false, false, true, true], ![false, false, true, true, true, true]]
+
+/-- `#example 5#` (§III) — that `D`-code satisfies the DRM above. -/
+theorem ex5_dcode_valid :
+    ∀ i j : Fin 4, i ≠ j → ex5DRM i j ≤ hammingDist (ex5Dcode i) (ex5Dcode j) := by
+  decide
+
+/-- `#example 5#` (§III) — the resulting length-9 code of the paper, whose
+messages are the eight vectors of `F₂³` in the order `000, 100, 010, 001, 110,
+101, 011, 111`. -/
+def ex5Code : Fin 8 → Word F₂ 9 :=
+  ![![false, false, false, false, false, false, false, false, false],
+    ![true, true, true, false, false, false, false, false, false],
+    ![true, false, false, true, true, true, true, false, false],
+    ![false, true, true, true, true, true, true, false, false],
+    ![false, true, false, true, true, false, false, true, true],
+    ![true, false, true, true, true, false, false, true, true],
+    ![false, false, true, false, false, true, true, true, true],
+    ![true, true, false, false, false, true, true, true, true]]
+
+/-- `#example 5#` (§III) — "it can be verified that the minimum distance of this
+code is `d = 3`": every pair of distinct codewords is at distance at least 3 and
+some pair is at distance exactly 3. -/
+theorem ex5_min_dist :
+    (∀ i j : Fin 8, i ≠ j → 3 ≤ hammingDist (ex5Code i) (ex5Code j)) ∧
+      ∃ i j : Fin 8, i ≠ j ∧ hammingDist (ex5Code i) (ex5Code j) = 3 := by
+  decide
+
 /-! ### Example 6 (`#example 6#`) — the `[6,3,3]` two-step construction -/
 
 /-- `#example 6#` (§IV) — the encoder of the `[6,3,3]` code, i.e. `u ↦ uG` for the
@@ -377,6 +440,21 @@ theorem ex7_drm_matches :
     ∀ i j : Fin 8, drmData (fun u => wt u) 1 2 ex7Vec i j = ex7DRM i j := by
   decide
 
+/-! ### Example 8 (`#example 8#`) — the `D`-code for the 8×8 DRM of `#example 7#` -/
+
+/-- `#example 8#` (§IV) — the `D`-code `{000000, 110110, 101110, 011110, 011101,
+101101, 110101, 000011}` of the example. -/
+def ex8Dcode : Fin 8 → Word F₂ 6 :=
+  ![![false, false, false, false, false, false], ![true, true, false, true, true, false],
+    ![true, false, true, true, true, false], ![false, true, true, true, true, false],
+    ![false, true, true, true, false, true], ![true, false, true, true, false, true],
+    ![true, true, false, true, false, true], ![false, false, false, false, true, true]]
+
+/-- `#example 8#` (§IV) — that `D`-code satisfies the 8×8 DRM of `#example 7#`. -/
+theorem ex8_dcode_valid :
+    ∀ i j : Fin 8, i ≠ j → ex7DRM i j ≤ hammingDist (ex8Dcode i) (ex8Dcode j) := by
+  decide
+
 /-! ## §V — Non-existence of strict `(f : d_d, d_f)`-FCCs
 
 Definition 12 is below.  Still to come: `#theorem 8#`, `#theorem 9#`,
@@ -392,6 +470,22 @@ def minDistGraph {n : ℕ} (C : Finset (Word F n)) : SimpleGraph (Word F n) wher
   symm := ⟨fun x y ⟨hxy, hx, hy, hd⟩ =>
     ⟨hxy.symm, hy, hx, by rwa [hammingDist_comm]⟩⟩
   loopless := ⟨fun x ⟨hxx, _⟩ => hxx rfl⟩
+
+/-! ### Example 9 (`#example 9#`) — the minimum-distance graph of a 4-word code -/
+
+/-- `#example 9#` (§V-A) — the code `C = {0000, 0011, 1100, 1111}`. -/
+def ex9C : Finset (Word F₂ 4) :=
+  {![false, false, false, false], ![false, false, true, true], ![true, true, false, false],
+    ![true, true, true, true]}
+
+/-- `#example 9#` (§V-A) — `d_min(C) = 2`, and `G(C)` is a 4-cycle: each of the
+four codewords has exactly two codewords at the minimum distance 2, so the
+distance-2 pairs are the four edges of a cycle. -/
+theorem ex9_min_dist_and_cycle :
+    (∀ x ∈ ex9C, ∀ y ∈ ex9C, x ≠ y → 2 ≤ hammingDist x y) ∧
+      (∃ x ∈ ex9C, ∃ y ∈ ex9C, x ≠ y ∧ hammingDist x y = 2) ∧
+      ∀ x ∈ ex9C, (ex9C.filter fun y => y ≠ x ∧ hammingDist x y = 2).card = 2 := by
+  decide
 
 /-! ## §VI — Function-correcting codes for specific functions
 
@@ -499,6 +593,92 @@ def IsLinearFCCKernel {k r : ℕ} (f : Word F k →ₗ[F] Word F r)
   (∀ c ∈ C, c ≠ 0 → dd ≤ wt c) ∧ df ≤ cosetCodeMinDist C (kernelSubcode f C)
 
 end Linear
+
+/-! ### Example 12 (`#example 12#`) — a linear FCC for a non-linear function -/
+
+/-- `#example 12#` (§VII) — the non-linear function `f(x₁,x₂,x₃) = x₁x₂` on
+`F₂³` (as `Bool`: `false = 0`, `true = 1`). -/
+def ex12F (u : Word F₂ 3) : Bool := u 0 && u 1
+
+/-- `#example 12#` (§VII) — the encoder `u ↦ uG` of the binary linear code
+generated by the matrix printed in the example. -/
+def ex12Enc (u : Word F₂ 3) : Word F₂ 9 :=
+  ![u 1, u 1, u 0, u 0, u 0 != u 1, u 0 != u 1, u 2, u 1 != u 2, u 0 != u 2]
+
+/-- `#example 12#` (§VII) — the codewords of the table in the paper. -/
+theorem ex12_codewords :
+    ex12Enc ![false, false, false] = ![false, false, false, false, false, false, false, false, false] ∧
+      ex12Enc ![false, false, true] = ![false, false, false, false, false, false, true, true, true] ∧
+      ex12Enc ![false, true, false] =
+        ![true, true, false, false, true, true, false, true, false] ∧
+      ex12Enc ![true, true, true] = ![true, true, true, true, false, false, true, false, false] := by
+  decide
+
+/-- `#example 12#` (§VII) — "the minimum distance of `C` is `d_d = 3`; whenever
+`f(u) ≠ f(v)`, the corresponding codewords satisfy `d(c_u, c_v) ≥ 5`", i.e. `C`
+is a linear `(f : 3, 5)`-FCC. -/
+theorem ex12_is_fcc :
+    (∀ u : Word F₂ 3, u ≠ 0 → 3 ≤ wt (ex12Enc u)) ∧
+      ∀ u v : Word F₂ 3, ex12F u ≠ ex12F v → 5 ≤ hammingDist (ex12Enc u) (ex12Enc v) := by
+  decide
+
+/-! ### Example 13 (`#example 13#`) — a linear `(f : 2, 3)`-FCC -/
+
+/-- `#example 13#` (§VII) — a linear function `f` on `F₂²` with
+`ker(f) = {00, 11}`, i.e. `f(u) = u₁ ⊕ u₂`. -/
+def ex13F (u : Word F₂ 2) : Bool := u 0 != u 1
+
+/-- `#example 13#` (§VII) — the code `C = {0000, 0111, 1100, 1011}`. -/
+def ex13C : Fin 4 → Word F₂ 4 :=
+  ![![false, false, false, false], ![false, true, true, true], ![true, true, false, false],
+    ![true, false, true, true]]
+
+/-- `#example 13#` (§VII) — the messages of those four codewords (`00, 01, 11, 10`). -/
+def ex13Msg : Fin 4 → Word F₂ 2 :=
+  ![![false, false], ![false, true], ![true, true], ![true, false]]
+
+/-- `#example 13#` (§VII) — "the following linear code `C` has the minimum
+distance `d_d = 2` and the minimum coset distance `d_f = 3`", i.e. it is an
+`(f : 2, 3)`-FCC. -/
+theorem ex13_is_linear_fcc :
+    (∀ i j : Fin 4, i ≠ j → 2 ≤ hammingDist (ex13C i) (ex13C j)) ∧
+      ∀ i j : Fin 4, ex13F (ex13Msg i) ≠ ex13F (ex13Msg j) →
+        3 ≤ hammingDist (ex13C i) (ex13C j) := by
+  decide
+
+/-! ### Example 14 (`#example 14#`) — the `[10,3,4]` linear FCC of the §VII-B
+construction -/
+
+/-- `#example 14#` (§VII-B) — the linear function `f(u₁,u₂,u₃) = (u₁⊕u₂, u₃)`. -/
+def ex14F (u : Word F₂ 3) : Bool × Bool := (u 0 != u 1, u 2)
+
+/-- `#example 14#` (§VII-B) — the eight codewords of the final linear
+`(f : 4, 6)`-FCC (message `⊕` `C`-parity `⊕` `D`-parity), in the order of the
+paper's table `000, 110, 100, 010, 001, 111, 101, 011`. -/
+def ex14Code : Fin 8 → Word F₂ 10 :=
+  ![![false, false, false, false, false, false, false, false, false, false],
+    ![true, true, false, false, true, true, false, false, false, false],
+    ![true, false, false, true, true, false, true, true, false, true],
+    ![false, true, false, true, false, true, true, true, false, true],
+    ![false, false, true, false, true, true, true, false, true, true],
+    ![true, true, true, false, false, false, true, false, true, true],
+    ![true, false, true, true, false, true, false, true, true, false],
+    ![false, true, true, true, true, false, false, true, true, false]]
+
+/-- `#example 14#` (§VII-B) — the construction gives an `(f : 4, 6)`-FCC: the
+minimum distance is at least 4 and codewords whose messages have different
+`f`-values are at distance at least 6.  (The messages are the eight vectors in
+the paper's order.) -/
+def ex14Msg : Fin 8 → Word F₂ 3 :=
+  ![![false, false, false], ![true, true, false], ![true, false, false],
+    ![false, true, false], ![false, false, true], ![true, true, true],
+    ![true, false, true], ![false, true, true]]
+
+theorem ex14_is_fcc :
+    (∀ i j : Fin 8, i ≠ j → 4 ≤ hammingDist (ex14Code i) (ex14Code j)) ∧
+      ∀ i j : Fin 8, ex14F (ex14Msg i) ≠ ex14F (ex14Msg j) →
+        6 ≤ hammingDist (ex14Code i) (ex14Code j) := by
+  decide
 
 /-! ## §VIII — Extension of bounds from error-correcting codes to FCCs
 
