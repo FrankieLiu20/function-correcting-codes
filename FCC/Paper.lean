@@ -4,6 +4,7 @@ import FCC.Balls
 import FCC.Internal
 import Mathlib.Algebra.Module.LinearMap.Basic
 import Mathlib.Combinatorics.SimpleGraph.Basic
+import Mathlib.Combinatorics.SimpleGraph.Connectivity.Connected
 import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 import Mathlib.Order.Lattice.Nat
 
@@ -592,6 +593,68 @@ def minDistGraph {n : ℕ} (C : Finset (Word F n)) : SimpleGraph (Word F n) wher
   symm := ⟨fun x y ⟨hxy, hx, hy, hd⟩ =>
     ⟨hxy.symm, hy, hx, by rwa [hammingDist_comm]⟩⟩
   loopless := ⟨fun x ⟨hxx, _⟩ => hxx rfl⟩
+
+/-! ### §V results — non-existence of strict `(f : d_d, d_f)`-FCCs
+
+Statements only, in the paper's order (proofs are phases 3.5–3.7).  `#theorem 9#`
+is not written yet: it counts the connected components of `G(C)`, and phase 1 did
+not define that count for `SimpleGraph` — it is the natural next helper.
+`IsPerfect` and `IsMDS` are `(internal, §V-B)` definitions in `FCC/Basic.lean`,
+because §V-B introduces those two code classes in prose rather than numbered. -/
+
+/-- `#theorem 8#` (§V-A) — "let `C` be a `(n, q^k, d)` code.  If the
+minimum-distance graph `G(C)` is a connected graph, then `C` cannot be an
+`(f : d, d_f)`-FCC for any `f : F_q^k → Im(f)` with `|Im(f)| ≥ 2` and `d_f > d`,
+equivalently `C` cannot be a strict `(f : d, d_f)`-FCC".  The encoding is
+required to have all its codewords in `C`, so that `G(C)` is the graph of the
+code under test. -/
+theorem not_isFCCData_of_connected {k r d df : ℕ} (C : Finset (Word F (k + r)))
+    (hmin : minDist C = d) (hconn : (minDistGraph C).Preconnected) (f : Word F k → α)
+    (h2 : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b)
+    (hdf : d < df) :
+    ¬∃ enc : Word F k → Word F (k + r), IsFCCData f enc d df ∧ ∀ u, enc u ∈ C := by
+  sorry
+
+/-- `#theorem 10#` (§V-B) — "the minimum-distance graph of a perfect `t`-error
+correcting code is connected". -/
+theorem isConnected_minDistGraph_of_perfect {F : Type*} [Zero F] [Fintype F] [DecidableEq F]
+    {n t : ℕ} (C : Finset (Word F n)) (h : IsPerfect C t) :
+    (minDistGraph C).Preconnected := by
+  sorry
+
+/-- `#lemma 2#` (§V-B) — "let `C` be an MDS code with parameters `(n, M, d)_q`,
+and let `u, v ∈ C`.  Then there exists `u' ∈ C` such that `d(u,u') = d` (i.e.
+`u'` is a neighbour of `u` in `G(C)`) and `d(u',v) ≤ d(u,v) − 1`". -/
+theorem exists_mds_neighbor {n d : ℕ} (C : Finset (Word F n)) (h : IsMDS C d)
+    {u v : Word F n} (hu : u ∈ C) (hv : v ∈ C) (huv : u ≠ v) :
+    ∃ u' ∈ C, u' ≠ u ∧ hammingDist u u' = d ∧ hammingDist u' v ≤ hammingDist u v - 1 := by
+  sorry
+
+/-- `#theorem 11#` (§V-B) — "the minimum-distance graph of any MDS code is
+connected". -/
+theorem isConnected_minDistGraph_of_mds {n d : ℕ} (C : Finset (Word F n))
+    (h : IsMDS C d) : (minDistGraph C).Preconnected := by
+  sorry
+
+/-- `#corollary 7#` (§V-B) — "let `f : F_q^k → Im(f)` be a function.  Then for an
+`(f : d_d, d_f)`-FCC with `d_f > d_d` we have `r_f(k : d_d, d_f) ≥ n − k + 1`,
+where `n` is the integer satisfying
+`q^{n−k} = Σ_{i≤⌊(d_d−1)/2⌋} C(n,i)(q−1)^i`". -/
+theorem perfect_optimalRedundancyData_ge {k n dd df : ℕ} (f : Word F k → α)
+    (hperf : Fintype.card F ^ (n - k) =
+      ∑ i ∈ Finset.range (dd / 2 + 1), n.choose i * (Fintype.card F - 1) ^ i)
+    (hlt : dd < df) :
+    n - k + 1 ≤ optimalRedundancyData f dd df := by
+  sorry
+
+/-- `#corollary 8#` (§V-B) — "let `f : F_q^k → Im(f)` be a function.  Assume
+there exists an MDS `(n, q^k, d)_q` code, i.e. `n = k + d − 1`.  Then for an
+`(f : d, d_f)`-FCC with `d_f > d` we have `r_f(k : d, d_f) ≥ n − k + 1 = d`,
+equivalently any such FCC must have length `≥ k + d`". -/
+theorem mds_optimalRedundancyData_ge {k n d df : ℕ} (f : Word F k → α)
+    (hmds : n = k + d - 1) (hlt : d < df) :
+    d ≤ optimalRedundancyData f d df := by
+  sorry
 
 /-! ### Example 9 (`#example 9#`) — the minimum-distance graph of a 4-word code -/
 

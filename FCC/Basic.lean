@@ -92,4 +92,27 @@ noncomputable def minDist {F : Type*} [DecidableEq F] {n : ℕ} (C : Finset (Wor
 
 end MinDist
 
+section PerfectAndMDS
+
+/-- `(internal, §V-B — used by `#theorem 10#`)` — a perfect `t`-error correcting
+code.  The paper defines it in prose: "the Hamming bound on the size of an
+error-correcting code `C` with length `n` and minimum distance `d` is
+`M ≤ q^n/Σ_{i≤⌊(d−1)/2⌋} C(n,i)(q−1)^i`", and "a code that achieves the Hamming
+bound is called a perfect code" — here written as: minimum distance `≥ 2t+1` and
+the Hamming bound met with equality. -/
+def IsPerfect {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {n : ℕ} (C : Finset (Word F n))
+    (t : ℕ) : Prop :=
+  (∀ x ∈ C, ∀ y ∈ C, x ≠ y → 2 * t + 1 ≤ hammingDist x y) ∧
+    Fintype.card F ^ n = C.card * (ball (0 : Word F n) t).card
+
+/-- `(internal, §V-B — used by `#theorem 11#`, `#lemma 2#`)` — an MDS code:
+"a code that meets the Singleton bound with equality is called a maximum
+distance separable (MDS) code ... an `(n,M,d)_q` code is MDS if and only if
+`M = q^{n−d+1}`".  Stated as: `|C| = q^{n−d+1}` and `d_min(C) = d`. -/
+def IsMDS {F : Type*} [Fintype F] [DecidableEq F] {n : ℕ} (C : Finset (Word F n))
+    (d : ℕ) : Prop :=
+  C.card = Fintype.card F ^ (n - d + 1) ∧ minDist C = d
+
+end PerfectAndMDS
+
 end FCC

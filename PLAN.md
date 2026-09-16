@@ -70,13 +70,13 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | --- | --- | --- | --- | --- |
 | `#definition 10#` | IV | optimal redundancy `r_f(k:d_d,d_f) = r_f(k,t_d,t_f)` | `optimalRedundancyData` | stated |
 | `#definition 11#` | IV | DRM `D_f(t_d,t_f:u₁,…,u_M)`: `max(2t_d+1−d,0)` if `f(uᵢ)=f(uⱼ)`, `max(2t_f+1−d,0)` if `f(uᵢ)≠f(uⱼ)`, `0` on the diagonal | `drmData` | stated |
-| `#theorem 2#` | IV | `r_f(k,t_d,t_f) = N(D_f(t_d,t_f:u₁,…,u_{q^k}))` — **the central identity** | `optimalRedundancyData_eq_N_drmData` | stated |
-| `#theorem 3#` | IV | `r_f ≥ N(D_f(t_d,t_f:u₁,…,u_m))` for any subset; `r_f ≥ 2t_f` if `|Im f| ≥ 2`; `r_f ≥ N(q^k,2t_d+1)−k` | `optimalRedundancyData_ge_N_subset`, `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub` | stated |
-| `#theorem 4#` | IV | over `F₂`, if `2 ≤ |Im f| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d` | `binary_optimalRedundancyData_ge` | stated |
-| `#theorem 5#` | IV | for an `[n,k,2t_d+1]` code `C`: `N(DRM) ≤ N(CDRM) + n − k` | `N_drmData_le_N_cdrm_add` | stated |
-| `#corollary 4#` | IV | `r_f(k,t_d,t_f) ≤ N(D_{C,f}) + n − k` | `optimalRedundancyData_le_N_cdrm_add` | stated |
+| `#theorem 2#` | IV | `r_f(k,t_d,t_f) = N(D_f(t_d,t_f:u₁,…,u_{q^k}))` — **the central identity** | `optimalRedundancyData_eq_N_drmData` | todo |
+| `#theorem 3#` | IV | `r_f ≥ N(D_f(t_d,t_f:u₁,…,u_m))` for any subset; `r_f ≥ 2t_f` if `|Im f| ≥ 2`; `r_f ≥ N(q^k,2t_d+1)−k` | `optimalRedundancyData_ge_N_subset`, `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub` | todo |
+| `#theorem 4#` | IV | over `F₂`, if `2 ≤ |Im f| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d` | `binary_optimalRedundancyData_ge` | todo |
+| `#theorem 5#` | IV | for an `[n,k,2t_d+1]` code `C`: `N(DRM) ≤ N(CDRM) + n − k` | `N_drmData_le_N_cdrm_add` | todo |
+| `#corollary 4#` | IV | `r_f(k,t_d,t_f) ≤ N(D_{C,f}) + n − k` | `optimalRedundancyData_le_N_cdrm_add` | todo |
 | `#corollary 5#` | IV | binary version with the explicit `t_d log k` redundancy of `C` (carries the [1, App.] bound as a hypothesis) | `binary_optimalRedundancyData_le` | todo |
-| `#theorem 6#` | IV | `N(D_{C,f}(t_f:u₁,…,u_M)) ≤ N(M, 2(t_f−t_d))` | `N_cdrm_le_Nconst` | stated |
+| `#theorem 6#` | IV | `N(D_{C,f}(t_f:u₁,…,u_M)) ≤ N(M, 2(t_f−t_d))` | `N_cdrm_le_Nconst` | todo |
 | `#corollary 6#` | IV | `N(M,2(t_f−t_d)) ≤ 4(t_f−t_d)−2 )/(1−√…)` for `t_f−t_d ≥ 5`, `M ≤ 4(t_f−t_d)²`; and `N(4,2(t_f−t_d)) = 3(t_f−t_d)` | `Nconst_le`, `Nconst_four` (first part needs `#lemma 1#`) | todo |
 | `#theorem 7#` | IV | for `C` an optimal-length `[n,k,2t_d+1]` linear code: `N(CDRM) + n−k ≤ r_s ≤ N(CFDM) + n−k` | `two_step_redundancy_bounds` | todo |
 | `#remark 1#` | IV | design remark (`N(D)` as the reduction target) | — | recorded here only |
@@ -86,13 +86,13 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
 | `#definition 12#` | V | minimum-distance graph `G(C)`: vertices `C`, edges between codewords at distance `d_min(C)` | `minDistGraph` | stated |
-| `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with `|Im f| ≥ 2`, `d_f > d` | `not_isFCCData_of_connected` | todo |
+| `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with `|Im f| ≥ 2`, `d_f > d` | `not_isFCCData_of_connected` | stated |
 | `#theorem 9#` | V | if `G(C)` has `Q` components then no `f` with `|Im f| ≥ Q+1` and `d_f > d` works | `not_isFCCData_of_components` | todo |
-| `#theorem 10#` | V | `G(C)` is connected for every perfect `t`-error-correcting code | `isConnected_minDistGraph_of_perfect` | todo |
-| `#corollary 7#` | V | `r_f(k:d_d,d_f) ≥ n−k+1` when a perfect code of length `n` exists | `perfect_optimalRedundancyData_ge` | todo |
-| `#lemma 2#` | V | MDS codes: for all `u,v` there is `u'` with `d(u,u') = d` and `d(u',v) ≤ d(u,v)−1` | `exists_mds_neighbor` | todo |
-| `#theorem 11#` | V | `G(C)` is connected for every MDS code | `isConnected_minDistGraph_of_mds` | todo |
-| `#corollary 8#` | V | `r_f(k:d_d,d_f) ≥ d` given an MDS `(n,q^k,d)` code | `mds_optimalRedundancyData_ge` | todo |
+| `#theorem 10#` | V | `G(C)` is connected for every perfect `t`-error-correcting code | `isConnected_minDistGraph_of_perfect` | stated |
+| `#corollary 7#` | V | `r_f(k:d_d,d_f) ≥ n−k+1` when a perfect code of length `n` exists | `perfect_optimalRedundancyData_ge` | stated |
+| `#lemma 2#` | V | MDS codes: for all `u,v` there is `u'` with `d(u,u') = d` and `d(u',v) ≤ d(u,v)−1` | `exists_mds_neighbor` | stated |
+| `#theorem 11#` | V | `G(C)` is connected for every MDS code | `isConnected_minDistGraph_of_mds` | stated |
+| `#corollary 8#` | V | `r_f(k:d_d,d_f) ≥ d` given an MDS `(n,q^k,d)` code | `mds_optimalRedundancyData_ge` | stated |
 
 #### §VI FCCs for specific functions
 

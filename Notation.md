@@ -139,6 +139,21 @@ one of these two tags fails `scripts/consistency_check.ps1`.
 4. **Diagonal of a DRM.**  Always `0`; the Lean side therefore quantifies over
    `i ≠ j` in `IsDCode`, and the paper's "for all `i,j`" is recovered because
    `d(pᵢ,pᵢ) = 0 ≥ 0`.
+
+   **Matrices are indexed by an arbitrary type.**  The paper writes its matrices
+   as `u₁,…,u_M` (an arbitrary list) or `f₁,…,f_E` (the image), so in Lean
+   `drm`, `cdrm`, `drmData`, `IsDCode` and `N` take an index type `ι` rather than
+   `Fin M`.  That is what lets `#theorem 2#` (indexed by the *whole* message
+   space `Word F k`), `#theorem 3#`/`#theorem 5#` (indexed by a subset
+   `Fin m`), and `#theorem 1#` (indexed by the image values `α`) be stated with
+   a single `N`, without extra "this enumeration is a bijection" hypotheses.
+   The constant-matrix case keeps the paper's shape: `Nconst M d` is `N` of the
+   constant `Fin M × Fin M` matrix.
+
+   *Lean detail (cost us one build):* `N`'s alphabet `F` appears only in its
+   body, so a call like `N (drm f t u)` cannot infer it from the `ℕ`-valued
+   matrix and instance search stalls on `DecidableEq ?F`.  Write
+   `N (F := F) (ι := …) …` explicitly, as every statement in the main file does.
 5. **Which distance goes where in `#definition 11#`.**  Equal function value ⇒ the
    `2t_d+1` row; different function value ⇒ the `2t_f+1` row.  Sanity check with
    `#example 7#`, whose matrix is reproduced in `PLAN.md` §1.2 as a test case.
