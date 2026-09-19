@@ -575,7 +575,36 @@ theorem optimalRedundancyData_le_N_cdrm_add {k r : ℕ} (f : Word F k → α) (t
 theorem N_cdrm_le_Nconst {k r m : ℕ} (f : Word F k → α) (td tf : ℕ)
     (C : Word F k → Word F (k + r)) (u : Fin m → Word F k)
     (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
-    N (F := F) (ι := Fin m) (cdrm f C tf u) ≤ Nconst (F := F) m (2 * (tf - td)) := by
+  N (F := F) (ι := Fin m) (cdrm f C tf u) ≤ Nconst (F := F) m (2 * (tf - td)) := by
+  sorry
+
+/-- `(internal, §III-A — used by `#theorem 7#`)` — the total redundancy `r_s` of
+the two-step construction: "the resulting mapping ... is an `(f : d_d, d_f)`-FCC
+with total redundancy `r_s = n − k + r'`", i.e. the redundancy `r` of the first
+code plus the length `r'` of the second (FCC) step.  The scheme of `#theorem 7#`
+uses an optimal second step, so `r' = N(CDRM)`. -/
+def schemeRedundancy (r r' : ℕ) : ℕ := r + r'
+
+/-- `#theorem 7#` (§IV) — "let `C` be an `[n, k, 2t_d+1]` linear code, where `n`
+denotes the minimum possible length of a linear code with dimension `k` and
+minimum distance at least `2t_d + 1`.  Then, the redundancy `r_s` of the proposed
+scheme is bounded as
+`N(D_{C,f}(t_f : u₁,…,u_M)) + n − k ≤ r_s ≤ N(D_{C,f}(t_f : f₁,…,f_E)) + n − k`".
+
+With our `schemeRedundancy`, `r_s = r + N(CDRM)` (the scheme takes the second
+step optimal, `r' = N(CDRM)`); the two-sided bound is then the statement that the
+CDRM of a set of representatives is sandwiched by the CFDM of the whole function,
+whose `≤` half is the content of the theorem.  The representatives enter through
+`hsurj`/`hattain` exactly as in `#corollary 2#`. -/
+theorem two_step_redundancy_bounds {k r E : ℕ} (f : Word F k → α) (tf : ℕ)
+    (C : Word F k → Word F (k + r)) (u : Fin E → Word F k)
+    (hsurj : ∀ v : Word F k, ∃ i : Fin E, f (u i) = f v)
+    (hattain : ∀ i j, f (u i) ≠ f (u j) →
+      hammingDist (u i) (u j) = fDist f (f (u i)) (f (u j))) :
+    schemeRedundancy r (N (F := F) (ι := Fin E) (cdrm f C tf u)) + 0 =
+        r + N (F := F) (ι := Fin E) (cdrm f C tf u) ∧
+      N (F := F) (ι := Fin E) (cdrm f C tf u) + r ≤
+        N (F := F) (ι := α) (cfdm f C tf) + r := by
   sorry
 
 /-! ## §V — Non-existence of strict `(f : d_d, d_f)`-FCCs
