@@ -516,19 +516,22 @@ theorem N_le_of_isDCode {ι : Type*} {D : ι → ι → ℕ} {r : ℕ}
     (h : IsDCode (F := F) D r) : N (F := F) D ≤ r :=
   Nat.sInf_le h
 
-/-- `(internal, §II — the `N`-API of phase 3.0)` — a `D`-code exists for some
-length (so that the `sInf` defining `N` is taken over a non-empty set: this is
-what every lower-bound statement about `N` needs).
+/-! The **lower** half of the `N`-API — `N(D) = r` from "a `D`-code of length `r`
+exists and none of length `< r` does" — does **not** need a lemma that a `D`-code
+exists for every matrix: the witness `IsDCode D r` already makes the set in
+`N`'s `sInf` non-empty, which is all `Nat.le_sInf` asks for.  So the next slice
+proves, instead of any block construction,
 
-Construction (the proof, next slice): for each unordered pair `{i,j}` append a
-block of `D i j` coordinates in which `p_i` is `1` and `p_j` is `0` (all other
-`p_k` are `0` there).  Then `d(p_i,p_j) ≥ D i j`, and the total length is
-`∑_{i<j} D i j` (with `Fin`-indexed blocks; the sum is `Finset.univ.filter` over
-ordered pairs with `i < j`).  The paper itself never needs this lemma — it is the
-price of defining `N` as a `sInf` (`ISSUES.md` §6). -/
-theorem exists_isDCode {ι : Type*} [Fintype ι] (D : ι → ι → ℕ) :
-    ∃ r : ℕ, IsDCode (F := F) D r := by
-  sorry
+```lean
+theorem N_eq_of {D : ι → ι → ℕ} {r : ℕ} (h1 : IsDCode (F := F) D r)
+    (h2 : ∀ r' < r, ¬ IsDCode (F := F) D r') : N (F := F) D = r
+```
+
+(`Nat.sInf_le h1` for `≤`, `Nat.le_sInf … ⟨r, h1⟩` for `≥`), with the analogous
+`minDist_eq_of`, `fDist_eq_of`, `optimalRedundancy_eq_of` and
+`optimalRedundancyData_eq_of`.  Those are what turn the examples' decidable
+"witness exists / nothing smaller exists" pairs into equalities about `N` and
+`d_min` (`ISSUES.md` §6). -/
 
 /-- `(internal, §II)` — the minimum distance of a code is at most the distance of
 any pair of distinct codewords. -/
