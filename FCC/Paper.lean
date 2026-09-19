@@ -543,7 +543,14 @@ length `r` exists and none of length `< r` does. -/
 theorem N_eq_of {ι : Type*} {D : ι → ι → ℕ} {r : ℕ}
     (h1 : IsDCode (F := F) D r) (h2 : ∀ r' < r, ¬ IsDCode (F := F) D r') :
     N (F := F) D = r := by
-  sorry
+  classical
+  have hne : ∃ n : ℕ, IsDCode (F := F) D n := ⟨r, h1⟩
+  have hkey : N (F := F) D = Nat.find hne := by
+    rw [N]
+    exact dif_pos hne
+  rw [hkey]
+  exact le_antisymm (Nat.find_min' hne h1)
+    (le_of_not_gt fun hlt => h2 _ hlt (Nat.find_spec hne))
 
 /-- `(internal, §II)` — `d_min(C) = r` when two codewords of `C` are at distance
 exactly `r` and no two distinct codewords are closer. -/
