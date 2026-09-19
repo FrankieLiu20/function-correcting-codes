@@ -225,6 +225,50 @@ Design decisions worth recording:
 formalized; `PLAN.md` §1.2 lists the rest, and 11/15/16/17 need the §VIII bounds
 too), then phase 2 (all remaining statements with `sorry`) and phase 3 (proofs).
 
+## 2026-09-19 — Phase 3.0: the `sInf` API, and what the scratch file taught us
+
+Phase 2 finished (every numbered item of the paper is stated in `FCC/Paper.lean`
+or recorded as an external input: the checker reports "every row with a Lean
+name is stated").  Phase 3.0 then aims at the API of the `sInf`-defined
+quantities `N`, `d_min`, `d(fᵢ,fⱼ)`, `r_f`.  The **upper** half is proved and
+committed (`N_le_of_isDCode`, `minDist_le`, `fDist_le`,
+`optimalRedundancy_le_of`, `optimalRedundancyData_le_of` — each `Nat.sInf_le`
+with an explicit witness).  The **lower** half (`N(D) = r` from "a witness
+exists and nothing smaller does") is *stated* and its proof resisted four
+attempts; the scratch file (`import FCC.Paper`, then `lake env lean Scratch.lean`
+— seconds instead of a full build) pinned down exactly why:
+
+1. **A scratch file needs the library built first.**  `lake env lean` on a file
+   importing `FCC.Paper` fails with "object file … Paper.olean does not exist"
+   if the previous `lake build` failed; run `lake build` first.
+2. **`dif_pos` is deprecated** (the replacement is `dite_eq_left`), and
+   `Nat.find` needs a `DecidablePred`, which `classical` supplies — so the proof
+   of `N_eq_of` must open with `classical`, and `rw [N]` then `exact dif_pos hne`
+   does work for the three quantities whose hypotheses are plain existentials
+   (`N`, `r_f`, `r_f(k:d_d,d_f)`).
+3. **Do not rewrite the *set* inside `sInf`.**  `minDist` and `fDist` index
+   `sInf` by a set-builder, and `rw [minDist, hs]` fails with *"motive is not
+   type correct"*: ℕ's `sInf` is `if h : ∃ n, n ∈ s then Nat.find h else 0`, so
+   changing the set changes the `Decidable` instance that `Nat.find` depends on.
+   Likewise `Nat.sInf_def` under a type annotation mismatches "after
+   simplification" because the annotated (folded) set and the elaborated
+   (unfolded) predicate differ.
+
+Two candidate fixes for that last obstacle, in order of preference:
+
+* **(A) Change the form of the four definitions** to the `dite` form that ℕ's
+   `sInf` *is*, e.g.
+   `def minDist C := if h : ∃ d, d ∈ {d | …} then Nat.find h else 0`.
+   Same mathematics, but `rw [minDist]; exact dif_pos hne` now works uniformly.
+   Cost: the five already-proved `≤`-side lemmas use `Nat.sInf_le` and would
+   need the one-line `dif_pos` proof instead.
+* **(B) Keep `sInf`** and handle the dependent rewrite with `simp`/`conv` (the
+   error message's own suggestion) instead of `rw`.
+
+(A) is the cleaner of the two and is what the next session should try first;
+whichever is chosen, the definition-form decision belongs in `ISSUES.md`, since
+it is a change of *form* with no change of content.
+
 ## 2026-09-14 — Examples 1, 2 and 4 formalized
 
 The §II/§III worked examples are now `decide` checks in `FCC/Paper.lean`, stated
