@@ -516,22 +516,56 @@ theorem N_le_of_isDCode {ι : Type*} {D : ι → ι → ℕ} {r : ℕ}
     (h : IsDCode (F := F) D r) : N (F := F) D ≤ r :=
   Nat.sInf_le h
 
-/-! The **lower** half of the `N`-API — `N(D) = r` from "a `D`-code of length `r`
-exists and none of length `< r` does" — does **not** need a lemma that a `D`-code
-exists for every matrix: the witness `IsDCode D r` already makes the set in
-`N`'s `sInf` non-empty, which is all `Nat.le_sInf` asks for.  So the next slice
-proves, instead of any block construction,
+/-! The **lower** half of the `sInf` API: `N(D) = r` (and its `d_min`, `d(fᵢ,fⱼ)`,
+`r_f` analogues) from "a witness of size `r` exists and nothing smaller does".
+No block construction is needed — the witness alone makes `sInf`'s set non-empty.
 
-```lean
-theorem N_eq_of {D : ι → ι → ℕ} {r : ℕ} (h1 : IsDCode (F := F) D r)
-    (h2 : ∀ r' < r, ¬ IsDCode (F := F) D r') : N (F := F) D = r
-```
+Probe of the library (via a scratch file, 2026-09-19) settled the API:
+`Nat.sInf_le : m ∈ s → sInf s ≤ m` (the `≤` side, proved below);
+**there is no `Nat.le_sInf`**; instead
+`Nat.sInf_def : s.Nonempty → sInf s = Nat.find h` with
+`Nat.find_le : p n → Nat.find h ≤ n`, so the `≥` side is `r ≤ Nat.find h`, which
+is `Nat.le_find`-shaped and is the one name still to be checked.  The statements
+are given below with `sorry` proofs so that later phases (the example upgrades,
+then `#theorem 2#`) can already cite them. -/
 
-(`Nat.sInf_le h1` for `≤`, `Nat.le_sInf … ⟨r, h1⟩` for `≥`), with the analogous
-`minDist_eq_of`, `fDist_eq_of`, `optimalRedundancy_eq_of` and
-`optimalRedundancyData_eq_of`.  Those are what turn the examples' decidable
-"witness exists / nothing smaller exists" pairs into equalities about `N` and
-`d_min` (`ISSUES.md` §6). -/
+/-- `(internal, §II — the `N`-API of phase 3.0)` — `N(D) = r` when a `D`-code of
+length `r` exists and none of length `< r` does. -/
+theorem N_eq_of {ι : Type*} {D : ι → ι → ℕ} {r : ℕ}
+    (h1 : IsDCode (F := F) D r) (h2 : ∀ r' < r, ¬ IsDCode (F := F) D r') :
+    N (F := F) D = r := by
+  sorry
+
+/-- `(internal, §II)` — `d_min(C) = r` when two codewords of `C` are at distance
+exactly `r` and no two distinct codewords are closer. -/
+theorem minDist_eq_of {n r : ℕ} {C : Finset (Word F n)}
+    (h1 : ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = r)
+    (h2 : ∀ x ∈ C, ∀ y ∈ C, x ≠ y → r ≤ hammingDist x y) : minDist C = r := by
+  sorry
+
+/-- `(internal, §II)` — `d(fᵢ,fⱼ) = r` when a pair of witnesses achieves `r` and
+every pair of witnesses is at distance at least `r`. -/
+theorem fDist_eq_of {k r : ℕ} {f : Word F k → α} {a b : α}
+    (h1 : ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = r)
+    (h2 : ∀ u v : Word F k, f u = a → f v = b → r ≤ hammingDist u v) :
+    fDist f a b = r := by
+  sorry
+
+/-- `(internal, §II)` — `r_f(k,t) = r` when an `(f,t)`-FCC of redundancy `r`
+exists and nothing smaller does. -/
+theorem optimalRedundancy_eq_of {k r : ℕ} {f : Word F k → α} {t : ℕ}
+    (h1 : ∃ C : Word F k → Word F (k + r), IsFCC f C t)
+    (h2 : ∀ r' < r, ¬ ∃ C : Word F k → Word F (k + r'), IsFCC f C t) :
+    optimalRedundancy f t = r := by
+  sorry
+
+/-- `(internal, §IV)` — `r_f(k : d_d, d_f) = r` when an `(f : d_d, d_f)`-FCC of
+redundancy `r` exists and nothing smaller does. -/
+theorem optimalRedundancyData_eq_of {k r : ℕ} {f : Word F k → α} {dd df : ℕ}
+    (h1 : ∃ C : Word F k → Word F (k + r), IsFCCData f C dd df)
+    (h2 : ∀ r' < r, ¬ ∃ C : Word F k → Word F (k + r'), IsFCCData f C dd df) :
+    optimalRedundancyData f dd df = r := by
+  sorry
 
 /-- `(internal, §II)` — the minimum distance of a code is at most the distance of
 any pair of distinct codewords. -/
