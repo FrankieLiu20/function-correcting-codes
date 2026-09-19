@@ -852,6 +852,42 @@ theorem hammingWeight_redundancy_le {k r td tf : ℕ} (C : Word F k → Word F (
 
 end SectionVIStatements
 
+section CorollariesFiveSix
+
+variable {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {α : Type*} [DecidableEq α]
+
+/-- `#corollary 5#` (§IV) — "for any function `f : F₂^k → Im(f)`,
+`r_f(k,t_d,t_f) ≤ N(D_{C,f}(t_f : u₁,…,u_{q^k})) + t_d log k + t_d(1 − (t_d/k) log e)`,
+where `C` is an `[n, k, 2t_d+1]` binary error-correcting code, and
+`n ≤ k + t_d⌈log n⌉`".  The `t_d log k` redundancy bound on such a binary code is
+the external result of [1, Appendix] (`Notation.md` §6), so it enters as the
+hypothesis `hbound : r ≤ b`; the corollary's own step is the upper bound on
+`r_f`. -/
+theorem binary_optimalRedundancyData_le {k r td tf b : ℕ} (f : Word (ZMod 2) k → α)
+    (C : Word (ZMod 2) k → Word (ZMod 2) (k + r))
+    (hC : ∀ v w : Word (ZMod 2) k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w))
+    (hbound : r ≤ b) :
+    optimalRedundancyData f (2 * td + 1) (2 * tf + 1) ≤
+      N (F := ZMod 2) (ι := Word (ZMod 2) k) (cdrm f C tf fun v => v) + b := by
+  sorry
+
+/-- `#corollary 6#` (§IV) — "let `C` be an `[n, k, 2t_d+1]` code.  Then for
+`t_f − t_d ≥ 5` and `M ≤ 4(t_f − t_d)²`,
+`N(D_{C,f}(t_f : u₁,…,u_M)) ≤ N(M, 2(t_f − t_d)) ≤ 4(t_f − t_d) − 2)/(1 − …)`",
+and for `M = 4`, `N(4, 2(t_f − t_d)) = 3(t_f − t_d)`.  The first inequality is
+`#theorem 6#`; the numerical bound on `N(M, 2(t_f − t_d))` is the external
+`#lemma 1#` ([10, Lem. 2], whose printed constants are ambiguous —
+`Notation.md` §5.2), so it enters as `hbound` and the corollary's step is the
+transitivity. -/
+theorem N_cdrm_le_bounded {k r m td tf b : ℕ} (f : Word F k → α)
+    (C : Word F k → Word F (k + r)) (u : Fin m → Word F k)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w))
+    (hbound : Nconst (F := F) m (2 * (tf - td)) ≤ b) :
+    N (F := F) (ι := Fin m) (cdrm f C tf u) ≤ b := by
+  sorry
+
+end CorollariesFiveSix
+
 /-! ## §VII — Linear `(f : d_d, d_f)`-FCC
 
 Definitions 16–18 are below.  Still to come: `#lemma 7#`, `#lemma 8#`,
