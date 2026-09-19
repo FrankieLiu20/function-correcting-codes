@@ -49,10 +49,12 @@ ones that serve as convention tests are formalized (`#example 6#`,
 `#example 7#`, `#example 10#`); the rest are prose illustrations.
 -/
 
--- The `decide` checks of the examples (e.g. the search over 256 candidate
--- `D`-codes in `ex6_no_length_two`) need a deeper kernel recursion limit than
--- the default.
-set_option maxRecDepth 100000
+-- The `decide` checks of the examples (e.g. the search over 256 candidates in
+-- `ex6_no_length_two`) need a deeper kernel recursion limit than the default of
+-- 1000.  Keep this as small as the checks allow: at 100000 a full build took
+-- ~15 minutes locally (CI stayed at ~2 minutes), which is why the DEVLOG note
+-- about scoping the option is honoured by lowering it rather than removing it.
+set_option maxRecDepth 4000
 
 namespace FCC
 
