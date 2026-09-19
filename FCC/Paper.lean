@@ -124,7 +124,10 @@ noncomputable def Nconst (M D : ℕ) : ℕ := N (F := F) (fun _ _ : Fin M => D)
 `d(fᵢ, fⱼ) = min{d(u₁,u₂) | f(u₁) = fᵢ, f(u₂) = fⱼ}`.  The minimum over an empty
 family (an empty preimage) is `0`; every use below is for values in `Im(f)`. -/
 noncomputable def fDist {k : ℕ} (f : Word F k → α) (a b : α) : ℕ :=
-  sInf {d : ℕ | ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = d}
+  by
+    classical
+    exact if h : ∃ d : ℕ, d ∈ {d : ℕ | ∃ u v : Word F k,
+        f u = a ∧ f v = b ∧ hammingDist u v = d} then Nat.find h else 0
 
 /-- `#definition 5#` (§II) — the function distance matrix (FDM): the `E × E`
 matrix (`E = |Im(f)|`) with entries `max(2t+1 − d(fᵢ,fⱼ), 0)` off the diagonal
@@ -541,7 +544,19 @@ exactly `r` and no two distinct codewords are closer. -/
 theorem minDist_eq_of {n r : ℕ} {C : Finset (Word F n)}
     (h1 : ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = r)
     (h2 : ∀ x ∈ C, ∀ y ∈ C, x ≠ y → r ≤ hammingDist x y) : minDist C = r := by
-  sorry
+  classical
+  have hmem : r ∈ {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d} := by
+    simpa using h1
+  have hne : ∃ d : ℕ, d ∈ {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d} :=
+    ⟨r, hmem⟩
+  have hkey : minDist C = Nat.find hne := by
+    rw [minDist, dif_pos hne]
+  rw [hkey]
+  refine le_antisymm (Nat.find_min' hne (by simpa using h1)) (le_of_not_gt fun hlt => ?_)
+  have hspec : ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = Nat.find hne := by
+    simpa using Nat.find_spec hne
+  obtain ⟨x, hx, y, hy, hxy, hval⟩ := hspec
+  exact absurd (hval ▸ h2 x hx y hy hxy) (not_le.mpr hlt)
 
 /-- `(internal, §II)` — `d(fᵢ,fⱼ) = r` when a pair of witnesses achieves `r` and
 every pair of witnesses is at distance at least `r`. -/
@@ -549,7 +564,19 @@ theorem fDist_eq_of {k r : ℕ} {f : Word F k → α} {a b : α}
     (h1 : ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = r)
     (h2 : ∀ u v : Word F k, f u = a → f v = b → r ≤ hammingDist u v) :
     fDist f a b = r := by
-  sorry
+  classical
+  have hmem : r ∈ {d : ℕ | ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = d} := by
+    simpa using h1
+  have hne : ∃ d : ℕ,
+      d ∈ {d : ℕ | ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = d} := ⟨r, hmem⟩
+  have hkey : fDist f a b = Nat.find hne := by
+    rw [fDist, dif_pos hne]
+  rw [hkey]
+  refine le_antisymm (Nat.find_min' hne (by simpa using h1)) (le_of_not_gt fun hlt => ?_)
+  have hspec : ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = Nat.find hne := by
+    simpa using Nat.find_spec hne
+  obtain ⟨u, v, hu, hv, hval⟩ := hspec
+  exact absurd (hval ▸ h2 u v hu hv) (not_le.mpr hlt)
 
 /-- `(internal, §II)` — `r_f(k,t) = r` when an `(f,t)`-FCC of redundancy `r`
 exists and nothing smaller does. -/
@@ -571,13 +598,24 @@ theorem optimalRedundancyData_eq_of {k r : ℕ} {f : Word F k → α} {dd df : �
 any pair of distinct codewords. -/
 theorem minDist_le {n : ℕ} {C : Finset (Word F n)} {x y : Word F n} (hx : x ∈ C)
     (hy : y ∈ C) (hxy : x ≠ y) : minDist C ≤ hammingDist x y :=
-  Nat.sInf_le ⟨x, hx, y, hy, hxy, rfl⟩
+  by
+    classical
+    have hne : ∃ d : ℕ, d ∈ {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d} :=
+      ⟨hammingDist x y, ⟨x, hx, y, hy, hxy, rfl⟩⟩
+    rw [minDist, dif_pos hne]
+    exact Nat.find_min' hne ⟨x, hx, y, hy, hxy, rfl⟩
 
 /-- `(internal, §II)` — `d(fᵢ,fⱼ)` is at most the distance of any pair of
 witnesses, one from each preimage. -/
 theorem fDist_le {k : ℕ} {f : Word F k → α} {a b : α} {u v : Word F k} (hu : f u = a)
     (hv : f v = b) : fDist f a b ≤ hammingDist u v :=
-  Nat.sInf_le ⟨u, v, hu, hv, rfl⟩
+  by
+    classical
+    have hne : ∃ d : ℕ,
+        d ∈ {d : ℕ | ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = d} :=
+      ⟨hammingDist u v, ⟨u, v, hu, hv, rfl⟩⟩
+    rw [fDist, dif_pos hne]
+    exact Nat.find_min' hne ⟨u, v, hu, hv, rfl⟩
 
 /-- `(internal, §II)` — `r_f(k,t)` is at most the redundancy of any `(f,t)`-FCC. -/
 theorem optimalRedundancy_le_of {k r : ℕ} {f : Word F k → α}

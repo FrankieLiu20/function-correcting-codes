@@ -88,7 +88,10 @@ section MinDist
 of a code: the smallest Hamming distance between two distinct codewords, and `0`
 when `C` has fewer than two words. -/
 noncomputable def minDist {F : Type*} [DecidableEq F] {n : ℕ} (C : Finset (Word F n)) : ℕ :=
-  sInf {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d}
+  by
+    classical
+    exact if h : ∃ d : ℕ, d ∈ {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d}
+      then Nat.find h else 0
 
 end MinDist
 
