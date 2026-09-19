@@ -644,6 +644,24 @@ theorem not_isFCCData_of_connected {k r d df : ℕ} (C : Finset (Word F (k + r))
     ¬∃ enc : Word F k → Word F (k + r), IsFCCData f enc d df ∧ ∀ u, enc u ∈ C := by
   sorry
 
+/-- `(internal, §V-A — used by `#theorem 9#`)` — the number `Q` of connected
+components of a graph: "if the minimum-distance graph `G(C)` has `Q` number of
+connected components".  (`Nat.card` of the quotient of vertices by reachability,
+so no `Fintype` instance on the quotient is needed.) -/
+noncomputable def componentCount {V : Type*} (G : SimpleGraph V) : ℕ :=
+  Nat.card G.ConnectedComponent
+
+/-- `#theorem 9#` (§V-A) — "let `C` be a `(n, q^k, d)` code.  If the
+minimum-distance graph `G(C)` has `Q` number of connected components, then `C`
+cannot be a `(f : d, d_f)`-FCC for any `f : F_q^k → Im(f)` with
+`|Im(f)| ≥ Q + 1` and `d_f > d`."  As in `#theorem 8#`, the encoding is required
+to have all its codewords in `C`. -/
+theorem not_isFCCData_of_components {k r d df Q : ℕ} (C : Finset (Word F (k + r)))
+    (hmin : minDist C = d) (hQ : componentCount (minDistGraph C) = Q) (f : Word F k → α)
+    (h2 : Q + 1 ≤ (Finset.univ.image f).card) (hdf : d < df) :
+    ¬∃ enc : Word F k → Word F (k + r), IsFCCData f enc d df ∧ ∀ u, enc u ∈ C := by
+  sorry
+
 /-- `#theorem 10#` (§V-B) — "the minimum-distance graph of a perfect `t`-error
 correcting code is connected". -/
 theorem isConnected_minDistGraph_of_perfect {F : Type*} [Zero F] [Fintype F] [DecidableEq F]
