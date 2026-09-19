@@ -92,7 +92,10 @@ def IsFCC {k r : ℕ} (f : Word F k → α) (C : Word F k → Word F (k + r)) (t
 `r` for which there exists an `(f,t)`-FCC with an encoding function
 `C : F_q^k → F_q^{k+r}`". -/
 noncomputable def optimalRedundancy {k : ℕ} (f : Word F k → α) (t : ℕ) : ℕ :=
-  sInf {r : ℕ | ∃ C : Word F k → Word F (k + r), IsFCC f C t}
+  by
+    classical
+    exact if h : ∃ r : ℕ, r ∈ {r : ℕ | ∃ C : Word F k → Word F (k + r), IsFCC f C t}
+      then Nat.find h else 0
 
 /-- `#definition 2#` (§II) — the distance requirement matrix (DRM):
 `[D_f(t, u₁,…,u_M)]_{i,j} = max(2t+1 − d(u_i,u_j), 0)` if `f(u_i) ≠ f(u_j)`, and
@@ -336,7 +339,10 @@ Definitions 10–11 are below.  Still to come: `#theorem 2#` (the central identi
 there exists an `(f : d_d, d_f)`-FCC with an encoding function
 `C_f : F_q^k → F_q^{k+r}`". -/
 noncomputable def optimalRedundancyData {k : ℕ} (f : Word F k → α) (dd df : ℕ) : ℕ :=
-  sInf {r : ℕ | ∃ C : Word F k → Word F (k + r), IsFCCData f C dd df}
+  by
+    classical
+    exact if h : ∃ r : ℕ, r ∈ {r : ℕ | ∃ C : Word F k → Word F (k + r), IsFCCData f C dd df}
+      then Nat.find h else 0
 
 /-- `#definition 11#` (§IV) — the distance requirement matrix for an
 `(f, t_d, t_f)`-FCC: entries `max(2t_d+1 − d(u_i,u_j), 0)` when `u_i ≠ u_j` and
@@ -584,7 +590,14 @@ theorem optimalRedundancy_eq_of {k r : ℕ} {f : Word F k → α} {t : ℕ}
     (h1 : ∃ C : Word F k → Word F (k + r), IsFCC f C t)
     (h2 : ∀ r' < r, ¬ ∃ C : Word F k → Word F (k + r'), IsFCC f C t) :
     optimalRedundancy f t = r := by
-  sorry
+  classical
+  have hne : ∃ n : ℕ, n ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'), IsFCC f C t} :=
+    ⟨r, h1⟩
+  have hkey : optimalRedundancy f t = Nat.find hne := by
+    rw [optimalRedundancy, dif_pos hne]
+  rw [hkey]
+  refine le_antisymm (Nat.find_min' hne h1) (le_of_not_gt fun hlt => ?_)
+  exact h2 _ hlt (Nat.find_spec hne)
 
 /-- `(internal, §IV)` — `r_f(k : d_d, d_f) = r` when an `(f : d_d, d_f)`-FCC of
 redundancy `r` exists and nothing smaller does. -/
@@ -592,7 +605,14 @@ theorem optimalRedundancyData_eq_of {k r : ℕ} {f : Word F k → α} {dd df : �
     (h1 : ∃ C : Word F k → Word F (k + r), IsFCCData f C dd df)
     (h2 : ∀ r' < r, ¬ ∃ C : Word F k → Word F (k + r'), IsFCCData f C dd df) :
     optimalRedundancyData f dd df = r := by
-  sorry
+  classical
+  have hne : ∃ n : ℕ,
+      n ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'), IsFCCData f C dd df} := ⟨r, h1⟩
+  have hkey : optimalRedundancyData f dd df = Nat.find hne := by
+    rw [optimalRedundancyData, dif_pos hne]
+  rw [hkey]
+  refine le_antisymm (Nat.find_min' hne h1) (le_of_not_gt fun hlt => ?_)
+  exact h2 _ hlt (Nat.find_spec hne)
 
 /-- `(internal, §II)` — the minimum distance of a code is at most the distance of
 any pair of distinct codewords. -/
@@ -621,14 +641,24 @@ theorem fDist_le {k : ℕ} {f : Word F k → α} {a b : α} {u v : Word F k} (hu
 theorem optimalRedundancy_le_of {k r : ℕ} {f : Word F k → α}
     {C : Word F k → Word F (k + r)} {t : ℕ} (h : IsFCC f C t) :
     optimalRedundancy f t ≤ r :=
-  Nat.sInf_le ⟨C, h⟩
+  by
+    classical
+    have hne : ∃ n : ℕ, n ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'), IsFCC f C t} :=
+      ⟨r, C, h⟩
+    rw [optimalRedundancy, dif_pos hne]
+    exact Nat.find_min' hne ⟨C, h⟩
 
 /-- `(internal, §IV)` — `r_f(k : d_d, d_f)` is at most the redundancy of any
 `(f : d_d, d_f)`-FCC. -/
 theorem optimalRedundancyData_le_of {k r : ℕ} {f : Word F k → α}
     {C : Word F k → Word F (k + r)} {dd df : ℕ} (h : IsFCCData f C dd df) :
     optimalRedundancyData f dd df ≤ r :=
-  Nat.sInf_le ⟨C, h⟩
+  by
+    classical
+    have hne : ∃ n : ℕ,
+        n ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'), IsFCCData f C dd df} := ⟨r, C, h⟩
+    rw [optimalRedundancyData, dif_pos hne]
+    exact Nat.find_min' hne ⟨C, h⟩
 
 /-! ### §IV results — bounds for the optimal redundancy with data protection
 
