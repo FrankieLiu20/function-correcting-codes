@@ -501,6 +501,44 @@ theorem ex8_dcode_valid :
     ∀ i j : Fin 8, i ≠ j → ex7DRM i j ≤ hammingDist (ex8Dcode i) (ex8Dcode j) := by
   decide
 
+/-! ### Phase 3.0 — the `sInf` API of `N`, `d_min`, `d(fᵢ,fⱼ)` and `r_f`
+
+Proved, not stubbed: every one of them unwinds an `sInf` by exhibiting a witness
+(`Nat.sInf_le`).  They are the entry point of every later proof, and they are what
+lets the examples' "a witness exists" checks be converted into statements about
+`N` and `d_min` (see `ISSUES.md` §6). -/
+
+/-- `(internal, §II — the `N`-API of phase 3.0)` — `N(D)` is at most the length of
+any `D`-code. -/
+theorem N_le_of_isDCode {ι : Type*} {D : ι → ι → ℕ} {r : ℕ}
+    (h : IsDCode (F := F) D r) : N (F := F) D ≤ r :=
+  Nat.sInf_le h
+
+/-- `(internal, §II)` — the minimum distance of a code is at most the distance of
+any pair of distinct codewords. -/
+theorem minDist_le {n : ℕ} {C : Finset (Word F n)} {x y : Word F n} (hx : x ∈ C)
+    (hy : y ∈ C) (hxy : x ≠ y) : minDist C ≤ hammingDist x y :=
+  Nat.sInf_le ⟨x, hx, y, hy, hxy, rfl⟩
+
+/-- `(internal, §II)` — `d(fᵢ,fⱼ)` is at most the distance of any pair of
+witnesses, one from each preimage. -/
+theorem fDist_le {k : ℕ} {f : Word F k → α} {a b : α} {u v : Word F k} (hu : f u = a)
+    (hv : f v = b) : fDist f a b ≤ hammingDist u v :=
+  Nat.sInf_le ⟨u, v, hu, hv, rfl⟩
+
+/-- `(internal, §II)` — `r_f(k,t)` is at most the redundancy of any `(f,t)`-FCC. -/
+theorem optimalRedundancy_le_of {k r : ℕ} {f : Word F k → α}
+    {C : Word F k → Word F (k + r)} {t : ℕ} (h : IsFCC f C t) :
+    optimalRedundancy f t ≤ r :=
+  Nat.sInf_le ⟨C, h⟩
+
+/-- `(internal, §IV)` — `r_f(k : d_d, d_f)` is at most the redundancy of any
+`(f : d_d, d_f)`-FCC. -/
+theorem optimalRedundancyData_le_of {k r : ℕ} {f : Word F k → α}
+    {C : Word F k → Word F (k + r)} {dd df : ℕ} (h : IsFCCData f C dd df) :
+    optimalRedundancyData f dd df ≤ r :=
+  Nat.sInf_le ⟨C, h⟩
+
 /-! ### §IV results — bounds for the optimal redundancy with data protection
 
 Statements only, in the paper's order (`#theorem 2#`–`#theorem 6#`; proofs are
