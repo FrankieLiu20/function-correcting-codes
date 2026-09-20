@@ -90,4 +90,48 @@ theorem card_ball_univ {F : Type*} [Fintype F] [DecidableEq F] {n : ℕ} {u : Wo
   rw [ball_eq_univ_of_le h, Finset.card_univ]
   exact card_word n
 
+/-! ## Concatenating coordinates adds the distances
+
+The paper's two-step construction and §VII-B glue a message to a redundancy block,
+i.e. concatenate words; this section records that the Hamming distance is additive
+under that gluing.  It is stated outside any `[Field F]` section so that proofs
+over an arbitrary alphabet (which is all `#theorem 2#` needs) can use it. -/
+
+/-- `(internal, §VII — used by `#lemma 10#`, `#theorem 13#` and both halves of
+`#theorem 2#`)` — concatenating coordinates adds the Hamming distances:
+`d(Fin.append x₁ y₁, Fin.append x₂ y₂) = d(x₁,x₂) + d(y₁,y₂)`.
+
+Proof: carve the two `diffSet`s at the `Fin.castAdd`/`Fin.natAdd` boundary
+(`Fin.addCases` with `Fin.append_left`/`Fin.append_right`), show the two segments
+disjoint by comparing `Fin.val` (there is no ready-made `Fin.castAdd_ne_natAdd`,
+so `omega` closes `a.val < m ≤ m + b.val`), and add the cardinalities with
+`Finset.card_union_of_disjoint` and the two injectivity lemmas. -/
+theorem hammingDist_append {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {m n : ℕ}
+    (x₁ x₂ : Word F m) (y₁ y₂ : Word F n) :
+    hammingDist (Fin.append x₁ y₁) (Fin.append x₂ y₂) = hammingDist x₁ x₂ + hammingDist y₁ y₂ := by
+  classical
+  have hne : ∀ (a : Fin m) (b : Fin n), Fin.castAdd n a ≠ Fin.natAdd m b := by
+    intro a b h
+    have hval : (Fin.castAdd n a).val = (Fin.natAdd m b).val := congrArg Fin.val h
+    simp [Fin.castAdd, Fin.natAdd] at hval
+    omega
+  have hne' : ∀ (a : Fin m) (b : Fin n), Fin.natAdd m b ≠ Fin.castAdd n a :=
+    fun a b => (hne a b).symm
+  have hsplit : diffSet (Fin.append x₁ y₁) (Fin.append x₂ y₂) =
+      (diffSet x₁ x₂).image (Fin.castAdd n) ∪ (diffSet y₁ y₂).image (Fin.natAdd m) := by
+    ext i
+    refine Fin.addCases (fun a => ?_) (fun b => ?_) i <;>
+      simp [diffSet, Fin.append_left, Fin.append_right, hne, hne']
+  have hdisj : Disjoint ((diffSet x₁ x₂).image (Fin.castAdd n))
+      ((diffSet y₁ y₂).image (Fin.natAdd m)) := by
+    rw [Finset.disjoint_left]
+    intro i hi hj
+    obtain ⟨a, -, ha⟩ := Finset.mem_image.mp hi
+    obtain ⟨b, -, hb⟩ := Finset.mem_image.mp hj
+    exact hne a b (ha.trans hb.symm)
+  rw [hammingDist_eq_card_diffSet, hammingDist_eq_card_diffSet, hammingDist_eq_card_diffSet, hsplit,
+    Finset.card_union_of_disjoint hdisj,
+    Finset.card_image_of_injective _ (Fin.castAdd_injective m n),
+    Finset.card_image_of_injective _ (Fin.natAdd_injective n m)]
+
 end FCC
