@@ -82,6 +82,10 @@ in the same commit that does the work.
       `two_mul_le_optimalRedundancy`), `#theorem 1#` (`optimalRedundancy_le_fdm`),
       `#corollary 2#` (`optimalRedundancy_eq_fdm`) — the §II analogues of
       `#theorem 2#`/`#theorem 3#` without data protection.
+- [ ] 3.2 (statement fix, **do first**). Re-index the FDM of `#theorem 1#` and
+      `#corollary 2#` by the image of `f` (`ι := Set.range f`) instead of by the
+      ambient `α`: as transcribed they are false for an infinite `α`, see
+      `ISSUES.md` §12 (with the counterexample and the provable replacement).
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

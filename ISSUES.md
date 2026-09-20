@@ -138,3 +138,35 @@ This removes `hex` from `#theorem 2#` and is what makes every lower bound of §I
 
 Only (a) remains as a hypothesis, and only of `#theorem 2#` and of the internal
 `optimalRedundancyData_le_of_isDCode`; no other row of the catalogue is affected.
+
+## 12. `#theorem 1#`/`#corollary 2#`: the FDM has to be indexed by `Im(f)`
+
+**Found while preparing the §II proofs (2026-09-20); the two statements need a
+fix before they can be proved.**  The paper's §II results of [1] index the FDM by
+the *image* of `f`: `D_f(t, f₁, …, f_E)` with `E = |Im(f)|`, a finite set.  Our
+transcriptions `optimalRedundancy_le_fdm` and `optimalRedundancy_eq_fdm` instead
+index `fdm f t` by the ambient alphabet `α`, so that `N` is taken over `α` — and
+in our signatures `α` is an arbitrary type.  As stated they are **false for
+infinite `α`**:
+
+* `fDist f a b` is `0` when a preimage is empty (the blanket convention of
+  `#definition 4#`, issue §8), so for `a, b ∉ Im(f)` the FDM demands distance
+  `max(2t+1 − 0, 0) = 2t+1` between *distinct values*;
+* an infinite index set cannot be placed in the finite space `Word F r`, so the
+  FDM code set is empty and `N (fdm f t) = 0` by the `sInf ∅ = 0` convention
+  (issue §6) — while `r_f` can be positive;
+* concrete counterexample: `F = ZMod 2`, `k = 1`, `α = ℕ`, `f` the two-valued map
+  on the one-bit messages, `t = 1`.  Then `r_f = 2` (two messages at distance
+  `≥ 3` need length `≥ 3 = k + r`), but the right-hand side is `N (fdm f 1) = 0`.
+
+**Fix (queued as the next step of phase 3.2).**  Index the FDM by the image,
+i.e. state both results over `ι := Set.range f` (`{a : α // ∃ u, f u = a}`) with
+the matrix `fun a b => fdm f t a.1 b.1`.  That is the paper's
+`D_f(t, f₁, …, f_E)` literally, and with that index type the statements are
+provable with the phase-3.14 machinery: the FDM code set is nonempty — take a
+representative `u_a` of each image value (`fDist f a b ≤ d(u_a, u_b)`, and
+`d(u_a, u_b) ≥ 1` for `a ≠ b`) and repeat each representative `2t+1` times, giving
+distance `≥ 2t+1 ≥` every FDM entry — and the `optimalRedundancy_ge_drm`-style
+extraction runs on that code.  `#corollary 1#` (both halves) is unaffected: it
+indexes the DRM by the messages `u₁, …, u_m`, which is exactly what the paper
+does.
