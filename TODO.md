@@ -56,9 +56,31 @@ in the same commit that does the work.
 
 ## Phase 2 — statement catalogue
 
-- [ ] Every non-`external` row of `PLAN.md` §1.1 as a `sorry`-stubbed statement
-      with its paper label in the docstring.
-- [ ] Flip `scripts/consistency_check.ps1 -Strict` on in CI (milestone M2).
+- [x] Every non-`external` row of `PLAN.md` §1.1 as a `sorry`-stubbed statement
+      with its paper label in the docstring (73 rows; the four `external` rows
+      stay without a declaration and enter as hypotheses, `#remark 1#` has no
+      declaration).
+- [x] Flip `scripts/consistency_check.ps1 -Strict` on in CI (milestone M2).
+
+## Phase 3 — proofs (`PLAN.md` §4)
+
+- [x] 3.0. The `sInf` API: `N_le_of_isDCode`, `minDist_le`, `fDist_le`,
+      `optimalRedundancy_le_of`, `optimalRedundancyData_le_of` and the five
+      `…_eq_of` minimality lemmas.
+- [x] 3.1/3.2. `#theorem 2#` — the central identity `r_f = N(D_f(t_d,t_f:u₁,…,u_{q^k}))`:
+      `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,
+      `N_drmData_le_of_isFCCData`, `optimalRedundancyData_le_of_isDCode`,
+      `optimalRedundancyData_eq_N_drmData` (headline result; `ISSUES.md` §11).
+- [ ] 3.2 (next). `#theorem 3#` (`optimalRedundancyData_ge_N_subset`,
+      `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub`),
+      then `#corollary 1#`, `#theorem 1#`, `#corollary 2#`.
+- [ ] 3.14. Non-vacuity of the FCC set, so that `#theorem 2#` can drop its
+      `hex` hypothesis (`ISSUES.md` §11(b)): a construction of
+      `∃ r, ∃ C, IsFCCData f C dd df` from `Word F k` alone (padding the message
+      with copies of itself is the cheapest route).
+- [ ] Upgrade the examples that currently check "a witness exists / none exists"
+      (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
+      `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.
 
 ## Housekeeping
 
@@ -66,6 +88,10 @@ in the same commit that does the work.
 - [ ] Set the repository description/topics on GitHub.
 - [ ] Re-read `ONBOARDING.md` §2 and §3: it was written for the guide
       repository and still quotes a few paths from there.
-- [ ] After the first paper-specific theorem lands: add it to
+- [x] After the first paper-specific theorem lands: add it to
       `scripts/headline_theorems.txt` **and** `FCC/AxiomCheck.lean` (the two are
-      checked against each other).
+      checked against each other).  `#theorem 2#` (`optimalRedundancyData_eq_N_drmData`)
+      is the first entry of the `Phase 3.2` block of the manifest.
+- [x] Keep `lake build` warning-free apart from the `sorry` stubs: deprecated
+      `dif_pos`/`if_pos`/`if_neg`/`Set.mem_setOf_eq` replaced, and the unused
+      section variables of the `sInf` API silenced with `omit … in`.

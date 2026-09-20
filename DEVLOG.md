@@ -334,3 +334,63 @@ minimum over preimages (or the phase-3.0 `fDist` API), `#example 5#`'s
 `N(D) = 6` is the Plotkin bound of `#lemma 11#` (phase 3.11), and
 `#example 11#`, `#example 15#`, `#example 16#`, `#example 17#` need the §VIII
 bounds or a value quoted from [1].
+
+## 2026-09-20 — Phase 3.2: `#theorem 2#` proved (the first paper result)
+
+`sorry` count 49 → 46.  `optimalRedundancyData_eq_N_drmData` — the paper's
+central identity `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — is a
+theorem, not a stub, and is registered as a headline result (`FCC/AxiomCheck.lean`
+and `scripts/headline_theorems.txt`): its audit output is the standard trusted base
+`propext`, `Classical.choice`, `Quot.sound`, no `sorryAx`.
+
+**How it was split.**  Four `(internal, …)` bricks, now stored *before*
+`#theorem 2#` in dependency order so that the paper's statement can cite them
+(helpers may move freely; paper items may not):
+
+| Brick | What it does |
+| --- | --- |
+| `hammingDist_eq_msg_add_red` | systematic ⇒ `d(C u, C v) = d(u,v) + d(p_u,p_v)` |
+| `isDCode_drmData_of_isFCCData` | an FCC of redundancy `r` gives a DRM `D`-code of length `r` |
+| `N_drmData_le_of_isFCCData` | hence `N(D_f) ≤ r` — the **≥** half |
+| `optimalRedundancyData_le_of_isDCode` | a DRM `D`-code of length `r` gives `r_f ≤ r` — the **≤** half |
+
+**Lesson 1 — the paper's `d_d ≤ d_f` is load-bearing.**  `#definition 6#`
+demands data protection for *every* pair `u₁ ≠ u₂`, while the DRM records the
+`2t_d+1` slack only on the pairs with `f(u₁) = f(u₂)`; for the other pairs it
+supplies `2t_f+1 − d`.  So the `≤` half needs `2t_d+1 ≤ 2t_f+1` to transfer the
+guarantee, and without it the identity is false (not merely hard).  The first
+attempt wrote the proof without the hypothesis and `omega` refused — correctly;
+the fix was to add the hypothesis to the statement, not to weaken the goal.
+Recorded as `ISSUES.md` §11(a).
+
+**Lesson 2 — `sInf` attainment has to be earned.**  The `≤` half needs a DRM
+code of length *exactly* `N(D_f)`, i.e. `Nat.sInf_mem` plus nonemptiness of the
+code set.  Nonemptiness comes from the FCC itself
+(`isDCode_drmData_of_isFCCData`), which is why `#theorem 2#` carries an
+existence hypothesis `hex`.  (The `≥` half is easier: there `Nat.find_spec`
+hands over the FCC that attains `r_f`.)  Removing `hex` — by constructing an FCC
+outright, e.g. by padding the message with copies of itself — is `PLAN.md` §4
+phase 3.14.  Recorded as `ISSUES.md` §11(b).
+
+**Lesson 3 — a stale pipeline reverted a file (worth remembering).**  A command
+from the *previous* session of the form
+`lake build 2>&1 | Select-String … ; if ($LASTEXITCODE -ne 0) { git checkout -- … }`
+was still finishing when this session started.  `Select-String` exits with `1`
+when it finds no match, so the "revert on failure" branch fired after a
+*successful* build: the uncommitted proof silently vanished, and the next build
+looked green precisely because the file was back at `HEAD`.  Two habits came out
+of it: capture `$LASTEXITCODE` from `lake build` itself and never from a cmdlet
+downstream of a pipe, and re-read `git status`/`git diff` before believing a
+green build (a green build of the wrong file looks exactly like a green build).
+
+**Lint cleanup, in the same session.**  `dif_pos`/`if_pos`/`if_neg` are
+deprecated in this mathlib pin (`dite_eq_left`/`ite_eq_left`/`ite_eq_right`),
+`Set.mem_setOf_eq` is now `Set.mem_ofPred_eq`, and the eight `sInf`-API lemmas
+carried unused section variables, silenced with
+`omit [Fintype F] in` / `omit [DecidableEq α] in` (the form mathlib itself uses:
+the `omit` goes *before* the docstring).  `lake build` is now warning-free apart
+from the remaining `sorry` stubs, which keeps the next sessions' output readable.
+
+**Verification for this session.**  `lake build` green (1818 jobs),
+`scripts/consistency_check.ps1` green (78 markers, 73 rows stated, 46 `sorry`),
+`scripts/axioms_check.ps1` green (14 headline results), CI green on the push.

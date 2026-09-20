@@ -97,3 +97,43 @@ proofs and all their uses run the other way; `#lemma 1#`'s constants are
 ambiguous in the PDF; `#definition 11#`'s printed case split omits `max(·,0)` in
 two branches; `#theorem 4#`'s "similar proof" needs checking.  Each is resolved
 when its phase is done, and the resolution is recorded in `DEVLOG.md`.
+
+## 11. `#theorem 2#` carries two side conditions that the paper leaves implicit
+
+`#theorem 2#` is the first paper result proved in this development (phase 3.2).
+Its Lean statement has two hypotheses that the printed statement does not spell
+out.  Both are in the declaration's docstring; neither weakens the *content* of
+the identity, and neither is a `sorry`-style gap.
+
+**(a) `d_d ≤ d_f`.**  `#definition 6#` states `d_d ≤ d_f` as part of the
+definition, and the paper's `r_f(k : d_d, d_f)` is only ever used under it, so
+making it a hypothesis is faithful.  It is *used* by the proof, though — it is
+not decoration: `IsFCCData` demands the data-protection distance `d_d` of
+**every** pair `u ≠ v` (the paper's literal wording: "for any `u₁, u₂` with
+`u₁ ≠ u₂`, `d(C_f(u₁), C_f(u₂)) ≥ d_d`"), while the DRM `D_f` only records the
+`2t_d+1` slack on the pairs with `f(u₁) = f(u₂)`; for a pair with
+`f(u₁) ≠ f(u₂)` the DRM supplies `2t_f+1 − d`, so `2t_d + 1 ≤ 2t_f + 1` is what
+closes the `≤` half.  Without it the identity is **false**: a DRM code of length
+`r` can exist while the systematic code built from it fails data protection.
+Hence `hdf : 2 * t_d + 1 ≤ 2 * t_f + 1` in `optimalRedundancyData_eq_N_drmData`
+and in the internal `optimalRedundancyData_le_of_isDCode`.
+
+**(b) Existence of an FCC (`hex`).**  `optimalRedundancyData` and `N` are
+`sInf`s with the convention `sInf ∅ = 0` (issue §6).  If no
+`(f : 2t_d+1, 2t_f+1)`-FCC existed at all, the left-hand side would be the
+vacuous `0`, while `N(D_f) > 0` in general — the identity would fail for a
+reason that has nothing to do with the paper.  The hypothesis
+
+`hex : ∃ r, ∃ C : Word F k → Word F (k + r), IsFCCData f C (2*t_d+1) (2*t_f+1)`
+
+excludes that degenerate case.  It is not dead weight: `hex` is what produces a
+DRM code of length `N(D_f)` (`Nat.sInf_mem` over a nonempty set), which is the
+`≤` direction of the identity; the `≥` direction instead uses `Nat.find_spec` to
+get the FCC attaining `r_f`.  In the paper's setting (`f : F_q^k → Im(f)` on a
+finite message space, the message being padded by one block per unit of
+required distance) an FCC always exists, so the hypothesis is automatic there;
+our statement allows an arbitrary alphabet `α`, hence the explicit hypothesis.
+Removing it is a tracked task (`PLAN.md` §4 phase 3.14).
+
+Both conditions are hypotheses of `#theorem 2#` and of the two internal halves
+only; no other row of the catalogue is affected.

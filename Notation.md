@@ -213,6 +213,13 @@ are `u`.  This hypothesis is what makes `d(C u, C v) = d(u,v) + d(p_u,p_v)` exac
 (`#theorem 2#`, `#theorem 5#`); that identity is where a faithfulness error would be easiest
 to hide, so the hypothesis is explicit in every statement that uses it.
 
+What `#theorem 2#` additionally needs *spelled out* (the paper assumes both
+silently) is recorded in `ISSUES.md` §11: the side condition `d_d ≤ d_f` of
+`#definition 6#`, and the existence of an `(f : d_d, d_f)`-FCC.  The first is
+used by the proof (the DRM records the `2t_d+1` slack only on the pairs with
+`f(u₁) = f(u₂)`, while `IsFCCData` demands `d_d` of every pair), the second keeps
+the `sInf`-based `r_f` and `N` away from the vacuous value `0` (§3.4).
+
 ### 3.6 Codes are `Finset`s of words, not matrices
 
 Minimum distance, `G(C)`, coset codes and so on are stated for
@@ -311,3 +318,4 @@ its phase is done, in `DEVLOG.md`.
 | Date | Step | What was checked against the PDF |
 | --- | --- | --- |
 | 2026-09-14 | Phase 0 | dictionary §2 built from §I-E, §II, §III, §IV, §VI, §VII, §VIII and the appendix; the `#example 6#` and `#example 7#` matrices recomputed entry by entry against the paper (they agree, and `#example 7#`'s DRM is reproduced in `PLAN.md` §1.2 as a test case); the suspected issues of §5 recorded. |
+| 2026-09-20 | Phase 3.2 (`#theorem 2#`) | re-read `#definition 6#` (§III) and the DRM `D_f(t_d,t_f)` of `#definition 11#` (§IV) to decide what the identity's proof actually consumes: `#definition 6#`'s "where `d_d ≤ d_f`" is used, and its data-protection clause is stated for **every** pair `u₁ ≠ u₂` while `D_f` records the `2t_d+1` slack only on the pairs with `f(u₁) = f(u₂)`.  Both are now explicit hypotheses — `ISSUES.md` §11. |

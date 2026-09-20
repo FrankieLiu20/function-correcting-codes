@@ -43,17 +43,20 @@ labelling conventions follow Shenghao Yang's
 
 | Module | Contents | Status |
 | --- | --- | --- |
-| `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | Definitions 1–18 and 12 of the 17 examples (1, 2, 4–10, 12–14) are formalized; the theorems, lemmas and corollaries are listed as `TODO`s under their section |
+| `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | All 65 numbered items are present: Definitions 1–18 stated, 12 of the 17 examples formalized, every theorem/lemma/corollary stated.  **Proved**: `#theorem 2#` (the central identity `r_f = N(DRM)`); the rest carry `sorry` (46 in total) |
 | `FCC/Definitions.lean` | §I-E notation: `Word F n` (= `F_q^n`), `wt`, `ball` | Phase 0 — complete |
 | `FCC/Basic.lean` | internal: `wt_le_wt_add_hammingDist`, `wt_zero`, `mem_ball_self` | Phase 0 — complete |
 | `FCC/Balls.lean` | internal: `card_word`, `diffSet`, `sphere`, `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`, `ball_eq_univ_of_le`, `card_ball_univ` | Phase 1a — partly done (the closed form `Σ_{i≤t} C(n,i)(q-1)^i` is next) |
 | `FCC/Internal.lean` | internal scaffolding for the example checks | Phase 1a |
 | `FCC/AxiomCheck.lean` | `#print axioms` audit of the headline results | complete |
 
-Phase 0 (infrastructure) is done; the paper-specific definitions are phase 1.
-`PLAN.md` §4 lists the phases and `PLAN.md` §1.1 is the table of *all* 65
-numbered items of the paper (18 definitions, 19 theorems, 14 lemmas and 14
-corollaries) with their status — that table is the project's checklist.
+Phases 0 (infrastructure), 1 (modelling) and 2 (statement catalogue) are done,
+and phase 3 (proofs) has started: 3.0 (the `sInf`/attainment API for `N`, `r_f`,
+`d_min`, `d(fᵢ,fⱼ)`) and 3.1–3.2 (`#theorem 2#`) are finished, everything else
+carries a `sorry` stub.  `PLAN.md` §4 lists the phases — with a status column —
+and `PLAN.md` §1.1 is the table of *all* 65 numbered items of the paper (18
+definitions, 19 theorems, 14 lemmas and 14 corollaries) with their status; that
+table is the project's checklist.
 
 **Where to read the formalization.**  `FCC/Paper.lean` is the deliverable:
 every numbered item of the paper appears there, once, in the paper's order, with
@@ -91,7 +94,7 @@ reproduce the checks from a fresh clone are recorded in
 [`VERIFICATION.md`](VERIFICATION.md).  In short:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\consistency_check.ps1   # build + PLAN/Lean label coverage + orphans + sorry count
+powershell -ExecutionPolicy Bypass -File scripts\consistency_check.ps1 -Strict   # build + PLAN/Lean label coverage (both directions) + orphans + sorry count
 powershell -ExecutionPolicy Bypass -File scripts\axioms_check.ps1        # per-theorem axiom audit (fails on sorryAx)
 ```
 

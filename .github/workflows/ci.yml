@@ -22,7 +22,10 @@ jobs:
           lint: false
 
       - name: Paper/Lean consistency check
-        run: pwsh scripts/consistency_check.ps1
+        # -Strict: an inventory row that has a Lean name but no matching
+        # declaration fails the build.  Milestone M2 (`PLAN.md` §6) is reached
+        # because phase 2 is complete: every row is stated.
+        run: pwsh scripts/consistency_check.ps1 -Strict
 
       - name: Axiom audit (fails on sorryAx)
         run: pwsh scripts/axioms_check.ps1

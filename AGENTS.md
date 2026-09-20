@@ -130,7 +130,7 @@ The rules below are adapted from `AGENTS.md` in Shenghao Yang's
 
 1. After editing a module: `lake build FCC.<Module>`.
 2. After every step (before committing):
-   `powershell -ExecutionPolicy Bypass -File scripts\consistency_check.ps1`
+   `powershell -ExecutionPolicy Bypass -File scripts\consistency_check.ps1 -Strict`
    and follow the checklist in `CONSISTENCY.md` — in particular the *manual*
    step: re-read the paper's statement in the PDF and compare it word by word
    with the Lean statement (there is no LaTeX source, so this cannot be
@@ -140,6 +140,35 @@ The rules below are adapted from `AGENTS.md` in Shenghao Yang's
 5. Before any release: `powershell -ExecutionPolicy Bypass -File
    scripts\axioms_check.ps1` (fails on `sorryAx`), and fill in the verification
    report in `VERIFICATION.md`.
+
+## Tooling rules (PowerShell, git)
+
+16. **Never read a build's exit code through a pipe.**  The idiom
+    `lake build 2>&1 | Select-String … ; if ($LASTEXITCODE -ne 0) { git checkout -- … }`
+    is a trap: `$LASTEXITCODE` is then the *cmdlet's* status, and
+    `Select-String` exits `1` when it finds no match, so the "failure" branch
+    fires after a perfectly good build and silently reverts the file.  Capture
+    the build's own status instead:
+
+    ```powershell
+    $out = lake build 2>&1; $code = $LASTEXITCODE; $out | Select-String 'error'
+    ```
+
+    This happened once (`DEVLOG.md`, 2026-09-20) and produced a *green build of
+    the reverted file*, which is the worst kind of green.
+
+17. **A green build is not evidence that the edit is present.**  Before
+    reporting a step as done, `git status --short` and `git diff --stat` must
+    show the files the step touched.  Committing is the only durable record:
+    uncommitted work in the shared working copy can be reverted by another
+    process.
+
+18. **Keep the build warning-free apart from `sorry` stubs.**  In this mathlib
+    pin `dif_pos`/`if_pos`/`if_neg` are deprecated
+    (`dite_eq_left`/`ite_eq_left`/`ite_eq_right`) and `Set.mem_setOf_eq` is now
+    `Set.mem_ofPred_eq`.  A declaration that does not use a section variable
+    should silence the linter with `omit [<instance>] in` placed **before** its
+    docstring (the form mathlib itself uses).
 
 ## Common failure modes
 
