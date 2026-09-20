@@ -213,12 +213,14 @@ are `u`.  This hypothesis is what makes `d(C u, C v) = d(u,v) + d(p_u,p_v)` exac
 (`#theorem 2#`, `#theorem 5#`); that identity is where a faithfulness error would be easiest
 to hide, so the hypothesis is explicit in every statement that uses it.
 
-What `#theorem 2#` additionally needs *spelled out* (the paper assumes both
+What `#theorem 2#` additionally needs *spelled out* (the paper assumes it
 silently) is recorded in `ISSUES.md` §11: the side condition `d_d ≤ d_f` of
-`#definition 6#`, and the existence of an `(f : d_d, d_f)`-FCC.  The first is
-used by the proof (the DRM records the `2t_d+1` slack only on the pairs with
-`f(u₁) = f(u₂)`, while `IsFCCData` demands `d_d` of every pair), the second keeps
-the `sInf`-based `r_f` and `N` away from the vacuous value `0` (§3.4).
+`#definition 6#`.  It is used by the proof (the DRM records the `2t_d+1` slack
+only on the pairs with `f(u₁) = f(u₂)`, while `IsFCCData` demands `d_d` of every
+pair).  The other implicit ingredient — an `(f : d_d, d_f)`-FCC actually
+existing, which keeps the `sInf`-based `r_f` and `N` away from the vacuous value
+`0` (§3.4) — is *proved* here rather than assumed: `exists_isFCCData` writes the
+message down `max d_d d_f` times.
 
 ### 3.6 Codes are `Finset`s of words, not matrices
 

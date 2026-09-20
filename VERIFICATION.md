@@ -112,7 +112,7 @@ phase 3.0), `#example 5#`'s `N(D) = 6` (Plotkin, phase 3.11), and
 `#example 11#`, `#example 15#`, `#example 16#`, `#example 17#` (§VIII bounds or
 a value quoted from [1]).
 
-## Phase 3.2 — `#theorem 2#`, the first paper result proved (2026-09-20)
+## Phase 3.2 — `#theorem 2#` and `#theorem 3#` proved (2026-09-20)
 
 Verified:
 
@@ -120,20 +120,26 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 14 audited results; `optimalRedundancyData_eq_N_drmData` depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 46 (was 49: `#theorem 2#` and its two internal halves) |
+| `scripts/axioms_check.ps1` | green — 17 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 43 (was 49; four paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
-Proved: `optimalRedundancyData_eq_N_drmData` — the paper's central identity
-`r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — together with the four
-internal bricks it is assembled from (`hammingDist_eq_msg_add_red`,
-`isDCode_drmData_of_isFCCData`, `N_drmData_le_of_isFCCData`,
-`optimalRedundancyData_le_of_isDCode`).
+Proved:
 
-Statement-level caveats for this result: the paper's implicit `d_d ≤ d_f` and
-the existence of an FCC are explicit hypotheses of the Lean statement, since
-`r_f` and `N` are `sInf`-based; see `ISSUES.md` §11 and `Notation.md` §3.5 for
-why each is needed and why neither changes the content of the identity.
+* `optimalRedundancyData_eq_N_drmData` — the paper's central identity
+  `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
+  `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,
+  `N_drmData_le_of_isFCCData`, `optimalRedundancyData_le_of_isDCode`;
+* `#theorem 3#` in all three parts: `optimalRedundancyData_ge_N_subset`,
+  `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub`;
+* the non-vacuity brick `exists_isFCCData` (phase 3.14), on which the lower
+  bounds rest: an `(f : d_d, d_f)`-FCC always exists (`C u = (u, u, …, u)`).
+
+Statement-level caveat for this result: the paper's implicit `d_d ≤ d_f` is an
+explicit hypothesis of `#theorem 2#` (it is used by the proof, and without it the
+identity is false); see `ISSUES.md` §11 and `Notation.md` §3.5.  The existence of
+an FCC, which the `sInf`-based `r_f` needs, is no longer a hypothesis: it is
+proved (`exists_isFCCData`).  `#theorem 3#` needs no extra hypothesis at all.
 
 ## Not formalized (and why)
 
@@ -147,11 +153,12 @@ papers and will be used as explicit hypotheses rather than assumed as axioms.
 
 ## Statement-level caveats
 
-`#theorem 2#` is stated with two side conditions that the paper assumes rather
-than prints — `d_d ≤ d_f` (from `#definition 6#`, and used by the proof) and the
-existence of an `(f : d_d, d_f)`-FCC (needed because `r_f` and `N` are
-`sInf`-based) — see `ISSUES.md` §11.  Neither changes the content of the
-identity; both are explicit hypotheses of the Lean statement.
+`#theorem 2#` is stated with one side condition that the paper assumes rather
+than prints — `d_d ≤ d_f` (from `#definition 6#`, and used by the proof) — see
+`ISSUES.md` §11(a).  The other implicit ingredient, the existence of an
+`(f : d_d, d_f)`-FCC, is proved rather than assumed (`exists_isFCCData`,
+`ISSUES.md` §11(b)), so `#theorem 2#` and `#theorem 3#` carry no existence
+hypotheses.
 
 `Notation.md` §5 lists the places where the paper's printed statement
 needs care (the direction of `#theorem 15#`/`#theorem 16#`, the constants of `#lemma 1#`, the

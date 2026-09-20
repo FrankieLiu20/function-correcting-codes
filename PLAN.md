@@ -71,7 +71,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#definition 10#` | IV | optimal redundancy `r_f(k:d_d,d_f) = r_f(k,t_d,t_f)` | `optimalRedundancyData` | stated |
 | `#definition 11#` | IV | DRM `D_f(t_d,t_f:u₁,…,u_M)`: `max(2t_d+1−d,0)` if `f(uᵢ)=f(uⱼ)`, `max(2t_f+1−d,0)` if `f(uᵢ)≠f(uⱼ)`, `0` on the diagonal | `drmData` | stated |
 | `#theorem 2#` | IV | `r_f(k,t_d,t_f) = N(D_f(t_d,t_f:u₁,…,u_{q^k}))` — **the central identity**.  Proved; carried with the paper's standing `d_d ≤ d_f` and one existence hypothesis made explicit — `ISSUES.md` §11 | `optimalRedundancyData_eq_N_drmData` | proved |
-| `#theorem 3#` | IV | `r_f ≥ N(D_f(t_d,t_f:u₁,…,u_m))` for any subset; `r_f ≥ 2t_f` if `|Im f| ≥ 2`; `r_f ≥ N(q^k,2t_d+1)−k` | `optimalRedundancyData_ge_N_subset`, `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub` | todo |
+| `#theorem 3#` | IV | `r_f ≥ N(D_f(t_d,t_f:u₁,…,u_m))` for any subset; `r_f ≥ 2t_f` if `|Im f| ≥ 2`; `r_f ≥ N(q^k,2t_d+1)−k` | `optimalRedundancyData_ge_N_subset`, `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub` | proved |
 | `#theorem 4#` | IV | over `F₂`, if `2 ≤ |Im f| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d` | `binary_optimalRedundancyData_ge` | todo |
 | `#theorem 5#` | IV | for an `[n,k,2t_d+1]` code `C`: `N(DRM) ≤ N(CDRM) + n − k` | `N_drmData_le_N_cdrm_add` | todo |
 | `#corollary 4#` | IV | `r_f(k,t_d,t_f) ≤ N(D_{C,f}) + n − k` | `optimalRedundancyData_le_N_cdrm_add` | todo |
@@ -353,7 +353,7 @@ the labels 3.1/3.2 refer to that one row).
 | --- | --- | --- | --- |
 | 3.0 | `N`-API: existence, minimality, monotonicity, `N` of a constant matrix | everything else uses it | **done** (2026-09-19) |
 | 3.1 | `#theorem 2#` (the central identity `r_f = N(DRM)`) | the framework's backbone | **done** (2026-09-20) — bricks as `3.1`, identity as `3.2` |
-| 3.2 | `#theorem 3#`, `#corollary 1#`, `#theorem 1#`, `#corollary 2#`, `#remark 1#` | corollaries of 3.1 | next |
+| 3.2 | `#theorem 3#`, `#corollary 1#`, `#theorem 1#`, `#corollary 2#`, `#remark 1#` | corollaries of 3.1 | `#theorem 3#` **done** (2026-09-20); `#corollary 1#`, `#theorem 1#`, `#corollary 2#` next |
 | 3.3 | `#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#corollary 6#` | the two-step construction machinery | todo |
 | 3.4 | `#theorem 4#` | the first "real" combinatorial argument (binary, three words) | todo |
 | 3.5 | `#definition 12#` + `#theorem 8#`, `#theorem 9#` | graph argument, independent of §IV | todo |
@@ -365,7 +365,7 @@ the labels 3.1/3.2 refer to that one row).
 | 3.11 | `#lemma 13#`, `#lemma 11#`, `#theorem 14#` | Plotkin bounds (double counting) | todo |
 | 3.12 | `#theorem 15#`, `#corollary 13#`, `#theorem 16#`, `#corollary 14#` | Hamming bounds (sphere packing) | todo |
 | 3.13 | `#theorem 17#`, `#lemma 14#`, `#theorem 18#`, `#theorem 19#` | appendix: counting unions of balls | todo |
-| 3.14 | non-vacuity of the FCC set (`∃ r, ∃ C, IsFCCData f C dd df`), in particular without `#theorem 2#`'s `hex` hypothesis (`ISSUES.md` §11) | lets the paper's side conditions be dropped from `#theorem 2#` and is used by §V's "reduction to `N(D)`" | todo |
+| 3.14 | non-vacuity of the FCC set (`∃ r, ∃ C, IsFCCData f C dd df`) | lets the paper's side conditions be dropped from `#theorem 2#` and is used by every lower bound of §IV | **done** (2026-09-20) — `exists_isFCCData` (repeat the message `max d_d d_f` times) |
 
 Suggested *warm-up* before 3.1, if the first proof session should be gentle:
 3.13 (`#theorem 17#`–`#theorem 19#`) is pure binomial counting over `Finset`, uses no

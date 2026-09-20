@@ -394,3 +394,54 @@ from the remaining `sorry` stubs, which keeps the next sessions' output readable
 **Verification for this session.**  `lake build` green (1818 jobs),
 `scripts/consistency_check.ps1` green (78 markers, 73 rows stated, 46 `sorry`),
 `scripts/axioms_check.ps1` green (14 headline results), CI green on the push.
+
+## 2026-09-20 (same day, second session) — phase 3.14 (non-vacuity) and `#theorem 3#`
+
+`sorry` 46 → 43; headline results 14 → 17.
+
+**Phase 3.14 — an FCC always exists (`exists_isFCCData`).**  For *any* function
+`f` and *any* targets `d_d, d_f` there is an `(f : d_d, d_f)`-FCC of some
+redundancy.  The construction is the cheapest one: write the message down
+`m = max d_d d_f` times, i.e. take `C u = (u, u, …, u)` — the message followed by
+`m` copies of itself.  Then `d(C u, C v) = d(u,v) + m·d(u,v) ≥ m ≥ d_d, d_f` for
+`u ≠ v`, and `C` is systematic by construction.  Two internal bricks in
+`FCC/Balls.lean` carry it:
+
+* `repWord t u` — `t` copies of a word, in the shape `k * t` (recursion on `t`
+  with `Fin.append`);
+* `hammingDist_repWord` — `d(u…u, v…v) = t · d(u,v)`, by induction on `t` using
+  `hammingDist_append`;
+* `hammingDist_comp_cast` — re-indexing along a cardinality equality changes no
+  distance.  This looks trivial but is what makes the induction step go through:
+  the recursive definition shifts the shape `(t+1)*k ↔ k + t*k` by `Fin.cast`.
+
+Consequences, and the reason this is a "base" step rather than a paper item:
+`#theorem 2#` no longer needs its former `hex` hypothesis (its statement now
+carries only the paper's own `d_d ≤ d_f`), and everywhere a lower bound needs the
+optimum to be *attained* one may use `Nat.sInf_mem` / `Nat.find_spec`.
+
+**`#theorem 3#`, all three parts.**
+
+* `optimalRedundancyData_ge_N_subset` — the optimal FCC, restricted to any
+  subfamily `u₁, …, u_m`, is a `D`-code of the same length.  This is why
+  `isDCode_drmData_of_isFCCData` was generalised from the identity family to an
+  arbitrary family `u : ι → Word F k` (for `i ≠ j` with `uᵢ = uⱼ` the DRM entry is
+  `0` by definition, so there is nothing to prove there).
+* `two_mul_le_optimalRedundancyData` — needs the paper's "if `|Im(f)| ≥ 2` then
+  there exist `u, v` with `f(u) ≠ f(v)` and `d(u,v) = 1`", which the paper states
+  without proof.  The formal proof walks from `u` to `v` changing one coordinate
+  at a time (`exists_hammingDist_one_ne`): the walk starts at `f u` and ends at
+  `f v`, so some step of it changes the value of `f`, and that step is the pair.
+  On such a pair the DRM reads `max(2t_f + 1 − 1, 0) = 2t_f`, and a `D`-code of
+  length `r` has pairwise distances at most `r`, so `2t_f ≤ N(D_f) ≤ r_f`.
+* `optimalRedundancyData_ge_Nconst_sub` — the attaining FCC already has
+  `d(C u, C v) ≥ 2t_d+1` for *every* pair (data protection), so enumerating the
+  `q^k` messages turns it into a code of length `k + r_f` with `q^k` codewords and
+  minimum distance `2t_d+1`; hence `N(q^k, 2t_d+1) ≤ k + r_f`.  This part is
+  *cleaner* than the printed proof: it needs no `t_f ≥ t_d`, because it uses
+  `#definition 6#`'s first clause directly instead of the DRM entries (the paper
+  argues through `[D_f]_{i,j} ≥ max(2t_d+1 − d, 0)` and notes "as `t_f ≥ t_d`").
+
+**Verification.**  `lake build` green, warning-free apart from the 43 `sorry`
+stubs, `scripts/consistency_check.ps1 -Strict` green, `scripts/axioms_check.ps1`
+green (17 headline results, standard trusted base).

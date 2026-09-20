@@ -98,12 +98,13 @@ ambiguous in the PDF; `#definition 11#`'s printed case split omits `max(·,0)` i
 two branches; `#theorem 4#`'s "similar proof" needs checking.  Each is resolved
 when its phase is done, and the resolution is recorded in `DEVLOG.md`.
 
-## 11. `#theorem 2#` carries two side conditions that the paper leaves implicit
+## 11. `#theorem 2#` carries one side condition that the paper leaves implicit
 
 `#theorem 2#` is the first paper result proved in this development (phase 3.2).
-Its Lean statement has two hypotheses that the printed statement does not spell
-out.  Both are in the declaration's docstring; neither weakens the *content* of
-the identity, and neither is a `sorry`-style gap.
+Two things the paper leaves implicit showed up while proving it; one became a
+hypothesis of the statement and the other was *proved* as an internal lemma
+(phase 3.14), so the final statement carries only `d_d ≤ d_f`.  Neither is a
+`sorry`-style gap, and neither weakens the content of the identity.
 
 **(a) `d_d ≤ d_f`.**  `#definition 6#` states `d_d ≤ d_f` as part of the
 definition, and the paper's `r_f(k : d_d, d_f)` is only ever used under it, so
@@ -118,22 +119,22 @@ closes the `≤` half.  Without it the identity is **false**: a DRM code of leng
 Hence `hdf : 2 * t_d + 1 ≤ 2 * t_f + 1` in `optimalRedundancyData_eq_N_drmData`
 and in the internal `optimalRedundancyData_le_of_isDCode`.
 
-**(b) Existence of an FCC (`hex`).**  `optimalRedundancyData` and `N` are
-`sInf`s with the convention `sInf ∅ = 0` (issue §6).  If no
-`(f : 2t_d+1, 2t_f+1)`-FCC existed at all, the left-hand side would be the
-vacuous `0`, while `N(D_f) > 0` in general — the identity would fail for a
-reason that has nothing to do with the paper.  The hypothesis
+**(b) Non-vacuity of the FCC set — *proved*, not assumed.**  `optimalRedundancyData`
+and `N` are `sInf`s with the convention `sInf ∅ = 0` (issue §6).  If no
+`(f : 2t_d+1, 2t_f+1)`-FCC existed at all, the left-hand side of `#theorem 2#`
+would be the vacuous `0` while `N(D_f) > 0` in general, and the identity would
+fail for a reason that has nothing to do with the paper.  In the first version of
+the proof this entered as an explicit hypothesis `hex`.  It is now a theorem:
 
-`hex : ∃ r, ∃ C : Word F k → Word F (k + r), IsFCCData f C (2*t_d+1) (2*t_f+1)`
+`exists_isFCCData : ∃ r, ∃ C : Word F k → Word F (k + r), IsFCCData f C d_d d_f`
 
-excludes that degenerate case.  It is not dead weight: `hex` is what produces a
-DRM code of length `N(D_f)` (`Nat.sInf_mem` over a nonempty set), which is the
-`≤` direction of the identity; the `≥` direction instead uses `Nat.find_spec` to
-get the FCC attaining `r_f`.  In the paper's setting (`f : F_q^k → Im(f)` on a
-finite message space, the message being padded by one block per unit of
-required distance) an FCC always exists, so the hypothesis is automatic there;
-our statement allows an arbitrary alphabet `α`, hence the explicit hypothesis.
-Removing it is a tracked task (`PLAN.md` §4 phase 3.14).
+for **arbitrary** `f`, `d_d`, `d_f` — write the message down `m = max d_d d_f`
+times (`C u = (u, u, …, u)`, `m` copies of `u` in the redundancy block); then
+`d(C u, C v) = d(u,v) + m·d(u,v) ≥ m ≥ d_d, d_f` for `u ≠ v`, and `C` is
+systematic by construction (`repWord`, `hammingDist_repWord` in `FCC/Balls.lean`).
+This removes `hex` from `#theorem 2#` and is what makes every lower bound of §IV
+(`#theorem 2#`, `#theorem 3#`) go through: the optima are attained, so
+`Nat.sInf_mem` and `Nat.find_spec` can be used.
 
-Both conditions are hypotheses of `#theorem 2#` and of the two internal halves
-only; no other row of the catalogue is affected.
+Only (a) remains as a hypothesis, and only of `#theorem 2#` and of the internal
+`optimalRedundancyData_le_of_isDCode`; no other row of the catalogue is affected.

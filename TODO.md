@@ -71,13 +71,17 @@ in the same commit that does the work.
       `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,
       `N_drmData_le_of_isFCCData`, `optimalRedundancyData_le_of_isDCode`,
       `optimalRedundancyData_eq_N_drmData` (headline result; `ISSUES.md` §11).
-- [ ] 3.2 (next). `#theorem 3#` (`optimalRedundancyData_ge_N_subset`,
-      `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub`),
-      then `#corollary 1#`, `#theorem 1#`, `#corollary 2#`.
-- [ ] 3.14. Non-vacuity of the FCC set, so that `#theorem 2#` can drop its
-      `hex` hypothesis (`ISSUES.md` §11(b)): a construction of
-      `∃ r, ∃ C, IsFCCData f C dd df` from `Word F k` alone (padding the message
-      with copies of itself is the cheapest route).
+- [x] 3.2. `#theorem 3#`: `optimalRedundancyData_ge_N_subset`,
+      `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub`
+      (the middle one uses `exists_hammingDist_one_ne`, the paper's unproved
+      "some pair at distance 1 changes the value of `f`").
+- [x] 3.14. Non-vacuity of the FCC set (`exists_isFCCData`, by repeating the
+      message `max d_d d_f` times) — which is what let `#theorem 2#` drop its
+      `hex` hypothesis (`ISSUES.md` §11(b)) and makes the optimum attained.
+- [ ] 3.2 (next). `#corollary 1#` (`optimalRedundancy_ge_drm`,
+      `two_mul_le_optimalRedundancy`), `#theorem 1#` (`optimalRedundancy_le_fdm`),
+      `#corollary 2#` (`optimalRedundancy_eq_fdm`) — the §II analogues of
+      `#theorem 2#`/`#theorem 3#` without data protection.
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.
