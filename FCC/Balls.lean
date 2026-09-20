@@ -137,4 +137,44 @@ theorem hammingDist_append {F : Type*} [Fintype F] [DecidableEq F] {m n : ℕ}
     Finset.card_image_of_injective _ (Fin.castAdd_injective m n),
     Finset.card_image_of_injective _ (Fin.natAdd_injective n m)]
 
+/-! ## Repeating a word
+
+`repWord t u` writes the word `u` down `t` times, in the shape `Word F (k * t)`.
+Its use is the non-vacuity lemma `exists_isFCCData` of `FCC/Paper.lean`: writing a
+message down `m` times puts any two distinct messages at distance at least `m`, so
+an `(f : d_d, d_f)`-FCC of *some* redundancy always exists (take `m = max d_d d_f`).
+That is what lets the `sInf`-based `optimalRedundancyData` be assumed attained. -/
+
+/-- `(internal, §II — used by the non-vacuity brick of §III)` — `t` copies of the
+word `u`, concatenated, in the shape `Word F (k * t)`. -/
+def repWord {F : Type*} {k : ℕ} : (t : ℕ) → Word F k → Word F (k * t)
+  | 0, _ => Fin.elim0
+  | t + 1, u =>
+    fun j => Fin.append u (repWord t u) (Fin.cast (by rw [Nat.mul_succ, Nat.add_comm]) j)
+
+/-- `(internal, §I-E)` — re-indexing a word along a cardinality equality does not
+change Hamming distances.  (The recurrence defining `repWord` shifts the shape by
+`Fin.cast`, and this is the lemma that makes that shift invisible to distances.) -/
+theorem hammingDist_comp_cast {F : Type*} [DecidableEq F] {m n : ℕ} (h : m = n)
+    (x y : Word F n) :
+    hammingDist (fun i => x (Fin.cast h i)) (fun i => y (Fin.cast h i)) = hammingDist x y := by
+  subst h
+  simp
+
+/-- `(internal, §II)` — `t` copies of a word are at `t` times the distance:
+`d(u…u, v…v) = t · d(u,v)`. -/
+theorem hammingDist_repWord {F : Type*} [Fintype F] [DecidableEq F] {k : ℕ} (t : ℕ)
+    (u v : Word F k) :
+    hammingDist (repWord t u) (repWord t v) = t * hammingDist u v := by
+  induction t with
+  | zero => simp [repWord]
+  | succ t ih =>
+    rw [show repWord (t + 1) u = fun j => Fin.append u (repWord t u)
+          (Fin.cast (by rw [Nat.mul_succ, Nat.add_comm]) j) from rfl,
+      show repWord (t + 1) v = fun j => Fin.append v (repWord t v)
+          (Fin.cast (by rw [Nat.mul_succ, Nat.add_comm]) j) from rfl]
+    rw [hammingDist_comp_cast (by rw [Nat.mul_succ, Nat.add_comm])
+      (Fin.append u (repWord t u)) (Fin.append v (repWord t v))]
+    rw [hammingDist_append, ih, Nat.succ_mul, Nat.add_comm]
+
 end FCC

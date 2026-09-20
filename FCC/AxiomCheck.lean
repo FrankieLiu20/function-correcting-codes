@@ -39,5 +39,8 @@ namespace FCC
 
 -- Phase 3.2 (the paper's own theorems, in paper order):
 #print axioms optimalRedundancyData_eq_N_drmData
+#print axioms optimalRedundancyData_ge_N_subset
+#print axioms two_mul_le_optimalRedundancyData
+#print axioms optimalRedundancyData_ge_Nconst_sub
 
 end FCC

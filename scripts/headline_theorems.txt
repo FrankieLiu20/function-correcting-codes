@@ -26,3 +26,6 @@ ex7_drm_matches
 #
 # Phase 3.2 (the paper's own results, in paper order):
 optimalRedundancyData_eq_N_drmData
+optimalRedundancyData_ge_N_subset
+optimalRedundancyData_ge_Nconst_sub
+two_mul_le_optimalRedundancyData

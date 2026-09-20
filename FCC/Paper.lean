@@ -297,6 +297,35 @@ def IsFCCData {k r : ℕ} (f : Word F k → α) (C : Word F k → Word F (k + r)
   IsSystematic C ∧ (∀ u v, u ≠ v → dd ≤ hammingDist (C u) (C v)) ∧
     ∀ u v, f u ≠ f v → df ≤ hammingDist (C u) (C v)
 
+omit [DecidableEq α] in
+/-- `(internal, §III — non-vacuity of the FCC set, `PLAN.md` §4 phase 3.14)` — for
+*any* function `f` and *any* targets `d_d, d_f` there is an `(f : d_d, d_f)`-FCC of
+some redundancy: write the message down `m = max d_d d_f` times, i.e. take
+`C u = (u, u, …, u)` — the message followed by `m` copies of itself.  `C` is
+systematic by construction, and two distinct messages satisfy
+`d(C u, C v) = d(u,v) + m·d(u,v) ≥ m ≥ d_d, d_f`.
+
+This is the brick that keeps the `sInf`-based `optimalRedundancyData` (and `N`)
+away from their vacuous value `0`: it says the sets they take the infimum of are
+non-empty, so the optima are *attained*, which is what every lower bound in §IV
+(`#theorem 2#`, `#theorem 3#`) needs. -/
+theorem exists_isFCCData {k : ℕ} (f : Word F k → α) (dd df : ℕ) :
+    ∃ r : ℕ, ∃ C : Word F k → Word F (k + r), IsFCCData f C dd df := by
+  refine ⟨k * max dd df, fun u => Fin.append u (repWord (max dd df) u), ?_, ?_, ?_⟩
+  · intro u i
+    simp [Fin.append_left]
+  · intro u v huv
+    rw [hammingDist_append, hammingDist_repWord]
+    have hd1 : 0 < hammingDist u v := hammingDist_pos.mpr huv
+    have hmul : max dd df ≤ max dd df * hammingDist u v := Nat.le_mul_of_pos_right _ hd1
+    omega
+  · intro u v hf
+    rw [hammingDist_append, hammingDist_repWord]
+    have huv : u ≠ v := fun hh => hf (by rw [hh])
+    have hd1 : 0 < hammingDist u v := hammingDist_pos.mpr huv
+    have hmul : max dd df ≤ max dd df * hammingDist u v := Nat.le_mul_of_pos_right _ hd1
+    omega
+
 /-- `#definition 7#` (§III) — the coded distance requirement matrix (CDRM):
 like the DRM of `#definition 2#`, but the distances are taken between the
 *codewords* `c_u = uG` rather than between the messages. -/
@@ -725,35 +754,40 @@ theorem hammingDist_eq_msg_add_red {k r : ℕ} {C : Word F k → Word F (k + r)}
   conv_lhs => rw [hcu, hcv, hammingDist_append]
   rw [hmu, hmv]
 
-/-- `(internal, §IV — the extraction step inside `#theorem 2#`)` — an
-`(f : 2t_d+1, 2t_f+1)`-FCC of redundancy `r` *is* a `D`-code of length `r` for the
-DRM `D_f(t_d,t_f : u₁, …, u_{q^k})`: take `pᵢ := redPart (C uᵢ)`.
+/-- `(internal, §IV — the extraction step inside `#theorem 2#` and `#theorem 3#`)` —
+an `(f : 2t_d+1, 2t_f+1)`-FCC of redundancy `r` *is* a `D`-code of length `r` for
+the DRM of any family `u₁, …, u_m` of messages: take `pᵢ := redPart (C uᵢ)`.
 
 For `i ≠ j` the splitting brick gives `d(pᵢ,pⱼ) = d(C uᵢ,C uⱼ) − d(uᵢ,uⱼ)`; when
 `f(uᵢ) = f(uⱼ)` the data-protection condition bounds the first term by `2t_d+1`,
 and when `f(uᵢ) ≠ f(uⱼ)` the function-correcting condition bounds it by `2t_f+1`.
 Those are exactly `drmData`'s two off-diagonal entries modulo the outer `max (…) 0`,
-which is what `max_le` and `omega` discharge. -/
-theorem isDCode_drmData_of_isFCCData {k r td tf : ℕ} {f : Word F k → α}
-    {C : Word F k → Word F (k + r)} (hC : IsFCCData f C (2 * td + 1) (2 * tf + 1)) :
-    IsDCode (F := F) (drmData f td tf fun v => v) r := by
+which is what `max_le` and `omega` discharge.  (When `i ≠ j` but `uᵢ = uⱼ` there is
+nothing to prove: that entry of the DRM is `0` by definition.) -/
+theorem isDCode_drmData_of_isFCCData {k r td tf : ℕ} {ι : Type*} {f : Word F k → α}
+    {C : Word F k → Word F (k + r)} (u : ι → Word F k)
+    (hC : IsFCCData f C (2 * td + 1) (2 * tf + 1)) :
+    IsDCode (F := F) (drmData f td tf u) r := by
   classical
-  refine ⟨fun i => redPart (C i), ?_⟩
+  refine ⟨fun i => redPart (C (u i)), ?_⟩
   intro i j hij
-  have hsplit := hammingDist_eq_msg_add_red hC.1 i j
   simp only [drmData]
-  rw [ite_eq_right hij]
-  by_cases hf : f i = f j
-  · rw [ite_eq_left hf]
-    have hd := hC.2.1 i j hij
-    rw [hsplit] at hd
-    refine max_le ?_ (Nat.zero_le _)
-    omega
-  · rw [ite_eq_right hf]
-    have hd := hC.2.2 i j hf
-    rw [hsplit] at hd
-    refine max_le ?_ (Nat.zero_le _)
-    omega
+  by_cases huv : u i = u j
+  · rw [ite_eq_left huv]
+    exact Nat.zero_le _
+  · rw [ite_eq_right huv]
+    have hsplit := hammingDist_eq_msg_add_red hC.1 (u i) (u j)
+    by_cases hf : f (u i) = f (u j)
+    · rw [ite_eq_left hf]
+      have hd := hC.2.1 (u i) (u j) huv
+      rw [hsplit] at hd
+      refine max_le ?_ (Nat.zero_le _)
+      omega
+    · rw [ite_eq_right hf]
+      have hd := hC.2.2 (u i) (u j) hf
+      rw [hsplit] at hd
+      refine max_le ?_ (Nat.zero_le _)
+      omega
 
 /-- `(internal, §IV — the "≥" half of `#theorem 2#`)` — any
 `(f : 2t_d+1, 2t_f+1)`-FCC of redundancy `r` yields a `D`-code of length `r` for
@@ -763,7 +797,7 @@ theorem N_drmData_le_of_isFCCData {k r td tf : ℕ} (f : Word F k → α)
     (h : ∃ C : Word F k → Word F (k + r), IsFCCData f C (2 * td + 1) (2 * tf + 1)) :
     N (F := F) (ι := Word F k) (drmData f td tf fun v => v) ≤ r := by
   obtain ⟨C, hC⟩ := h
-  exact N_le_of_isDCode (isDCode_drmData_of_isFCCData hC)
+  exact N_le_of_isDCode (isDCode_drmData_of_isFCCData (fun v => v) hC)
 
 /-- `(internal, §IV — the "≤" half of `#theorem 2#`)` — if a `D`-code
 `p₁, …, p_{q^k}` of length `r` exists for the DRM of the whole message space, then
@@ -819,67 +853,193 @@ theorem optimalRedundancyData_le_of_isDCode {k r td tf : ℕ} (f : Word F k → 
 `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))`": the optimal redundancy is
 exactly the minimum length of a `D`-code for the DRM of the whole message space.
 
-Two hypotheses make the paper's standing assumptions explicit — they are part of
-the paper's own notation (`r_f(k : d_d, d_f) = r_f(k,t_d,t_f)`, and `#definition 6#`
-says `d_d ≤ d_f`) and are recorded in `ISSUES.md` §11:
+One hypothesis makes the paper's standing assumption explicit: `hdf`, the
+`d_d ≤ d_f` of `#definition 6#` (see `ISSUES.md` §11(a)).  It is *used*: the
+data-protection clause of `IsFCCData` is demanded of every pair `u₁ ≠ u₂`, while
+the DRM records the `2t_d+1` slack only on the pairs with `f(u₁) = f(u₂)`, so the
+`≤` half of the proof needs `2t_d+1 ≤ 2t_f+1` to transfer the guarantee.  Both
+sides are attained — `exists_isFCCData` above provides an FCC of some redundancy,
+which makes the FCC set non-empty, and hence both `sInf`s minima (`ISSUES.md`
+§11(b), `PLAN.md` §4 phase 3.14).
 
-* `hdf : 2t_d+1 ≤ 2t_f+1` — the paper's `d_d ≤ d_f`; without it the DRM code of
-  the right-hand side is not necessarily an FCC (data protection is demanded of
-  every pair, see the `≤` half above);
-* `hex` — some `(f : 2t_d+1, 2t_f+1)`-FCC exists.  In the paper's setting the
-  message space `F_q^k` is finite and `f` takes finitely many values, so this is
-  automatic; here it is needed because `r_f` and `N` are `sInf`-based and would
-  otherwise both fall back to the vacuous value `0` without the two sides meeting.
-
-Proof: `le_antisymm` of the two halves above.  For `≤`, the DRM code attaining
-`N(D_f)` exists because `hex` gives a DRM code (`Nat.sInf_mem`), and it builds an
-FCC of that redundancy; for `≥`, the FCC attaining `r_f` (`Nat.find_spec`) is a DRM
-code of that length. -/
+Proof: `le_antisymm` of the two halves above.  For `≤`, the FCC supplied by
+`exists_isFCCData` gives a DRM code (`Nat.sInf_mem`), whose length is at least
+`N(D_f)`; for `≥`, the FCC attaining `r_f` (`Nat.find_spec`) is a DRM code of that
+length.  Neither direction needs any additional existence hypothesis. -/
 theorem optimalRedundancyData_eq_N_drmData {k : ℕ} (f : Word F k → α) (td tf : ℕ)
-    (hdf : 2 * td + 1 ≤ 2 * tf + 1)
-    (hex : ∃ r : ℕ, ∃ C : Word F k → Word F (k + r),
-      IsFCCData f C (2 * td + 1) (2 * tf + 1)) :
+    (hdf : 2 * td + 1 ≤ 2 * tf + 1) :
     optimalRedundancyData f (2 * td + 1) (2 * tf + 1) =
       N (F := F) (ι := Word F k) (drmData f td tf fun v => v) := by
   classical
   refine le_antisymm ?_ ?_
-  · have hne : {r : ℕ | IsDCode (F := F) (drmData f td tf fun v => v) r}.Nonempty := by
-      obtain ⟨r, C, hC⟩ := hex
-      exact ⟨r, isDCode_drmData_of_isFCCData hC⟩
+  · obtain ⟨r, C, hC⟩ := exists_isFCCData f (2 * td + 1) (2 * tf + 1)
+    have hne : {r : ℕ | IsDCode (F := F) (drmData f td tf fun v => v) r}.Nonempty :=
+      ⟨r, isDCode_drmData_of_isFCCData (fun v => v) hC⟩
     obtain ⟨p, hp⟩ := Nat.sInf_mem hne
     exact optimalRedundancyData_le_of_isDCode f hdf p hp
-  · have hne : ∃ r : ℕ, r ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'),
-        IsFCCData f C (2 * td + 1) (2 * tf + 1)} := by
-      obtain ⟨r, C, hC⟩ := hex
-      exact ⟨r, C, hC⟩
+  · obtain ⟨r, C, hC⟩ := exists_isFCCData f (2 * td + 1) (2 * tf + 1)
+    have hne : ∃ r' : ℕ, r' ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'),
+        IsFCCData f C (2 * td + 1) (2 * tf + 1)} := ⟨r, C, hC⟩
     rw [optimalRedundancyData, dite_eq_left hne]
     have hspec := Nat.find_spec hne
     simp only [Set.mem_ofPred_eq] at hspec
     exact N_drmData_le_of_isFCCData f hspec
 
+omit [Fintype F] in
+/-- `(internal, §IV — used by `#theorem 3#`)` — if two messages carry different
+values of `f`, then so does some pair at Hamming distance exactly one.  This is
+the paper's "if `|Im(f)| ≥ 2`, then there exist `u, v` with `f(u) ≠ f(v)` and
+`d(u,v) = 1`": walk from `u` to `v` changing one coordinate at a time (the
+`m`-th word of the walk agrees with `v` on the first `m` coordinates), and note
+that `f` starts at `f(u)` and ends at `f(v)`, so one step of the walk must change
+the value of `f`. -/
+theorem exists_hammingDist_one_ne {k : ℕ} (f : Word F k → α) {u v : Word F k}
+    (h : f u ≠ f v) :
+    ∃ u' v' : Word F k, hammingDist u' v' = 1 ∧ f u' ≠ f v' := by
+  classical
+  have hstep : ∃ m : ℕ, m < k ∧
+      f (fun i : Fin k => if (i : ℕ) < m then v i else u i) ≠
+        f (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) := by
+    by_contra hcon
+    push Not at hcon
+    have hchain : ∀ m : ℕ, m ≤ k →
+        f (fun i : Fin k => if (i : ℕ) < m then v i else u i) = f u := by
+      intro m
+      induction m with
+      | zero => intro _; simp
+      | succ m ih =>
+        intro hm
+        rw [← hcon m (by omega)]
+        exact ih (by omega)
+    have hk := hchain k le_rfl
+    have hwv : (fun i : Fin k => if (i : ℕ) < k then v i else u i) = v := by
+      funext i
+      simp [i.isLt]
+    rw [hwv] at hk
+    exact h hk.symm
+  obtain ⟨m, hmk, hm⟩ := hstep
+  refine ⟨fun i : Fin k => if (i : ℕ) < m then v i else u i,
+    fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i, ?_, hm⟩
+  have hdiff : ∀ a : Fin k, (fun i : Fin k => if (i : ℕ) < m then v i else u i) a ≠
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) a → (a : ℕ) = m := by
+    intro a ha
+    have hge : ¬ (a : ℕ) < m := fun h1 => ha (by simp [h1, Nat.lt_succ_of_lt h1])
+    have hlt : (a : ℕ) < m + 1 := by
+      by_contra h2
+      exact ha (by simp [hge, h2])
+    omega
+  have hsub : diffSet (fun i : Fin k => if (i : ℕ) < m then v i else u i)
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) ⊆ {⟨m, hmk⟩} := by
+    intro a ha
+    rw [diffSet, Finset.mem_filter] at ha
+    rw [Finset.mem_singleton]
+    exact Fin.ext (hdiff a ha.2)
+  have h1 : hammingDist (fun i : Fin k => if (i : ℕ) < m then v i else u i)
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) ≤ 1 := by
+    rw [hammingDist_eq_card_diffSet]
+    calc (diffSet _ _).card ≤ ({⟨m, hmk⟩} : Finset (Fin k)).card := Finset.card_le_card hsub
+      _ = 1 := Finset.card_singleton _
+  have hne : (fun i : Fin k => if (i : ℕ) < m then v i else u i) ≠
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) := fun hh => hm (by rw [hh])
+  have hpos : 0 < hammingDist (fun i : Fin k => if (i : ℕ) < m then v i else u i)
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) := hammingDist_pos.mpr hne
+  omega
+
 /-- `#theorem 3#` (§IV) — "for any function `f : F_q^k → Im(f)` and
 `{u₁, u₂, …, u_m} ⊆ F_q^k`, we have
-`r_f(k,t_d,t_f) ≥ N(D_f(t_d,t_f : u₁, …, u_m))`". -/
+`r_f(k,t_d,t_f) ≥ N(D_f(t_d,t_f : u₁, …, u_m))`".
+
+Proof (the paper's "the first part is straightforward"): an optimal FCC satisfies
+the DRM's distance requirement on the whole message space, so restricting its
+redundancy part to `u₁, …, u_m` gives a `D`-code of the same length
+(`isDCode_drmData_of_isFCCData`), whence `N(D_f(u₁,…,u_m)) ≤ r_f`.  The optimum
+is attained because `exists_isFCCData` exhibits an FCC. -/
 theorem optimalRedundancyData_ge_N_subset {k m : ℕ} (f : Word F k → α) (td tf : ℕ)
     (u : Fin m → Word F k) :
     N (F := F) (ι := Fin m) (drmData f td tf u) ≤
       optimalRedundancyData f (2 * td + 1) (2 * tf + 1) := by
-  sorry
+  classical
+  obtain ⟨r, C, hC⟩ := exists_isFCCData f (2 * td + 1) (2 * tf + 1)
+  have hne : ∃ r' : ℕ, r' ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'),
+      IsFCCData f C (2 * td + 1) (2 * tf + 1)} := ⟨r, C, hC⟩
+  rw [optimalRedundancyData, dite_eq_left hne]
+  have hspec := Nat.find_spec hne
+  simp only [Set.mem_ofPred_eq] at hspec
+  obtain ⟨C₀, hC₀⟩ := hspec
+  exact N_le_of_isDCode (isDCode_drmData_of_isFCCData u hC₀)
 
 /-- `#theorem 3#` (§IV) — "and `r_f(k,t_d,t_f) ≥ 2t_f` for `|Im(f)| ≥ 2`" (the
-hypothesis is stated as: two distinct values, each attained). -/
+hypothesis is stated as: two distinct values, each attained).
+
+Proof (the paper's): pick messages `u, v` with `f(u) ≠ f(v)` and, by
+`exists_hammingDist_one_ne`, a pair `u', v'` at distance one with `f(u') ≠ f(v')`.
+On that pair the DRM reads `max(2t_f + 1 − 1, 0) = 2t_f`, and a `D`-code of
+length `r` has pairwise distances at most `r`, so `2t_f ≤ N(D_f(u',v')) ≤ r_f`
+by the first part. -/
 theorem two_mul_le_optimalRedundancyData {k : ℕ} (f : Word F k → α) (td tf : ℕ)
     (h : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b) :
     2 * tf ≤ optimalRedundancyData f (2 * td + 1) (2 * tf + 1) := by
-  sorry
+  classical
+  obtain ⟨a, b, hab, ⟨u, hu⟩, ⟨v, hv⟩⟩ := h
+  have huv : f u ≠ f v := by rw [hu, hv]; exact hab
+  obtain ⟨u', v', hd1, hfne⟩ := exists_hammingDist_one_ne f huv
+  let w : Fin 2 → Word F k := fun i => if i = 0 then u' else v'
+  have hw0 : w 0 = u' := by simp [w]
+  have hw1 : w 1 = v' := by simp [w]
+  have huw : w 0 ≠ w 1 := by rw [hw0, hw1]; exact fun hh => hfne (by rw [hh])
+  have hentry : drmData f td tf w 0 1 = 2 * tf := by
+    simp only [drmData]
+    rw [ite_eq_right huw, ite_eq_right (by rw [hw0, hw1]; exact hfne), hw0, hw1, hd1,
+      show 2 * tf + 1 - 1 = 2 * tf from by omega, max_eq_left (Nat.zero_le _)]
+  have hNentry : drmData f td tf w 0 1 ≤ N (F := F) (ι := Fin 2) (drmData f td tf w) := by
+    obtain ⟨r, C, hC⟩ := exists_isFCCData f (2 * td + 1) (2 * tf + 1)
+    have hne : {r : ℕ | IsDCode (F := F) (drmData f td tf w) r}.Nonempty :=
+      ⟨r, isDCode_drmData_of_isFCCData w hC⟩
+    obtain ⟨p, hp⟩ := Nat.sInf_mem hne
+    calc drmData f td tf w 0 1 ≤ hammingDist (p 0) (p 1) := hp 0 1 (by decide)
+      _ ≤ N (F := F) (ι := Fin 2) (drmData f td tf w) := by
+        have hle := hammingDist_le_card_fintype (x := p 0) (y := p 1)
+        rw [Fintype.card_fin] at hle
+        exact hle
+  calc 2 * tf = drmData f td tf w 0 1 := hentry.symm
+    _ ≤ N (F := F) (ι := Fin 2) (drmData f td tf w) := hNentry
+    _ ≤ optimalRedundancyData f (2 * td + 1) (2 * tf + 1) :=
+        optimalRedundancyData_ge_N_subset f td tf w
 
+omit [DecidableEq α] in
 /-- `#theorem 3#` (§IV) — "further, `r_f(k,t_d,t_f) ≥ N(q^k, 2t_d+1) − k`, where
 `N(M,d)` is the minimum length of an error-correcting code with `M` codewords
-and minimum distance `d`" (`#definition 3#`). -/
+and minimum distance `d`" (`#definition 3#`).
+
+Proof: an `(f : 2t_d+1, 2t_f+1)`-FCC of redundancy `r` has `d(C u, C v) ≥ 2t_d+1`
+for *every* pair `u ≠ v` and lives in `F_q^{k+r}`, so (enumerating the `q^k`
+messages) it is an error-correcting code with `q^k` codewords, minimum distance
+`2t_d+1` and length `k + r`; hence `N(q^k, 2t_d+1) ≤ k + r`.  We take the FCC
+attaining `r_f`, which exists by `exists_isFCCData`.  Note that this needs no
+`t_f ≥ t_d` — the argument goes through the data-protection clause of
+`#definition 6#` directly, whereas the paper's runs through the DRM entries. -/
 theorem optimalRedundancyData_ge_Nconst_sub {k : ℕ} (f : Word F k → α) (td tf : ℕ) :
     Nconst (F := F) (Fintype.card (Word F k)) (2 * td + 1) - k ≤
       optimalRedundancyData f (2 * td + 1) (2 * tf + 1) := by
-  sorry
+  classical
+  obtain ⟨r, C, hC⟩ := exists_isFCCData f (2 * td + 1) (2 * tf + 1)
+  have hne : ∃ r' : ℕ, r' ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'),
+      IsFCCData f C (2 * td + 1) (2 * tf + 1)} := ⟨r, C, hC⟩
+  rw [optimalRedundancyData, dite_eq_left hne]
+  have hspec := Nat.find_spec hne
+  simp only [Set.mem_ofPred_eq] at hspec
+  obtain ⟨C₀, hC₀⟩ := hspec
+  let e : Fin (Fintype.card (Word F k)) ≃ Word F k :=
+    (Fintype.equivFin (Word F k)).symm
+  have hcode : IsDCode (F := F)
+      (fun _ _ : Fin (Fintype.card (Word F k)) => 2 * td + 1) (k + Nat.find hne) := by
+    refine ⟨fun i => C₀ (e i), ?_⟩
+    intro i j hij
+    exact hC₀.2.1 (e i) (e j) (fun hh => hij (e.injective hh))
+  have hN := N_le_of_isDCode hcode
+  show N (F := F) (fun _ _ : Fin (Fintype.card (Word F k)) => 2 * td + 1) - k ≤
+    Nat.find hne
+  omega
 
 /-- `#theorem 4#` (§IV) — over `F₂`: "for any function `f : F₂^k → Im(f)`, if
 `2 ≤ |Im(f)| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d`". -/
