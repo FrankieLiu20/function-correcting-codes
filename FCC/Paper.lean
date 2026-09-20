@@ -1261,10 +1261,10 @@ followed by the `D`-code vector.  `IsSystematic` holds by construction
 `d(uᵢ,uⱼ) + d(pᵢ,pⱼ)` by `hammingDist_eq_msg_add_red`, and `drmData` asks for
 exactly `max(2t_d+1 − d(uᵢ,uⱼ), 0)` resp. `max(2t_f+1 − d(uᵢ,uⱼ), 0)`, which the
 hypothesis `hp` covers.  Then `optimalRedundancyData_le_of` closes it. -/
-theorem optimalRedundancyData_le_of_isDCode {k m r td tf : ℕ} (f : Word F k → α)
-    (u : Fin m → Word F k) (p : Fin m → Word F r)
-    (hp : ∀ i j : Fin m, i ≠ j →
-      drmData f td tf u i j ≤ hammingDist (p i) (p j)) :
+theorem optimalRedundancyData_le_of_isDCode {k r td tf : ℕ} (f : Word F k → α)
+    (p : Word F k → Word F r)
+    (hp : ∀ i j : Word F k, i ≠ j →
+      drmData f td tf (fun v => v) i j ≤ hammingDist (p i) (p j)) :
     optimalRedundancyData f (2 * td + 1) (2 * tf + 1) ≤ r := by
   sorry
 
@@ -1278,10 +1278,9 @@ the systematic splitting brick gives
 conditions of `IsFCCData` (data: `2t_d+1`; function values: `2t_f+1`) and the
 fact that `drmData`'s entries are the corresponding slacks.  Then
 `N_le_of_isDCode` closes it. -/
-theorem N_drmData_le_of_isFCCData {k m r td tf : ℕ} (f : Word F k → α)
-    (u : Fin m → Word F k)
+theorem N_drmData_le_of_isFCCData {k r td tf : ℕ} (f : Word F k → α)
     (h : ∃ C : Word F k → Word F (k + r), IsFCCData f C (2 * td + 1) (2 * tf + 1)) :
-    N (F := F) (ι := Fin m) (drmData f td tf u) ≤ r := by
+    N (F := F) (ι := Word F k) (drmData f td tf fun v => v) ≤ r := by
   sorry
 
 end SectionVIIStatements
