@@ -1251,6 +1251,39 @@ theorem isLinearFCC_concat {k ℓ r r' dd df : ℕ} (f : Word F k →ₗ[F] Word
         df ≤ hammingDist (catWord (C u) (D (f u))) (catWord (C v) (D (f v))) := by
   sorry
 
+/-- `(internal, §IV — the "≤" half of `#theorem 2#`)` — if a `D`-code of length
+`r` exists for the DRM of a family `u₁,…,u_m`, then the optimal redundancy is at
+most `r`.
+
+Construction (the proof, next slice): let `C uᵢ = catWord (uᵢ) (pᵢ)`, the message
+followed by the `D`-code vector.  `IsSystematic` holds by construction
+(`Fin.append_left`); for `i ≠ j` the distance is
+`d(uᵢ,uⱼ) + d(pᵢ,pⱼ)` by `hammingDist_eq_msg_add_red`, and `drmData` asks for
+exactly `max(2t_d+1 − d(uᵢ,uⱼ), 0)` resp. `max(2t_f+1 − d(uᵢ,uⱼ), 0)`, which the
+hypothesis `hp` covers.  Then `optimalRedundancyData_le_of` closes it. -/
+theorem optimalRedundancyData_le_of_isDCode {k m r td tf : ℕ} (f : Word F k → α)
+    (u : Fin m → Word F k) (p : Fin m → Word F r)
+    (hp : ∀ i j : Fin m, i ≠ j →
+      drmData f td tf u i j ≤ hammingDist (p i) (p j)) :
+    optimalRedundancyData f (2 * td + 1) (2 * tf + 1) ≤ r := by
+  sorry
+
+/-- `(internal, §IV — the "≥" half of `#theorem 2#`)` — any `(f : d_d, d_f)`-FCC
+of redundancy `r` yields a `D`-code of length `r` for the DRM of `u₁,…,u_m`, so
+`N(DRM) ≤ r`.
+
+Construction (the proof, next slice): take `pᵢ := redPart (C uᵢ)`.  For `i ≠ j`
+the systematic splitting brick gives
+`d(pᵢ,pⱼ) = d(C uᵢ, C uⱼ) − d(uᵢ,uⱼ) ≥ drmData … i j`, using the two distance
+conditions of `IsFCCData` (data: `2t_d+1`; function values: `2t_f+1`) and the
+fact that `drmData`'s entries are the corresponding slacks.  Then
+`N_le_of_isDCode` closes it. -/
+theorem N_drmData_le_of_isFCCData {k m r td tf : ℕ} (f : Word F k → α)
+    (u : Fin m → Word F k)
+    (h : ∃ C : Word F k → Word F (k + r), IsFCCData f C (2 * td + 1) (2 * tf + 1)) :
+    N (F := F) (ι := Fin m) (drmData f td tf u) ≤ r := by
+  sorry
+
 end SectionVIIStatements
 
 /-! ### Example 12 (`#example 12#`) — a linear FCC for a non-linear function -/
