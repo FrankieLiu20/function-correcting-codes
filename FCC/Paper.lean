@@ -1160,7 +1160,7 @@ theorem wt_ge_of_not_mem_kernel {k r dd df : ℕ} (f : Word F k →ₗ[F] Word F
 of a word of length `m` with one of length `n`, i.e. the paper's pair
 `(C(u), D(f(u)))` written as a single word of length `m + n`. -/
 def catWord {m n : ℕ} (x : Word F m) (y : Word F n) : Word F (m + n) :=
-  Fin.addCases x y
+  Fin.append x y
 
 /-- `#lemma 10#` (§VII) — "let `f : F_q^k → F_q^ℓ` be a linear function.  Further,
 let `C ⊆ F_q^n` and `D ⊆ F_q^{r'}` be linear codes of dimensions `k` and `ℓ`,
@@ -1179,8 +1179,61 @@ the distances: `d(catWord x₁ y₁, catWord x₂ y₂) = d(x₁,x₂) + d(y₁,
 the proof of `#theorem 13#` takes for granted ("the Hamming distance between them
 is `d(C(u₁),C(u₂)) + d(D(f(u₁)),D(f(u₂)))`"). -/
 theorem hammingDist_catWord {m n : ℕ} (x₁ x₂ : Word F m) (y₁ y₂ : Word F n) :
-    hammingDist (catWord x₁ y₁) (catWord x₂ y₂) = hammingDist x₁ x₂ + hammingDist y₁ y₂ := by
-  sorry
+    hammingDist (Fin.append x₁ y₁) (Fin.append x₂ y₂) = hammingDist x₁ x₂ + hammingDist y₁ y₂ := by
+  classical
+  have hne : ∀ (a : Fin m) (b : Fin n), Fin.castAdd n a ≠ Fin.natAdd m b := by
+    intro a b h
+    have hval : (Fin.castAdd n a).val = (Fin.natAdd m b).val := congrArg Fin.val h
+    simp [Fin.castAdd, Fin.natAdd] at hval
+    omega
+  have hne' : ∀ (a : Fin m) (b : Fin n), Fin.natAdd m b ≠ Fin.castAdd n a :=
+    fun a b => (hne a b).symm
+  have hsplit : diffSet (Fin.append x₁ y₁) (Fin.append x₂ y₂) =
+      (diffSet x₁ x₂).image (Fin.castAdd n) ∪ (diffSet y₁ y₂).image (Fin.natAdd m) := by
+    ext i
+    refine Fin.addCases (fun a => ?_) (fun b => ?_) i <;>
+      simp [diffSet, Fin.append_left, Fin.append_right, hne, hne']
+  have hdisj : Disjoint ((diffSet x₁ x₂).image (Fin.castAdd n))
+      ((diffSet y₁ y₂).image (Fin.natAdd m)) := by
+    rw [Finset.disjoint_left]
+    intro i hi hj
+    obtain ⟨a, -, ha⟩ := Finset.mem_image.mp hi
+    obtain ⟨b, -, hb⟩ := Finset.mem_image.mp hj
+    exact hne a b (ha.trans hb.symm)
+  rw [hammingDist_eq_card_diffSet, hammingDist_eq_card_diffSet, hammingDist_eq_card_diffSet, hsplit,
+    Finset.card_union_of_disjoint hdisj,
+    Finset.card_image_of_injective _ (Fin.castAdd_injective m n),
+    Finset.card_image_of_injective _ (Fin.natAdd_injective n m)]
+
+/-- `(internal, §II — the key step of `#theorem 2#`)` — for a *systematic* encoding
+the Hamming distance of two codewords splits into the message part and the
+redundancy part: `d(C u, C v) = d(u,v) + d(p_u, p_v)`, where `p_u` is
+`redPart (C u)`.  This is the identity `#theorem 2#` uses in both directions (to
+build an FCC from a `D`-code, and to extract a `D`-code from an FCC), and the
+reason `ISSUES.md` §1 records systematicity as part of `#definition 6#`. -/
+theorem hammingDist_eq_msg_add_red {k r : ℕ} {C : Word F k → Word F (k + r)}
+    (hC : IsSystematic C) (u v : Word F k) :
+    hammingDist (C u) (C v) = hammingDist u v +
+      hammingDist (redPart (C u)) (redPart (C v)) := by
+  classical
+  have hcu : C u = Fin.append (fun i => C u (Fin.castAdd r i)) (redPart (C u)) := by
+    funext i
+    refine Fin.addCases (motive := fun i => C u i =
+        Fin.append (fun j => C u (Fin.castAdd r j)) (redPart (C u)) i)
+      (fun a => ?_) (fun b => ?_) i
+    · rw [Fin.append_left]
+    · rw [Fin.append_right]; rfl
+  have hcv : C v = Fin.append (fun i => C v (Fin.castAdd r i)) (redPart (C v)) := by
+    funext i
+    refine Fin.addCases (motive := fun i => C v i =
+        Fin.append (fun j => C v (Fin.castAdd r j)) (redPart (C v)) i)
+      (fun a => ?_) (fun b => ?_) i
+    · rw [Fin.append_left]
+    · rw [Fin.append_right]; rfl
+  have hmu : (fun i => C u (Fin.castAdd r i)) = u := funext fun i => hC u i
+  have hmv : (fun i => C v (Fin.castAdd r i)) = v := funext fun i => hC v i
+  conv_lhs => rw [hcu, hcv]
+  rw [hammingDist_catWord, hmu, hmv]
 
 /-- `#theorem 13#` (§VII-B) — "the image `C_cat = {(C(u), D(f(u))) : u ∈ F_q^k}`
 `⊆ F_q^{n+r'}` is a linear `(f : d_d, d_f)`-FCC of dimension `k` and total

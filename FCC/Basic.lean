@@ -169,19 +169,6 @@ systematic encoding into the message and the parity part. -/
 def redPart {F : Type*} {k r : ℕ} (c : Word F (k + r)) : Word F r :=
   fun i => c (Fin.natAdd k i)
 
-/-- `(internal, §II — the key step of `#theorem 2#`)` — for a *systematic*
-encoding the Hamming distance of two codewords splits into the message part and
-the redundancy part: `d(C u, C v) = d(u,v) + d(p_u, p_v)`, where `p_u` is
-`redPart (C u)`.  This is the identity that `#theorem 2#` uses in both
-directions (to build an FCC from a `D`-code, and to extract a `D`-code from an
-FCC), and the reason `ISSUES.md` §1 records systematicity as part of
-`#definition 6#`. -/
-theorem hammingDist_eq_msg_add_red {F : Type*} [Zero F] [Fintype F] [DecidableEq F]
-    {k r : ℕ} {C : Word F k → Word F (k + r)} (hC : IsSystematic C) (u v : Word F k) :
-    hammingDist (C u) (C v) = hammingDist u v +
-      hammingDist (redPart (C u)) (redPart (C v)) := by
-  sorry
-
 end SystematicSplit
 
 end FCC
