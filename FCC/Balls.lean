@@ -99,14 +99,17 @@ over an arbitrary alphabet (which is all `#theorem 2#` needs) can use it. -/
 
 /-- `(internal, §VII — used by `#lemma 10#`, `#theorem 13#` and both halves of
 `#theorem 2#`)` — concatenating coordinates adds the Hamming distances:
-`d(Fin.append x₁ y₁, Fin.append x₂ y₂) = d(x₁,x₂) + d(y₁,y₂)`.
+`d(Fin.append x₁ y₁, Fin.append x₂ y₂) = d(x₁,x₂) + d(y₁,y₂)`.  Field-free *and*
+zero-free: the proof only ever counts *disagreeing* coordinates (`diffSet`), so
+the lemma applies to an arbitrary alphabet, which is what `#theorem 2#` is stated
+over (`α` need not be a field).
 
 Proof: carve the two `diffSet`s at the `Fin.castAdd`/`Fin.natAdd` boundary
 (`Fin.addCases` with `Fin.append_left`/`Fin.append_right`), show the two segments
 disjoint by comparing `Fin.val` (there is no ready-made `Fin.castAdd_ne_natAdd`,
 so `omega` closes `a.val < m ≤ m + b.val`), and add the cardinalities with
 `Finset.card_union_of_disjoint` and the two injectivity lemmas. -/
-theorem hammingDist_append {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {m n : ℕ}
+theorem hammingDist_append {F : Type*} [Fintype F] [DecidableEq F] {m n : ℕ}
     (x₁ x₂ : Word F m) (y₁ y₂ : Word F n) :
     hammingDist (Fin.append x₁ y₁) (Fin.append x₂ y₂) = hammingDist x₁ x₂ + hammingDist y₁ y₂ := by
   classical

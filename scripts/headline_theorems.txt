@@ -23,3 +23,6 @@ ex6_cdrm_matches
 ex6_length_three
 ex6_no_length_two
 ex7_drm_matches
+#
+# Phase 3.2 (the paper's own results, in paper order):
+optimalRedundancyData_eq_N_drmData

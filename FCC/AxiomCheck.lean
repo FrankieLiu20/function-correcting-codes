@@ -17,7 +17,8 @@ Every name here must also appear in `scripts/headline_theorems.txt` (the
 manifest is checked in both directions, so a headline result cannot be added or
 dropped silently).  The list grows as the formalization does: the
 paper-independent base layer, the phase-1a counting lemmas, and the
-paper-example checks of `FCC/Paper.lean`.
+paper-example checks of `FCC/Paper.lean`, and — from phase 3.2 on — the paper
+results that are actually proved (`#theorem 2#` first).
 -/
 
 namespace FCC
@@ -35,5 +36,8 @@ namespace FCC
 #print axioms ex7_drm_matches
 #print axioms ex6_no_length_two
 #print axioms ex6_length_three
+
+-- Phase 3.2 (the paper's own theorems, in paper order):
+#print axioms optimalRedundancyData_eq_N_drmData
 
 end FCC
