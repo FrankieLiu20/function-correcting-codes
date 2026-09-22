@@ -495,3 +495,52 @@ FDM entry.  That is where the phase-3.14 machinery pays off a second time.
 **Verification.**  `lake build` green, warning-free apart from the 39 `sorry`
 stubs; `scripts/consistency_check.ps1 -Strict` green;
 `scripts/axioms_check.ps1` green (21 headline results).
+
+## 2026-09-22 (second session) — §IV two-step machinery: `#theorem 5#`, `#corollary 4#`, `#theorem 6#`
+
+`sorry` 39 → 36; headline results 21 → 24.  As asked, every statement was compared
+with the paper *before* proving; that found two deviations, one of which needed a
+hypothesis the paper's proof uses.
+
+**Statement check (the paper's §IV, pp. 4867–4868).**
+
+* `#theorem 5#` — the paper's proof says "Without loss of generality, consider a
+  *systematic* form of `C`, i.e. `c_u = (u, w_u)`".  That WLOG is legitimate for a
+  linear code, but our `C` is an arbitrary labelling map, so systematicity is an
+  extra hypothesis and is now explicit (`hCsys`).  It is used exactly there:
+  `d(w_u,w_v) = d(c_u,c_v) − d(u,v)`.  Recorded as `ISSUES.md` §13(a).
+* `#theorem 5#` is now stated for an arbitrary family `u : ι → Word F k` (the
+  paper's `u₁,…,u_{q^k}` is `ι = Word F k`, `u = id`); `D_f`/`D_{C,f}` are
+  family-indexed, and the generalization makes `#corollary 4#` a one-liner.
+* `#corollary 4#` therefore carries `hCsys` and the standing `d_d ≤ d_f`
+  (`hdf`), the latter inherited from `#theorem 2#` — `ISSUES.md` §13(c).
+* `#theorem 6#` matches the paper as printed (only the min-distance hypothesis) —
+  a nice contrast with `#theorem 5#`.
+* `#theorem 7#` was re-read and is a **proxy**, not the paper's statement: its
+  first conjunct is a definitional unfolding of `schemeRedundancy`, whereas the
+  paper bounds the scheme redundancy `r_s = (n−k) + r'` from below.  Fixing it
+  needs the second step (an `(f ∘ C⁻¹, t_f)`-FCC on the codeword set `Im(C)`) as
+  a parameter; queued, `ISSUES.md` §13(d).
+
+**Proofs.**  `#theorem 5#` is the heart of §III-A: from a `D₂`-code
+`p₁,…,p_m` for the CDRM, the code `p̃ᵢ := (wᵢ, pᵢ)` of length `N(D₂) + r` is a
+`D₁`-code for the DRM-data — the two cases being `f(uᵢ) = f(uⱼ)` (the redundancy
+part alone carries `2t_d+1 − d(uᵢ,uⱼ)`, by systematicity plus the code's minimum
+distance) and `f(uᵢ) ≠ f(uⱼ)` (the CDRM condition supplies
+`2t_f+1 − d(cᵢ,cⱼ)`, which combines with `d(wᵢ,wⱼ)` to `2t_f+1 − d(uᵢ,uⱼ)`).
+`#corollary 4#` is then `#theorem 2#` composed with `#theorem 5#`.
+
+`#theorem 6#` needed a new kind of care: the paper's one-liner "the entries are
+at most `2(t_f−t_d)`, therefore `N(D_{C,f}) ≤ N(M,2(t_f−t_d))`" implicitly uses
+that the constant matrix's optimum is *attained*.  In Lean the proof splits on
+whether the constant matrix has a code at all: if it does, `Nat.sInf_mem`
+supplies it; if it does not, the alphabet must be a single letter
+(`exists_isDCode_const`, built from `repWord`), all messages coincide, the CDRM
+is identically `0` and both sides are `0`.
+
+**New internal bricks.**  `cdrm_le` (CDRM entries `≤ 2(t_f−t_d)`) and
+`exists_isDCode_const`.
+
+**Verification.**  `lake build` green, warning-free apart from the 36 `sorry`
+stubs; `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green
+(24 headline results).

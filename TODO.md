@@ -89,10 +89,22 @@ in the same commit that does the work.
       `#theorem 7#` by `Im(f)` (`ι := Set.range f`) instead of by the ambient
       `α`, which was false for infinite `α` (`ISSUES.md` §12).  `#corollary 2#`
       was not affected.
-- [ ] 3.3 (next). `#theorem 5#` (`N_drmData_le_N_cdrm_add`), `#corollary 4#`
-      (`optimalRedundancyData_le_N_cdrm_add`), `#theorem 6#` (`N_cdrm_le_Nconst`)
-      and `#theorem 7#` (`two_step_redundancy_bounds`, now with the corrected
-      CFDM index set) — the two-step construction machinery of §III-A.
+- [x] 3.3. `#theorem 5#` (`N_drmData_le_N_cdrm_add`, with the paper's systematic
+      form of `C` made explicit — `ISSUES.md` §13(a)), `#corollary 4#`
+      (`optimalRedundancyData_le_N_cdrm_add`) and `#theorem 6#`
+      (`N_cdrm_le_Nconst`), with the internal bricks `cdrm_le` (CDRM entries are
+      at most `2(t_f−t_d)`) and `exists_isDCode_const` (a constant matrix has a
+      code as soon as the alphabet has two letters).
+- [ ] 3.3 (statement rework, **do before `#theorem 7#`**). `two_step_redundancy_bounds`
+      is a *proxy*: its second conjunct (`N(CDRM over the representatives) ≤
+      N(CFDM over `Im f`)`) is provable, but its first conjunct is the
+      definitional unfolding of `schemeRedundancy`, whereas the paper bounds the
+      scheme's `r_s = (n−k) + r'` from below.  Make it faithful: add the
+      second-step encoder (`D : Word F (k+r) → Word F (k+r+r')`, an
+      `(f ∘ C⁻¹, t_f)`-FCC on the codewords `Im(C)`) as a parameter, state
+      `N(CDRM(whole space)) + r ≤ schemeRedundancy r r'` (from `#theorem 3#`) and
+      `r' ≤ N(CFDM over Im f)` for the optimal second step.  See
+      `ISSUES.md` §13(d).
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

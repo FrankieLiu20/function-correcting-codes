@@ -112,7 +112,7 @@ phase 3.0), `#example 5#`'s `N(D) = 6` (Plotkin, phase 3.11), and
 `#example 11#`, `#example 15#`, `#example 16#`, `#example 17#` (§VIII bounds or
 a value quoted from [1]).
 
-## Phase 3.2 — the §II and §IV lower bounds proved (2026-09-20/22)
+## Phase 3.2–3.3 — the §II bounds and the §IV lower bounds proved (2026-09-20/22)
 
 Verified:
 
@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 21 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 39 (was 49: eight paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 24 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 36 (was 49: eleven paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -129,6 +129,10 @@ Proved:
 * §II (the `(f,t)`-FCC bounds quoted from [1]): `#corollary 1#` in both parts
   (`optimalRedundancy_ge_drm`, `two_mul_le_optimalRedundancy`), `#theorem 1#`
   (`optimalRedundancy_le_fdm`) and `#corollary 2#` (`optimalRedundancy_eq_fdm`);
+* §IV (the two-step construction of §III-A): `#theorem 5#`
+  (`N_drmData_le_N_cdrm_add`), `#corollary 4#`
+  (`optimalRedundancyData_le_N_cdrm_add`) and `#theorem 6#`
+  (`N_cdrm_le_Nconst`);
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,
@@ -151,6 +155,13 @@ upper-bound half of `#theorem 7#` indexed their FDM/CFDM by the whole alphabet
 the paper's `f₁, …, f_E` — see `ISSUES.md` §12 for the counterexample and the
 reasoning.  `#corollary 1#`/`#corollary 2#` were re-checked and are faithful as
 printed (their DRMs are indexed by messages).
+
+Two further statement deviations were found while comparing §IV with the paper
+and are recorded in `ISSUES.md` §13: `#theorem 5#`/`#corollary 4#` now carry the
+*systematic form* of `C` that the paper's proof assumes (`hCsys`; the WLOG is
+justified for linear codes, not for our arbitrary labelling map), and
+`#theorem 7#` is still a proxy for the paper's two-sided bound on the scheme
+redundancy `r_s` (queued for rework, `ISSUES.md` §13(d)).
 
 ## Not formalized (and why)
 

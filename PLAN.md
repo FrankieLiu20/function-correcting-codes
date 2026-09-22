@@ -73,10 +73,10 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#theorem 2#` | IV | `r_f(k,t_d,t_f) = N(D_f(t_d,t_f:u₁,…,u_{q^k}))` — **the central identity**.  Proved; carried with the paper's standing `d_d ≤ d_f` and one existence hypothesis made explicit — `ISSUES.md` §11 | `optimalRedundancyData_eq_N_drmData` | proved |
 | `#theorem 3#` | IV | `r_f ≥ N(D_f(t_d,t_f:u₁,…,u_m))` for any subset; `r_f ≥ 2t_f` if `|Im f| ≥ 2`; `r_f ≥ N(q^k,2t_d+1)−k` | `optimalRedundancyData_ge_N_subset`, `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub` | proved |
 | `#theorem 4#` | IV | over `F₂`, if `2 ≤ |Im f| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d` | `binary_optimalRedundancyData_ge` | todo |
-| `#theorem 5#` | IV | for an `[n,k,2t_d+1]` code `C`: `N(DRM) ≤ N(CDRM) + n − k` | `N_drmData_le_N_cdrm_add` | todo |
-| `#corollary 4#` | IV | `r_f(k,t_d,t_f) ≤ N(D_{C,f}) + n − k` | `optimalRedundancyData_le_N_cdrm_add` | todo |
+| `#theorem 5#` | IV | for an `[n,k,2t_d+1]` code `C`: `N(DRM) ≤ N(CDRM) + n − k`, with `C` in systematic form (which the paper's proof assumes WLOG; `ISSUES.md` §13(a)) | `N_drmData_le_N_cdrm_add` | proved |
+| `#corollary 4#` | IV | `r_f(k,t_d,t_f) ≤ N(D_{C,f}) + n − k` (with `C` systematic, and the paper's standing `d_d ≤ d_f`) | `optimalRedundancyData_le_N_cdrm_add` | proved |
 | `#corollary 5#` | IV | binary version with the explicit `t_d log k` redundancy of `C` (carries the [1, App.] bound as a hypothesis) | `binary_optimalRedundancyData_le` | stated |
-| `#theorem 6#` | IV | `N(D_{C,f}(t_f:u₁,…,u_M)) ≤ N(M, 2(t_f−t_d))` | `N_cdrm_le_Nconst` | todo |
+| `#theorem 6#` | IV | `N(D_{C,f}(t_f:u₁,…,u_M)) ≤ N(M, 2(t_f−t_d))` | `N_cdrm_le_Nconst` | proved |
 | `#corollary 6#` | IV | `N(M,2(t_f−t_d)) ≤ 4(t_f−t_d)−2 )/(1−√…)` for `t_f−t_d ≥ 5`, `M ≤ 4(t_f−t_d)²`; and `N(4,2(t_f−t_d)) = 3(t_f−t_d)` | `N_cdrm_le_bounded` (first part needs `#lemma 1#`) | stated |
 | `#theorem 7#` | IV | for `C` an optimal-length `[n,k,2t_d+1]` linear code: `N(CDRM) + n−k ≤ r_s ≤ N(CFDM) + n−k` | `two_step_redundancy_bounds` | stated |
 | `#remark 1#` | IV | design remark (`N(D)` as the reduction target) | — | recorded here only |

@@ -174,3 +174,39 @@ their statements were faithful as printed.  With the corrected `#theorem 1#` the
 are now proved too (the code set for the image-indexed FDM is nonempty: take a
 representative of each value and repeat it `2t+1` times, which is the same
 `repWord` device as in issue §11(b)).
+
+## 13. `#theorem 5#`/`#corollary 4#` use the systematic form of `C`; `#theorem 7#` is still a proxy
+
+**(a) Systematicity of `C` (`#theorem 5#`, `#corollary 4#`).**  The proof of
+`#theorem 5#` in the paper begins "Without loss of generality, consider a
+systematic form of `C`, i.e. `c_u = (u, w_u)`".  That step is legitimate for a
+*linear* code (permute coordinates to reach standard form), but our
+`C : Word F k → Word F (k+r)` is an arbitrary labelling map, for which the
+systematic form is an extra hypothesis.  It is now explicit
+(`hCsys : IsSystematic C`) in both `#theorem 5#` and `#corollary 4#`.  Exactly
+where it is used: turning `d(c_u,c_v) ≥ 2t_d+1` into
+`d(w_u,w_v) = d(c_u,c_v) − d(u,v) ≥ 2t_d+1 − d(u,v)` — the paper's identity (1).
+
+**(b) The message family is arbitrary.**  `#theorem 5#` is stated for an arbitrary
+`u : ι → Word F k`; the paper's `u₁, …, u_{q^k}` is the instance
+`ι = Word F k`, `u = id`.  `D_f`/`D_{C,f}` are family-indexed (`#definition 11#`,
+`#definition 7#`) and the paper itself uses subsets in `#theorem 3#`, so this is a
+harmless generalization — and it is what makes `#corollary 4#` a one-liner.
+
+**(c) `#corollary 4#` also carries `hdf`.**  It combines `#theorem 2#` with
+`#theorem 5#`, so it inherits the standing `d_d ≤ d_f` of §IV (issue §11(a)).
+
+**(d) `#theorem 7#` does not yet say what the paper says.**  The paper bounds the
+redundancy `r_s` of the two-step *scheme* from both sides,
+`N(D_{C,f}(t_f : u₁,…,u_M)) + n − k ≤ r_s ≤ N(D_{C,f}(t_f : f₁,…,f_E)) + n − k`,
+with `r_s = (n−k) + r'` and `r'` the second-step redundancy.  Our
+`two_step_redundancy_bounds` asserts instead (i) the definitional unfolding of
+`schemeRedundancy` — a tautology standing in for the lower bound — and (ii)
+`N(CDRM(representatives)) + r ≤ N(CFDM over Im f) + r`.  Conjunct (ii) is a real
+statement (provable: a CFDM code is a CDRM code because
+`codedFDist f C a b ≤ d(c_{u_i},c_{u_j})`), but the *lower* bound on `r_s` is
+missing.  Making the theorem faithful requires the second step as a parameter of
+the scheme — an encoder on the codeword set `Im(C)` with the function
+`c_u ↦ f(u)` (i.e. `f ∘ C⁻¹`, well defined on `Im(C)` for injective `C`) — which
+is the §III-A construction not yet modelled.  Queued in `TODO.md` as the first
+task after phase 3.3; `#theorem 7#` therefore stays a `sorry` stub.
