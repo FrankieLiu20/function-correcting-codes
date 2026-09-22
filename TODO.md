@@ -101,7 +101,7 @@ in the same commit that does the work.
       `N(CDRM over the whole message space) + r ≤ schemeRedundancy r r'`, and the
       upper bound is attained by any CFDM `D`-code over `Im f`
       (`ISSUES.md` §13(d)).
-- [ ] 3.4 (next). `#theorem 4#` (`binary_optimalRedundancyData_ge`): over `F₂`,
+- [x] 3.4. `#theorem 4#` (`binary_optimalRedundancyData_ge`): over `F₂`,
       `2 ≤ |Im f| ≤ k` gives `r_f(k,t_d,t_f) ≥ 2t_f + t_d`.
       **Statement checked against the PDF (2026-09-22): it matches as printed**
       (`2 ≤ |Im f| ≤ k`, bound `2t_f + t_d`).  Proof plan, from the paper's
@@ -126,6 +126,13 @@ in the same commit that does the work.
       New internal bricks needed: distances of coordinate-flipped binary words
       (`d(w, flip w i) = 1`, `d(flip w i, flip w j) = 2` for `i ≠ j`) and the
       three-word sum bound `d(p₁,p₂) + d(p₁,p₃) + d(p₂,p₃) ≤ 2 * r`.
+      **Done (2026-09-22)**; the bricks live in `FCC/Balls.lean`
+      (`flip`, `hammingDist_flip_self`, `hammingDist_flip_flip`,
+      `eq_flip_of_hammingDist_eq_one`, `hammingDist_three_le_two_mul`,
+      `exists_ne_eq_of_card_lt`).
+- [ ] 3.5 (next). `#definition 12#` (already stated) with `#theorem 8#` and
+      `#theorem 9#`: the minimum-distance graph `G(C)` and the obstruction to being
+      a strict FCC.  Check both statements against §V of the PDF first.
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

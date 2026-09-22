@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 25 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 35 (was 49: twelve paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 26 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 34 (was 49: thirteen paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -137,6 +137,8 @@ Proved:
   two-sided bound on the scheme redundancy `r_s` (the scheme is modelled by
   `twoStepCode`/`IsSecondStep`, and `twoStep_isFCCData` is the paper's
   "straightforward verification") — `ISSUES.md` §13(d);
+* §IV: `#theorem 4#` (`binary_optimalRedundancyData_ge`), the binary strengthening
+  `r_f ≥ 2t_f + t_d`, with the binary bricks in `FCC/Balls.lean`;
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,

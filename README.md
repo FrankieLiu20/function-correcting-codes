@@ -43,7 +43,7 @@ labelling conventions follow Shenghao Yang's
 
 | Module | Contents | Status |
 | --- | --- | --- |
-| `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | All 65 numbered items are present: Definitions 1–18 stated, 12 of the 17 examples formalized, every theorem/lemma/corollary stated.  **Proved**: `#corollary 1#`, `#theorem 1#`, `#corollary 2#` (§II); `#theorem 2#`, `#theorem 3#`, `#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#theorem 7#` (§IV); plus the non-vacuity bricks.  The rest carry `sorry` (35 in total) |
+| `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | All 65 numbered items are present: Definitions 1–18 stated, 12 of the 17 examples formalized, every theorem/lemma/corollary stated.  **Proved**: `#corollary 1#`, `#theorem 1#`, `#corollary 2#` (§II); `#theorem 2#`, `#theorem 3#`, `#theorem 4#`, `#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#theorem 7#` (§IV); plus the non-vacuity bricks.  The rest carry `sorry` (34 in total) |
 | `FCC/Definitions.lean` | §I-E notation: `Word F n` (= `F_q^n`), `wt`, `ball` | Phase 0 — complete |
 | `FCC/Basic.lean` | internal: `wt_le_wt_add_hammingDist`, `wt_zero`, `mem_ball_self` | Phase 0 — complete |
 | `FCC/Balls.lean` | internal: `card_word`, `diffSet`, `sphere`, `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`, `ball_eq_univ_of_le`, `card_ball_univ` | Phase 1a — partly done (the closed form `Σ_{i≤t} C(n,i)(q-1)^i` is next) |
@@ -52,10 +52,10 @@ labelling conventions follow Shenghao Yang's
 
 Phases 0 (infrastructure), 1 (modelling) and 2 (statement catalogue) are done,
 and phase 3 (proofs) is under way: 3.0 (the `sInf`/attainment API for `N`, `r_f`,
-`d_min`, `d(fᵢ,fⱼ)`), 3.1–3.3 (§II: `#corollary 1#`, `#theorem 1#`,
-`#corollary 2#`; §IV: `#theorem 2#`, `#theorem 3#`, `#theorem 5#`,
-`#corollary 4#`, `#theorem 6#`, `#theorem 7#`) and 3.14 (an FCC always exists) are
-finished; everything else carries a `sorry` stub.
+`d_min`, `d(fᵢ,fⱼ)`), 3.1–3.4 (§II: `#corollary 1#`, `#theorem 1#`,
+`#corollary 2#`; §IV: `#theorem 2#`, `#theorem 3#`, `#theorem 4#`,
+`#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#theorem 7#`) and 3.14 (an FCC
+always exists) are finished; everything else carries a `sorry` stub.
 `PLAN.md` §4 lists the phases — with a status column — and `PLAN.md` §1.1 is the
 table of *all* 65 numbered items of the paper (18 definitions, 19 theorems, 14
 lemmas and 14 corollaries) with their status; that table is the project's

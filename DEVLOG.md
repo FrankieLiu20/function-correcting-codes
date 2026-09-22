@@ -586,3 +586,42 @@ it is not a hypothesis of the Lean statement (recorded in the docstring).
 **Verification.**  `lake build` green, warning-free apart from the 35 `sorry`
 stubs; `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green
 (25 headline results).
+
+## 2026-09-22 (fourth session) — `#theorem 4#`, the binary lower bound
+
+`sorry` 35 → 34; headline results 25 → 26.
+
+**Statement checked first, as usual:** the paper (p. 4866) states
+`r_f(k,t_d,t_f) ≥ 2t_f + t_d` for any `f : F₂^k → Im(f)` with `2 ≤ |Im(f)| ≤ k` —
+our statement matches as printed (with `|Im f|` as `(Finset.univ.image f).card`),
+so no change was needed.
+
+**The proof (the paper's argument, pp. 4866–4867).**  Take a message `u₁` with a
+neighbour `u₂ = u₁ + e_j` at distance one and `f(u₂) ≠ f(u₁)`
+(`exists_hammingDist_one_ne`).  The `k` neighbours `u₁ + eᵢ` together with `f(u₁)`
+take at most `|Im f| ≤ k` values, so either two neighbours share a value `≠ f(u₁)`
+(Case 1) or some neighbour has `f(u₁ + eᵢ) = f(u₁)` (Case 2).  In both cases the
+three messages involved are at pairwise distances `1, 1, 2`, so the corresponding
+*redundancy blocks* satisfy two lower bounds of `2t_f` (resp. `2t_f − 1` for the
+distance-two pair) and one of `2t_d` (resp. `2t_d − 1`): the FCC conditions give
+`d(Cu,Cv) ≥ 2t_f+1` (function values differ) and `≥ 2t_d+1` (data protection),
+and the splitting identity turns those into bounds on the blocks.  Three *binary*
+words of length `r` have pairwise distances summing to at most `2r` (each
+coordinate contributes to at most two of the three pairs — three pairwise
+different values do not fit into `ZMod 2`), so `4t_f + 2t_d − 1 ≤ 2r`, i.e.
+`r ≥ 2t_f + t_d`.  Here `r` is the redundancy of the FCC attaining `r_f`, which
+exists by `exists_isFCCData` — no non-vacuity side condition is needed.
+
+**New internal bricks** (in `FCC/Balls.lean`, which therefore now imports
+`Mathlib.Data.ZMod.Basic`): `flip` (the neighbour `u + eᵢ`), `flip_flip`,
+`flip_ne_self`, `hammingDist_flip_self` (`d(u, u+eᵢ) = 1`),
+`hammingDist_flip_flip` (`d(u+eᵢ, u+eⱼ) = 2`),
+`eq_flip_of_hammingDist_eq_one` (a word at distance one *is* a flip — this is what
+identifies the paper's `u₂` as `u₁ + e_j`), `hammingDist_three_le_two_mul` and the
+pigeonhole `exists_ne_eq_of_card_lt`.  Two `ZMod 2` facts carry the arithmetic:
+`zmod_two_add_one_ne_self` and `zmod_two_eq_add_one_of_ne` (the latter by `decide`
+over the two elements).
+
+**Verification.**  `lake build` green, warning-free apart from the 34 `sorry`
+stubs; `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green
+(26 headline results).
