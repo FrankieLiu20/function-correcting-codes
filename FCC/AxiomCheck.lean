@@ -38,6 +38,12 @@ namespace FCC
 #print axioms ex6_length_three
 
 -- Phase 3.2 (the paper's own theorems, in paper order):
+-- §II (the (f,t)-FCC bounds of [1]):
+#print axioms optimalRedundancy_ge_drm
+#print axioms two_mul_le_optimalRedundancy
+#print axioms optimalRedundancy_le_fdm
+#print axioms optimalRedundancy_eq_fdm
+-- §IV (with data protection):
 #print axioms optimalRedundancyData_eq_N_drmData
 #print axioms optimalRedundancyData_ge_N_subset
 #print axioms two_mul_le_optimalRedundancyData

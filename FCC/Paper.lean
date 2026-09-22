@@ -134,15 +134,187 @@ noncomputable def fDist {k : ℕ} (f : Word F k → α) (a b : α) : ℕ :=
 
 /-- `#definition 5#` (§II) — the function distance matrix (FDM): the `E × E`
 matrix (`E = |Im(f)|`) with entries `max(2t+1 − d(fᵢ,fⱼ), 0)` off the diagonal
-and `0` on it.  We index it by the image values themselves. -/
+and `0` on it.  We define it on all of `α` (so that it is a total function); it is
+meant to be read on the image of `f`, the paper's `f₁, …, f_E`, i.e. on
+`Set.range f` — that is the index set every statement using it must take `N` over
+(`#theorem 1#`).  Rows for values outside `Im(f)` are junk: their `fDist` is `0`
+by the empty-preimage convention above, so their entries are `2t+1` — which is
+precisely why the whole-`α` index set is wrong (`ISSUES.md` §12). -/
 noncomputable def fdm {k : ℕ} (f : Word F k → α) (t : ℕ) : α → α → ℕ :=
   fun a b => if a = b then 0 else max (2 * t + 1 - fDist f a b) 0
 
+/-- `(internal, §II — the splitting identity behind `#corollary 1#`, `#theorem 1#`,
+`#theorem 2#` and `#theorem 5#`)` — for a *systematic* encoding the Hamming distance
+of two codewords splits into the message part and the redundancy part:
+`d(C u, C v) = d(u,v) + d(p_u, p_v)`, where `p_u` is `redPart (C u)`.  Every
+"extract a `D`-code from an FCC" step in this file is this identity plus one of the
+FCC's distance conditions.
+
+Proof: a systematic codeword *is* the concatenation of its message part with its
+redundancy part (`Fin.addCases`, `Fin.append_left`/`Fin.append_right`), and
+`hammingDist_append` adds the two distances. -/
+theorem hammingDist_eq_msg_add_red {k r : ℕ} {C : Word F k → Word F (k + r)}
+    (hC : IsSystematic C) (u v : Word F k) :
+    hammingDist (C u) (C v) = hammingDist u v +
+      hammingDist (redPart (C u)) (redPart (C v)) := by
+  classical
+  have hcu : C u = Fin.append (fun i => C u (Fin.castAdd r i)) (redPart (C u)) := by
+    funext i
+    refine Fin.addCases (motive := fun i => C u i =
+        Fin.append (fun j => C u (Fin.castAdd r j)) (redPart (C u)) i)
+      (fun a => ?_) (fun b => ?_) i
+    · rw [Fin.append_left]
+    · rw [Fin.append_right]; rfl
+  have hcv : C v = Fin.append (fun i => C v (Fin.castAdd r i)) (redPart (C v)) := by
+    funext i
+    refine Fin.addCases (motive := fun i => C v i =
+        Fin.append (fun j => C v (Fin.castAdd r j)) (redPart (C v)) i)
+      (fun a => ?_) (fun b => ?_) i
+    · rw [Fin.append_left]
+    · rw [Fin.append_right]; rfl
+  have hmu : (fun i => C u (Fin.castAdd r i)) = u := funext fun i => hC u i
+  have hmv : (fun i => C v (Fin.castAdd r i)) = v := funext fun i => hC v i
+  conv_lhs => rw [hcu, hcv, hammingDist_append]
+  rw [hmu, hmv]
+
+omit [Fintype F] in
+/-- `(internal, §II — the `N`-API)` — `N(D)` is at most the length of any `D`-code. -/
+theorem N_le_of_isDCode {ι : Type*} {D : ι → ι → ℕ} {r : ℕ}
+    (h : IsDCode (F := F) D r) : N (F := F) D ≤ r :=
+  Nat.sInf_le h
+
+/-- `(internal, §II)` — `d(fᵢ,fⱼ)` is at most the distance of any pair of
+witnesses, one from each preimage. -/
+theorem fDist_le {k : ℕ} {f : Word F k → α} {a b : α} {u v : Word F k} (hu : f u = a)
+    (hv : f v = b) : fDist f a b ≤ hammingDist u v :=
+  by
+    classical
+    have hne : ∃ d : ℕ,
+        d ∈ {d : ℕ | ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = d} :=
+      ⟨hammingDist u v, ⟨u, v, hu, hv, rfl⟩⟩
+    rw [fDist, dite_eq_left hne]
+    exact Nat.find_min' hne ⟨u, v, hu, hv, rfl⟩
+
+omit [DecidableEq α] in
+/-- `(internal, §II)` — `r_f(k,t)` is at most the redundancy of any `(f,t)`-FCC. -/
+theorem optimalRedundancy_le_of {k r : ℕ} {f : Word F k → α}
+    {C : Word F k → Word F (k + r)} {t : ℕ} (h : IsFCC f C t) :
+    optimalRedundancy f t ≤ r :=
+  by
+    classical
+    have hne : ∃ n : ℕ, n ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'), IsFCC f C t} :=
+      ⟨r, C, h⟩
+    rw [optimalRedundancy, dite_eq_left hne]
+    exact Nat.find_min' hne ⟨C, h⟩
+
+omit [DecidableEq α] in
+/-- `(internal, §II — non-vacuity of the `(f,t)`-FCC set)` — for any `f` and `t`
+there is an `(f,t)`-FCC of some redundancy: write the message down `2t+1` times
+(`C u = (u, u, …, u)`), so that any two distinct messages are at distance
+`d(u,v) + (2t+1)·d(u,v) ≥ 2t+1`.  This is the §II analogue of
+`exists_isFCCData` (§III) and is what makes the `sInf`-based `optimalRedundancy`
+attained. -/
+theorem exists_isFCC {k : ℕ} (f : Word F k → α) (t : ℕ) :
+    ∃ r : ℕ, ∃ C : Word F k → Word F (k + r), IsFCC f C t := by
+  refine ⟨k * (2 * t + 1), fun u => Fin.append u (repWord (2 * t + 1) u), ?_, ?_⟩
+  · intro u i
+    simp [Fin.append_left]
+  · intro u v huv
+    have huv' : u ≠ v := fun hh => huv (by rw [hh])
+    rw [hammingDist_append, hammingDist_repWord]
+    have hd1 : 0 < hammingDist u v := hammingDist_pos.mpr huv'
+    have hmul : 2 * t + 1 ≤ (2 * t + 1) * hammingDist u v := Nat.le_mul_of_pos_right _ hd1
+    omega
+
+/-- `(internal, §II — the extraction step of `#corollary 1#`)` — an `(f,t)`-FCC of
+redundancy `r` is a `D`-code of length `r` for the DRM of *any* family
+`u₁, …, u_m` of messages: take `pᵢ := redPart (C uᵢ)`.  For `i ≠ j` with
+`f(uᵢ) ≠ f(uⱼ)` the FCC condition gives `d(uᵢ,uⱼ) + d(pᵢ,pⱼ) ≥ 2t+1`, i.e.
+`d(pᵢ,pⱼ) ≥ max(2t+1 − d(uᵢ,uⱼ), 0)`, which is exactly the DRM entry. -/
+theorem isDCode_drm_of_isFCC {k r t : ℕ} {ι : Type*} {f : Word F k → α}
+    {C : Word F k → Word F (k + r)} (u : ι → Word F k) (hC : IsFCC f C t) :
+    IsDCode (F := F) (drm f t u) r := by
+  classical
+  refine ⟨fun i => redPart (C (u i)), ?_⟩
+  intro i j hij
+  simp only [drm]
+  by_cases hf : f (u i) = f (u j)
+  · rw [ite_eq_left hf]
+    exact Nat.zero_le _
+  · rw [ite_eq_right hf]
+    have hsplit := hammingDist_eq_msg_add_red hC.1 (u i) (u j)
+    have hd := hC.2 (u i) (u j) hf
+    rw [hsplit] at hd
+    refine max_le ?_ (Nat.zero_le _)
+    omega
+
+omit [Fintype F] in
+/-- `(internal, §II — used by `#corollary 1#` and `#theorem 3#`)` — if two messages
+carry different values of `f`, then so does some pair at Hamming distance exactly
+one.  This is the paper's "if `|Im(f)| ≥ 2`, then there exist `u, v` with
+`f(u) ≠ f(v)` and `d(u,v) = 1`" (stated there without proof): walk from `u` to `v`
+changing one coordinate at a time (the `m`-th word of the walk agrees with `v` on
+the first `m` coordinates), and note that `f` starts at `f(u)` and ends at `f(v)`,
+so one step of the walk must change the value of `f`. -/
+theorem exists_hammingDist_one_ne {k : ℕ} (f : Word F k → α) {u v : Word F k}
+    (h : f u ≠ f v) :
+    ∃ u' v' : Word F k, hammingDist u' v' = 1 ∧ f u' ≠ f v' := by
+  classical
+  have hstep : ∃ m : ℕ, m < k ∧
+      f (fun i : Fin k => if (i : ℕ) < m then v i else u i) ≠
+        f (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) := by
+    by_contra hcon
+    push Not at hcon
+    have hchain : ∀ m : ℕ, m ≤ k →
+        f (fun i : Fin k => if (i : ℕ) < m then v i else u i) = f u := by
+      intro m
+      induction m with
+      | zero => intro _; simp
+      | succ m ih =>
+        intro hm
+        rw [← hcon m (by omega)]
+        exact ih (by omega)
+    have hk := hchain k le_rfl
+    have hwv : (fun i : Fin k => if (i : ℕ) < k then v i else u i) = v := by
+      funext i
+      simp [i.isLt]
+    rw [hwv] at hk
+    exact h hk.symm
+  obtain ⟨m, hmk, hm⟩ := hstep
+  refine ⟨fun i : Fin k => if (i : ℕ) < m then v i else u i,
+    fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i, ?_, hm⟩
+  have hdiff : ∀ a : Fin k, (fun i : Fin k => if (i : ℕ) < m then v i else u i) a ≠
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) a → (a : ℕ) = m := by
+    intro a ha
+    have hge : ¬ (a : ℕ) < m := fun h1 => ha (by simp [h1, Nat.lt_succ_of_lt h1])
+    have hlt : (a : ℕ) < m + 1 := by
+      by_contra h2
+      exact ha (by simp [hge, h2])
+    omega
+  have hsub : diffSet (fun i : Fin k => if (i : ℕ) < m then v i else u i)
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) ⊆ {⟨m, hmk⟩} := by
+    intro a ha
+    rw [diffSet, Finset.mem_filter] at ha
+    rw [Finset.mem_singleton]
+    exact Fin.ext (hdiff a ha.2)
+  have h1 : hammingDist (fun i : Fin k => if (i : ℕ) < m then v i else u i)
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) ≤ 1 := by
+    rw [hammingDist_eq_card_diffSet]
+    calc (diffSet _ _).card ≤ ({⟨m, hmk⟩} : Finset (Fin k)).card := Finset.card_le_card hsub
+      _ = 1 := Finset.card_singleton _
+  have hne : (fun i : Fin k => if (i : ℕ) < m then v i else u i) ≠
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) := fun hh => hm (by rw [hh])
+  have hpos : 0 < hammingDist (fun i : Fin k => if (i : ℕ) < m then v i else u i)
+      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) := hammingDist_pos.mpr hne
+  omega
+
 /-! ### §II results — the `(f,t)`-FCC bounds of [1]
 
-Statements only, in the paper's order (the proofs are phase 3.2).  `N`'s index
-type is explicit in each statement, because the DRM is indexed by `Fin m` and
-the FDM by the image values. -/
+Proved in phase 3.2 from the internal bricks above.  `N`'s index type is explicit
+in each statement: the DRM is indexed by the messages (`Fin m`, or `Fin E` for a
+representative family) and the FDM by the *image* of `f` (`Set.range f`, the
+paper's `f₁, …, f_E`) — `ISSUES.md` §12 explains why the FDM must not be indexed
+by the whole alphabet `α`. -/
 
 /-- `#corollary 1#` (§II, quoted from [1, Cor. 1]) — "for any function
 `f : F_q^k → Im(f)` and `{u₁, u₂, …, u_m} ⊆ F_q^k`:
@@ -150,7 +322,15 @@ the FDM by the image values. -/
 theorem optimalRedundancy_ge_drm {k m : ℕ} (f : Word F k → α) (t : ℕ)
     (u : Fin m → Word F k) :
     N (F := F) (ι := Fin m) (drm f t u) ≤ optimalRedundancy f t := by
-  sorry
+  classical
+  obtain ⟨r, C, hC⟩ := exists_isFCC f t
+  have hne : ∃ r' : ℕ, r' ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'), IsFCC f C t} :=
+    ⟨r, C, hC⟩
+  rw [optimalRedundancy, dite_eq_left hne]
+  have hspec := Nat.find_spec hne
+  simp only [Set.mem_ofPred_eq] at hspec
+  obtain ⟨C₀, hC₀⟩ := hspec
+  exact N_le_of_isDCode (isDCode_drm_of_isFCC u hC₀)
 
 /-- `#corollary 1#` (§II, quoted from [1, Cor. 1]) — "and for `|Im(f)| ≥ 2`,
 `r_f(k,t) ≥ 2t`" (here `|Im(f)| ≥ 2` is stated as: two distinct values, each
@@ -158,28 +338,150 @@ attained). -/
 theorem two_mul_le_optimalRedundancy {k : ℕ} (f : Word F k → α) (t : ℕ)
     (h : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b) :
     2 * t ≤ optimalRedundancy f t := by
-  sorry
+  classical
+  obtain ⟨a, b, hab, ⟨u, hu⟩, ⟨v, hv⟩⟩ := h
+  have huv : f u ≠ f v := by rw [hu, hv]; exact hab
+  obtain ⟨u', v', hd1, hfne⟩ := exists_hammingDist_one_ne f huv
+  let w : Fin 2 → Word F k := fun i => if i = 0 then u' else v'
+  have hw0 : w 0 = u' := by simp [w]
+  have hw1 : w 1 = v' := by simp [w]
+  have hentry : drm f t w 0 1 = 2 * t := by
+    simp only [drm]
+    rw [ite_eq_right (by rw [hw0, hw1]; exact hfne), hw0, hw1, hd1,
+      show 2 * t + 1 - 1 = 2 * t from by omega, max_eq_left (Nat.zero_le _)]
+  have hNentry : drm f t w 0 1 ≤ N (F := F) (ι := Fin 2) (drm f t w) := by
+    obtain ⟨r, C, hC⟩ := exists_isFCC f t
+    have hne : {r : ℕ | IsDCode (F := F) (drm f t w) r}.Nonempty :=
+      ⟨r, isDCode_drm_of_isFCC w hC⟩
+    obtain ⟨p, hp⟩ := Nat.sInf_mem hne
+    calc drm f t w 0 1 ≤ hammingDist (p 0) (p 1) := hp 0 1 (by decide)
+      _ ≤ N (F := F) (ι := Fin 2) (drm f t w) := by
+        have hle := hammingDist_le_card_fintype (x := p 0) (y := p 1)
+        rw [Fintype.card_fin] at hle
+        exact hle
+  calc 2 * t = drm f t w 0 1 := hentry.symm
+    _ ≤ N (F := F) (ι := Fin 2) (drm f t w) := hNentry
+    _ ≤ optimalRedundancy f t := optimalRedundancy_ge_drm f t w
 
 /-- `#theorem 1#` (§II, quoted from [1, Thm. 2]) — "for any function
 `f : F_q^k → Im(f) = {f₁, f₂, …, f_E}`, `r_f(k,t) ≤ N(D_f(t, f₁, f₂, …, f_E))`,
-where `D_f(t, f₁, …, f_E)` is a FDM" (`#definition 5#`). -/
+where `D_f(t, f₁, …, f_E)` is a FDM" (`#definition 5#`).
+
+The FDM is indexed by the *image* of `f` — the paper's `f₁, …, f_E` — which in Lean
+is `Set.range f`.  Indexing it by the whole alphabet `α` instead is **wrong**, and
+not merely unproved: `fDist f a b = 0` for values outside `Im(f)`
+(`#definition 4#`'s empty-preimage convention), so the `α`-indexed matrix demands
+distance `2t+1` between *every* pair of values, which no finite code can meet when
+`α` is infinite; `N` would then collapse to `0` (its `sInf ∅` convention) and the
+inequality would be false.  See `ISSUES.md` §12.
+
+Proof: a `D`-code `p` for the image-indexed FDM gives the FCC
+`C u := (u, p_{f(u)})`: for `f(u) ≠ f(v)` the distance is
+`d(u,v) + d(p_{f(u)}, p_{f(v)}) ≥ d(u,v) + max(2t+1 − d(f(u),f(v)), 0) ≥ 2t+1`,
+the first inequality from the `D`-code and the last from
+`d(f(u),f(v)) ≤ d(u,v)` (`fDist_le`). -/
 theorem optimalRedundancy_le_fdm {k : ℕ} (f : Word F k → α) (t : ℕ) :
-    optimalRedundancy f t ≤ N (F := F) (ι := α) (fdm f t) := by
-  sorry
+    optimalRedundancy f t ≤
+      N (F := F) (ι := Set.range f) (fun a b => fdm f t a.1 b.1) := by
+  classical
+  have hbound : ∀ a b : Set.range f, fdm f t a.1 b.1 ≤ 2 * t + 1 := by
+    intro a b
+    rw [fdm]
+    split_ifs with h
+    · omega
+    · exact max_le (by omega) (Nat.zero_le _)
+  have hne : {r : ℕ |
+      IsDCode (F := F) (fun a b : Set.range f => fdm f t a.1 b.1) r}.Nonempty := by
+    refine ⟨k * (2 * t + 1),
+      ⟨fun a => repWord (2 * t + 1) (Classical.choose a.2), ?_⟩⟩
+    intro a b hab
+    rw [hammingDist_repWord]
+    have ha : f (Classical.choose a.2) = a.1 := Classical.choose_spec a.2
+    have hb : f (Classical.choose b.2) = b.1 := Classical.choose_spec b.2
+    have hfne : f (Classical.choose a.2) ≠ f (Classical.choose b.2) := by
+      intro hh
+      exact hab (Subtype.ext (by rw [← ha, hh, hb]))
+    have hdne : Classical.choose a.2 ≠ Classical.choose b.2 := fun hh => hfne (by rw [hh])
+    have hd1 : 0 < hammingDist (Classical.choose a.2) (Classical.choose b.2) :=
+      hammingDist_pos.mpr hdne
+    exact le_trans (hbound a b) (Nat.le_mul_of_pos_right _ hd1)
+  obtain ⟨p, hp⟩ := Nat.sInf_mem hne
+  refine optimalRedundancy_le_of
+    (C := fun v => Fin.append v (p ⟨f v, ⟨v, rfl⟩⟩)) ⟨?_, ?_⟩
+  · intro v i
+    simp [Fin.append_left]
+  · intro u v huv
+    rw [hammingDist_append]
+    have hidx : (⟨f u, ⟨u, rfl⟩⟩ : Set.range f) ≠ ⟨f v, ⟨v, rfl⟩⟩ := by
+      intro hh
+      exact huv (Subtype.ext_iff.mp hh)
+    have hentry := hp _ _ hidx
+    simp only [fdm] at hentry
+    rw [ite_eq_right huv] at hentry
+    have hple : 2 * t + 1 - fDist f (f u) (f v) ≤
+        hammingDist (p ⟨f u, ⟨u, rfl⟩⟩) (p ⟨f v, ⟨v, rfl⟩⟩) :=
+      le_trans (le_max_left _ _) hentry
+    have hfle : fDist f (f u) (f v) ≤ hammingDist u v := fDist_le rfl rfl
+    omega
 
 /-- `#corollary 2#` (§II, quoted from [1, Cor. 2]) — "if there exists a set of
 representative information vectors `u₁, u₂, …, u_E` with
 `{f(u₁), …, f(u_E)} = Im(f)` and `D_f(t, u₁, …, u_E) = D_f(t, f₁, …, f_E)`, then
 `r_f(k,t) = N(D_f(t, f₁, …, f_E))`".  The two hypotheses are stated as: the `u_i`
 attain the pairwise minimum distances of `#definition 4#`, and they hit every
-value of `f`. -/
+value of `f`.  `hattain` is what identifies the DRM of the representatives with
+the image-indexed FDM of `#theorem 1#` entry by entry, so stating the bound over
+the `Fin E`-indexed representatives (as here) is the paper's `D_f(t, f₁, …, f_E)`.
+
+Proof: `≤` sends a `D`-code `p` of the representatives to
+`C v := (v, p_{i(v)})`, where `i(v)` is a representative of the value `f(v)`
+(from `hsurj`) — this is where `hattain` is used; `≥` restricts the optimal FCC to
+the representatives (`isDCode_drm_of_isFCC`), which needs neither hypothesis. -/
 theorem optimalRedundancy_eq_fdm {k E : ℕ} (f : Word F k → α) (t : ℕ)
     (u : Fin E → Word F k)
     (hattain : ∀ i j, f (u i) ≠ f (u j) →
       hammingDist (u i) (u j) = fDist f (f (u i)) (f (u j)))
     (hsurj : ∀ v : Word F k, ∃ i : Fin E, f (u i) = f v) :
     optimalRedundancy f t = N (F := F) (ι := Fin E) (drm f t u) := by
-  sorry
+  classical
+  refine le_antisymm ?_ ?_
+  · obtain ⟨r, C, hC⟩ := exists_isFCC f t
+    have hne : {r : ℕ | IsDCode (F := F) (drm f t u) r}.Nonempty :=
+      ⟨r, isDCode_drm_of_isFCC u hC⟩
+    obtain ⟨p, hp⟩ := Nat.sInf_mem hne
+    refine optimalRedundancy_le_of
+      (C := fun v => Fin.append v (p (Classical.choose (hsurj v)))) ⟨?_, ?_⟩
+    · intro v i
+      simp [Fin.append_left]
+    · intro v w hvw
+      have hv : f (u (Classical.choose (hsurj v))) = f v := Classical.choose_spec (hsurj v)
+      have hw : f (u (Classical.choose (hsurj w))) = f w := Classical.choose_spec (hsurj w)
+      have hidx : Classical.choose (hsurj v) ≠ Classical.choose (hsurj w) := by
+        intro hh
+        exact hvw (by rw [← hv, hh, hw])
+      have hfe : f (u (Classical.choose (hsurj v))) ≠
+          f (u (Classical.choose (hsurj w))) := by
+        rw [hv, hw]
+        exact hvw
+      rw [hammingDist_append]
+      have hentry := hp _ _ hidx
+      simp only [drm] at hentry
+      rw [ite_eq_right hfe] at hentry
+      have hdist : hammingDist (u (Classical.choose (hsurj v)))
+          (u (Classical.choose (hsurj w))) = fDist f (f v) (f w) := by
+        rw [hattain _ _ hfe, hv, hw]
+      rw [hdist] at hentry
+      have hfle : fDist f (f v) (f w) ≤ hammingDist v w := fDist_le rfl rfl
+      have hple := le_trans (le_max_left _ _) hentry
+      omega
+  · obtain ⟨r, C, hC⟩ := exists_isFCC f t
+    have hne : ∃ r' : ℕ, r' ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'), IsFCC f C t} :=
+      ⟨r, C, hC⟩
+    rw [optimalRedundancy, dite_eq_left hne]
+    have hspec := Nat.find_spec hne
+    simp only [Set.mem_ofPred_eq] at hspec
+    obtain ⟨C₀, hC₀⟩ := hspec
+    exact N_le_of_isDCode (isDCode_drm_of_isFCC u hC₀)
 
 /-! ### Example 1 (`#example 1#`) — the DRM of a function on `F₂²` -/
 
@@ -342,7 +644,9 @@ noncomputable def codedFDist {k ℓ : ℕ} (f : Word F k → α) (C : Word F k �
 
 /-- `#definition 9#` (§III) — the coded function distance matrix (CFDM): the
 `E × E` matrix with entries `max(2t_f+1 − d_C(fᵢ,fⱼ), 0)` off the diagonal and
-`0` on it, indexed here by the image values. -/
+`0` on it, indexed here by the image values.  As with `#definition 5#`, it is
+defined on all of `α` but meant to be read on `Set.range f` (the paper's
+`f₁, …, f_E`), which is the index set `#theorem 7#` uses — see `ISSUES.md` §12. -/
 noncomputable def cfdm {k ℓ : ℕ} (f : Word F k → α) (C : Word F k → Word F ℓ) (tf : ℕ) :
     α → α → ℕ :=
   fun a b => if a = b then 0 else max (2 * tf + 1 - codedFDist f C a b) 0
@@ -548,13 +852,6 @@ Proved, not stubbed: every one of them unwinds an `sInf` by exhibiting a witness
 lets the examples' "a witness exists" checks be converted into statements about
 `N` and `d_min` (see `ISSUES.md` §6). -/
 
-omit [Fintype F] in
-/-- `(internal, §II — the `N`-API of phase 3.0)` — `N(D)` is at most the length of
-any `D`-code. -/
-theorem N_le_of_isDCode {ι : Type*} {D : ι → ι → ℕ} {r : ℕ}
-    (h : IsDCode (F := F) D r) : N (F := F) D ≤ r :=
-  Nat.sInf_le h
-
 /-! The **lower** half of the `sInf` API: `N(D) = r` (and its `d_min`, `d(fᵢ,fⱼ)`,
 `r_f` analogues) from "a witness of size `r` exists and nothing smaller does".
 No block construction is needed — the witness alone makes `sInf`'s set non-empty.
@@ -667,30 +964,6 @@ theorem minDist_le {n : ℕ} {C : Finset (Word F n)} {x y : Word F n} (hx : x �
     rw [minDist, dite_eq_left hne]
     exact Nat.find_min' hne ⟨x, hx, y, hy, hxy, rfl⟩
 
-/-- `(internal, §II)` — `d(fᵢ,fⱼ)` is at most the distance of any pair of
-witnesses, one from each preimage. -/
-theorem fDist_le {k : ℕ} {f : Word F k → α} {a b : α} {u v : Word F k} (hu : f u = a)
-    (hv : f v = b) : fDist f a b ≤ hammingDist u v :=
-  by
-    classical
-    have hne : ∃ d : ℕ,
-        d ∈ {d : ℕ | ∃ u v : Word F k, f u = a ∧ f v = b ∧ hammingDist u v = d} :=
-      ⟨hammingDist u v, ⟨u, v, hu, hv, rfl⟩⟩
-    rw [fDist, dite_eq_left hne]
-    exact Nat.find_min' hne ⟨u, v, hu, hv, rfl⟩
-
-omit [DecidableEq α] in
-/-- `(internal, §II)` — `r_f(k,t)` is at most the redundancy of any `(f,t)`-FCC. -/
-theorem optimalRedundancy_le_of {k r : ℕ} {f : Word F k → α}
-    {C : Word F k → Word F (k + r)} {t : ℕ} (h : IsFCC f C t) :
-    optimalRedundancy f t ≤ r :=
-  by
-    classical
-    have hne : ∃ n : ℕ, n ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'), IsFCC f C t} :=
-      ⟨r, C, h⟩
-    rw [optimalRedundancy, dite_eq_left hne]
-    exact Nat.find_min' hne ⟨C, h⟩
-
 omit [DecidableEq α] in
 /-- `(internal, §IV)` — `r_f(k : d_d, d_f)` is at most the redundancy of any
 `(f : d_d, d_f)`-FCC. -/
@@ -719,40 +992,6 @@ order: the systematic splitting `hammingDist_eq_msg_add_red`, the extraction of 
 `D`-code out of an FCC (`isDCode_drmData_of_isFCCData`), its consequence
 `N(D_f) ≤ r` (`N_drmData_le_of_isFCCData`), and the reverse half `r_f ≤ r`
 (`optimalRedundancyData_le_of_isDCode`) that builds an FCC from a `D`-code. -/
-
-/-- `(internal, §II — the key step of `#theorem 2#`)` — for a *systematic* encoding
-the Hamming distance of two codewords splits into the message part and the
-redundancy part: `d(C u, C v) = d(u,v) + d(p_u, p_v)`, where `p_u` is
-`redPart (C u)`.  This is the identity `#theorem 2#` uses in both directions (to
-build an FCC from a `D`-code, and to extract a `D`-code from an FCC), and the
-reason `ISSUES.md` §1 records systematicity as part of `#definition 6#`.
-
-Proof: a systematic codeword *is* the concatenation of its message part with its
-redundancy part (`Fin.addCases`, `Fin.append_left`/`Fin.append_right`), and
-`hammingDist_append` adds the two distances. -/
-theorem hammingDist_eq_msg_add_red {k r : ℕ} {C : Word F k → Word F (k + r)}
-    (hC : IsSystematic C) (u v : Word F k) :
-    hammingDist (C u) (C v) = hammingDist u v +
-      hammingDist (redPart (C u)) (redPart (C v)) := by
-  classical
-  have hcu : C u = Fin.append (fun i => C u (Fin.castAdd r i)) (redPart (C u)) := by
-    funext i
-    refine Fin.addCases (motive := fun i => C u i =
-        Fin.append (fun j => C u (Fin.castAdd r j)) (redPart (C u)) i)
-      (fun a => ?_) (fun b => ?_) i
-    · rw [Fin.append_left]
-    · rw [Fin.append_right]; rfl
-  have hcv : C v = Fin.append (fun i => C v (Fin.castAdd r i)) (redPart (C v)) := by
-    funext i
-    refine Fin.addCases (motive := fun i => C v i =
-        Fin.append (fun j => C v (Fin.castAdd r j)) (redPart (C v)) i)
-      (fun a => ?_) (fun b => ?_) i
-    · rw [Fin.append_left]
-    · rw [Fin.append_right]; rfl
-  have hmu : (fun i => C u (Fin.castAdd r i)) = u := funext fun i => hC u i
-  have hmv : (fun i => C v (Fin.castAdd r i)) = v := funext fun i => hC v i
-  conv_lhs => rw [hcu, hcv, hammingDist_append]
-  rw [hmu, hmv]
 
 /-- `(internal, §IV — the extraction step inside `#theorem 2#` and `#theorem 3#`)` —
 an `(f : 2t_d+1, 2t_f+1)`-FCC of redundancy `r` *is* a `D`-code of length `r` for
@@ -884,66 +1123,6 @@ theorem optimalRedundancyData_eq_N_drmData {k : ℕ} (f : Word F k → α) (td t
     have hspec := Nat.find_spec hne
     simp only [Set.mem_ofPred_eq] at hspec
     exact N_drmData_le_of_isFCCData f hspec
-
-omit [Fintype F] in
-/-- `(internal, §IV — used by `#theorem 3#`)` — if two messages carry different
-values of `f`, then so does some pair at Hamming distance exactly one.  This is
-the paper's "if `|Im(f)| ≥ 2`, then there exist `u, v` with `f(u) ≠ f(v)` and
-`d(u,v) = 1`": walk from `u` to `v` changing one coordinate at a time (the
-`m`-th word of the walk agrees with `v` on the first `m` coordinates), and note
-that `f` starts at `f(u)` and ends at `f(v)`, so one step of the walk must change
-the value of `f`. -/
-theorem exists_hammingDist_one_ne {k : ℕ} (f : Word F k → α) {u v : Word F k}
-    (h : f u ≠ f v) :
-    ∃ u' v' : Word F k, hammingDist u' v' = 1 ∧ f u' ≠ f v' := by
-  classical
-  have hstep : ∃ m : ℕ, m < k ∧
-      f (fun i : Fin k => if (i : ℕ) < m then v i else u i) ≠
-        f (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) := by
-    by_contra hcon
-    push Not at hcon
-    have hchain : ∀ m : ℕ, m ≤ k →
-        f (fun i : Fin k => if (i : ℕ) < m then v i else u i) = f u := by
-      intro m
-      induction m with
-      | zero => intro _; simp
-      | succ m ih =>
-        intro hm
-        rw [← hcon m (by omega)]
-        exact ih (by omega)
-    have hk := hchain k le_rfl
-    have hwv : (fun i : Fin k => if (i : ℕ) < k then v i else u i) = v := by
-      funext i
-      simp [i.isLt]
-    rw [hwv] at hk
-    exact h hk.symm
-  obtain ⟨m, hmk, hm⟩ := hstep
-  refine ⟨fun i : Fin k => if (i : ℕ) < m then v i else u i,
-    fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i, ?_, hm⟩
-  have hdiff : ∀ a : Fin k, (fun i : Fin k => if (i : ℕ) < m then v i else u i) a ≠
-      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) a → (a : ℕ) = m := by
-    intro a ha
-    have hge : ¬ (a : ℕ) < m := fun h1 => ha (by simp [h1, Nat.lt_succ_of_lt h1])
-    have hlt : (a : ℕ) < m + 1 := by
-      by_contra h2
-      exact ha (by simp [hge, h2])
-    omega
-  have hsub : diffSet (fun i : Fin k => if (i : ℕ) < m then v i else u i)
-      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) ⊆ {⟨m, hmk⟩} := by
-    intro a ha
-    rw [diffSet, Finset.mem_filter] at ha
-    rw [Finset.mem_singleton]
-    exact Fin.ext (hdiff a ha.2)
-  have h1 : hammingDist (fun i : Fin k => if (i : ℕ) < m then v i else u i)
-      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) ≤ 1 := by
-    rw [hammingDist_eq_card_diffSet]
-    calc (diffSet _ _).card ≤ ({⟨m, hmk⟩} : Finset (Fin k)).card := Finset.card_le_card hsub
-      _ = 1 := Finset.card_singleton _
-  have hne : (fun i : Fin k => if (i : ℕ) < m then v i else u i) ≠
-      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) := fun hh => hm (by rw [hh])
-  have hpos : 0 < hammingDist (fun i : Fin k => if (i : ℕ) < m then v i else u i)
-      (fun i : Fin k => if (i : ℕ) < m + 1 then v i else u i) := hammingDist_pos.mpr hne
-  omega
 
 /-- `#theorem 3#` (§IV) — "for any function `f : F_q^k → Im(f)` and
 `{u₁, u₂, …, u_m} ⊆ F_q^k`, we have
@@ -1094,7 +1273,11 @@ With our `schemeRedundancy`, `r_s = r + N(CDRM)` (the scheme takes the second
 step optimal, `r' = N(CDRM)`); the two-sided bound is then the statement that the
 CDRM of a set of representatives is sandwiched by the CFDM of the whole function,
 whose `≤` half is the content of the theorem.  The representatives enter through
-`hsurj`/`hattain` exactly as in `#corollary 2#`. -/
+`hsurj`/`hattain` exactly as in `#corollary 2#`.
+
+The CFDM is indexed by the *image* of `f` (the paper's `f₁, …, f_E`), i.e. by
+`Set.range f`; indexing it by the whole alphabet `α` would be wrong for the same
+reason as in `#theorem 1#` (`ISSUES.md` §12). -/
 theorem two_step_redundancy_bounds {k r E : ℕ} (f : Word F k → α) (tf : ℕ)
     (C : Word F k → Word F (k + r)) (u : Fin E → Word F k)
     (hsurj : ∀ v : Word F k, ∃ i : Fin E, f (u i) = f v)
@@ -1103,7 +1286,7 @@ theorem two_step_redundancy_bounds {k r E : ℕ} (f : Word F k → α) (tf : ℕ
     schemeRedundancy r (N (F := F) (ι := Fin E) (cdrm f C tf u)) + 0 =
         r + N (F := F) (ι := Fin E) (cdrm f C tf u) ∧
       N (F := F) (ι := Fin E) (cdrm f C tf u) + r ≤
-        N (F := F) (ι := α) (cfdm f C tf) + r := by
+        N (F := F) (ι := Set.range f) (fun a b => cfdm f C tf a.1 b.1) + r := by
   sorry
 
 /-! ## §V — Non-existence of strict `(f : d_d, d_f)`-FCCs

@@ -25,6 +25,12 @@ ex6_no_length_two
 ex7_drm_matches
 #
 # Phase 3.2 (the paper's own results, in paper order):
+# §II (the (f,t)-FCC bounds quoted from [1]):
+optimalRedundancy_eq_fdm
+optimalRedundancy_ge_drm
+optimalRedundancy_le_fdm
+two_mul_le_optimalRedundancy
+# §IV (with data protection):
 optimalRedundancyData_eq_N_drmData
 optimalRedundancyData_ge_N_subset
 optimalRedundancyData_ge_Nconst_sub
