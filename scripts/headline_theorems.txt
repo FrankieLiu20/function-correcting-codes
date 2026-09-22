@@ -31,7 +31,10 @@ optimalRedundancy_ge_drm
 optimalRedundancy_le_fdm
 two_mul_le_optimalRedundancy
 # §IV (with data protection):
+N_cdrm_le_Nconst
+N_drmData_le_N_cdrm_add
 optimalRedundancyData_eq_N_drmData
 optimalRedundancyData_ge_N_subset
 optimalRedundancyData_ge_Nconst_sub
+optimalRedundancyData_le_N_cdrm_add
 two_mul_le_optimalRedundancyData

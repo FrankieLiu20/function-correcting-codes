@@ -1227,34 +1227,200 @@ theorem binary_optimalRedundancyData_ge {k : ℕ} (f : Word (ZMod 2) k → α) (
     2 * tf + td ≤ optimalRedundancyData f (2 * td + 1) (2 * tf + 1) := by
   sorry
 
+omit [Fintype F] in
+/-- `(internal, §IV — used by `#theorem 5#` and `#theorem 6#`)` — the CDRM entries
+of an `[n, k, 2t_d+1]` code are at most `2(t_f − t_d)`: the entry is `0` when the two
+function values agree, and otherwise `max(2t_f+1 − d(c_ui,c_uj), 0) ≤ 2(t_f − t_d)`
+because `d(c_ui,c_uj) ≥ 2t_d + 1`.  This is the paper's one-line estimate in the
+proof of `#theorem 6#`. -/
+theorem cdrm_le {k r : ℕ} {ι : Type*} (f : Word F k → α) (td tf : ℕ)
+    (C : Word F k → Word F (k + r)) (u : ι → Word F k)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+    ∀ i j : ι, cdrm f C tf u i j ≤ 2 * (tf - td) := by
+  intro i j
+  simp only [cdrm]
+  split_ifs with hf
+  · omega
+  · refine max_le ?_ (Nat.zero_le _)
+    have huv : u i ≠ u j := fun hh => hf (by rw [hh])
+    have hd := hC (u i) (u j) huv
+    have : 2 * (tf - td) = 2 * tf - 2 * td := by omega
+    omega
+
+/-- `(internal, §IV — used by `#theorem 6#`)` — a constant-distance matrix has a
+`D`-code of some length as soon as the alphabet has two distinct letters: send
+the `i`-th index to the word that is `y` at coordinate `i` and `x` elsewhere,
+repeated `D₀ + 1` times, so that two different indices are at distance
+`2(D₀ + 1) ≥ D₀`.  (If the alphabet is a single letter, no code satisfying a
+positive entry exists at all — the degenerate case handled inside `#theorem 6#`.) -/
+theorem exists_isDCode_const {m D₀ : ℕ} (h : ∃ x y : F, x ≠ y) :
+    ∃ r : ℕ, IsDCode (F := F) (fun _ _ : Fin m => D₀) r := by
+  classical
+  obtain ⟨x, y, hxy⟩ := h
+  refine ⟨m * (D₀ + 1), ⟨fun i => repWord (D₀ + 1) (fun t => if t = i then y else x), ?_⟩⟩
+  intro i j hij
+  rw [hammingDist_repWord]
+  have hdiff : (fun t : Fin m => if t = i then y else x) ≠
+      (fun t : Fin m => if t = j then y else x) := by
+    intro hh
+    have h1 := congrFun hh i
+    simp [hij] at h1
+    exact hxy h1.symm
+  have hpos : 1 ≤ hammingDist (fun t : Fin m => if t = i then y else x)
+      (fun t : Fin m => if t = j then y else x) :=
+    Nat.one_le_iff_ne_zero.mpr (hammingDist_ne_zero.mpr hdiff)
+  have hmul : D₀ + 1 ≤ (D₀ + 1) * hammingDist (fun t : Fin m => if t = i then y else x)
+      (fun t : Fin m => if t = j then y else x) := by
+    calc D₀ + 1 = (D₀ + 1) * 1 := (Nat.mul_one _).symm
+      _ ≤ (D₀ + 1) * _ := Nat.mul_le_mul_left _ hpos
+  change D₀ ≤ (D₀ + 1) * hammingDist (fun t : Fin m => if t = i then y else x)
+      (fun t : Fin m => if t = j then y else x)
+  omega
+
 /-- `#theorem 5#` (§IV) — "let `C` be an `[n, k, 2t_d+1]` error-correcting code,
 and let `c_u` denote the codeword that corresponds to the message vector
 `u ∈ F_q^k`.  For any function `f`,
-`N(D_f(t_d,t_f : u₁,…,u_{q^k})) ≤ N(D_{C,f}(t_f : u₁,…,u_{q^k})) + n − k`". -/
-theorem N_drmData_le_N_cdrm_add {k r m : ℕ} (f : Word F k → α) (td tf : ℕ)
-    (C : Word F k → Word F (k + r)) (u : Fin m → Word F k)
+`N(D_f(t_d,t_f : u₁,…,u_{q^k})) ≤ N(D_{C,f}(t_f : u₁,…,u_{q^k})) + n − k`".
+
+Two modelling notes (both in `ISSUES.md` §13):
+
+* the family of messages is an arbitrary `u : ι → Word F k`; the paper's
+  `u₁, …, u_{q^k}` is the instance `ι = Word F k`, `u = id`, and the definitions of
+  `D_f`/`D_{C,f}` are family-based, so nothing is lost and `#corollary 4#` becomes
+  immediate;
+* the statement carries `IsSystematic C` explicitly.  The proof in the paper says
+  "without loss of generality, consider a systematic form of `C`, i.e.
+  `c_u = (u, w_u)`"; that step is justified for a *linear* code (permute the
+  coordinates), but our `C` is an arbitrary labelling map, for which the
+  systematic form is an extra hypothesis.  It is used exactly as in the paper:
+  `d(w_u,w_v) = d(c_u,c_v) − d(u,v)`.
+
+Proof (the paper's): take a `D₂`-code `p₁,…,p_m` of length `N(D₂)`, `D₂` being the
+CDRM, and let `p̃ᵢ := (wᵢ, pᵢ)` where `wᵢ` is the redundancy part of `cᵢ`.  Then
+`d(p̃ᵢ,p̃ⱼ) = d(wᵢ,wⱼ) + d(pᵢ,pⱼ)`; for `f(uᵢ) = f(uⱼ)` the first term alone is
+`≥ 2t_d+1 − d(uᵢ,uⱼ)`, and for `f(uᵢ) ≠ f(uⱼ)` the CDRM condition supplies
+`d(pᵢ,pⱼ) ≥ 2t_f+1 − d(cᵢ,cⱼ)`, which combines with `d(wᵢ,wⱼ)` to
+`2t_f+1 − d(uᵢ,uⱼ)`.  Both are the corresponding entries of the DRM.  (The
+`D₂`-code set is non-empty because the CDRM entries are at most `2(t_f−t_d)`:
+repeat the messages.) -/
+theorem N_drmData_le_N_cdrm_add {k r : ℕ} {ι : Type*} (f : Word F k → α) (td tf : ℕ)
+    (C : Word F k → Word F (k + r)) (u : ι → Word F k)
+    (hCsys : IsSystematic C)
     (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
-    N (F := F) (ι := Fin m) (drmData f td tf u) ≤
-      N (F := F) (ι := Fin m) (cdrm f C tf u) + r := by
-  sorry
+    N (F := F) (ι := ι) (drmData f td tf u) ≤
+      N (F := F) (ι := ι) (cdrm f C tf u) + r := by
+  classical
+  have hentry := cdrm_le f td tf C u hC
+  have hne2 : ∃ r₂ : ℕ, IsDCode (F := F) (cdrm f C tf u) r₂ := by
+    refine ⟨k * (2 * (tf - td) + 1),
+      ⟨fun i => repWord (2 * (tf - td) + 1) (u i), ?_⟩⟩
+    intro i j hij
+    by_cases huv : u i = u j
+    · rw [show cdrm f C tf u i j = 0 from by
+        simp only [cdrm]
+        rw [ite_eq_left (by rw [huv])]]
+      exact Nat.zero_le _
+    · rw [hammingDist_repWord]
+      have hd1 : 0 < hammingDist (u i) (u j) := hammingDist_pos.mpr huv
+      have hmul : 2 * (tf - td) + 1 ≤ (2 * (tf - td) + 1) * hammingDist (u i) (u j) :=
+        Nat.le_mul_of_pos_right _ hd1
+      have := hentry i j
+      omega
+  have hgen : ∀ r₂ : ℕ, IsDCode (F := F) (cdrm f C tf u) r₂ →
+      IsDCode (F := F) (drmData f td tf u) (r + r₂) := by
+    intro r₂ hr₂
+    obtain ⟨p, hp⟩ := hr₂
+    refine ⟨fun i => Fin.append (redPart (C (u i))) (p i), ?_⟩
+    intro i j hij
+    have hsplit := hammingDist_eq_msg_add_red hCsys (u i) (u j)
+    rw [hammingDist_append]
+    simp only [drmData]
+    by_cases huv : u i = u j
+    · rw [ite_eq_left huv]
+      exact Nat.zero_le _
+    · rw [ite_eq_right huv]
+      by_cases hf : f (u i) = f (u j)
+      · rw [ite_eq_left hf]
+        have hred : 2 * td + 1 - hammingDist (u i) (u j) ≤
+            hammingDist (redPart (C (u i))) (redPart (C (u j))) := by
+          have hd := hC (u i) (u j) huv
+          rw [hsplit] at hd
+          omega
+        refine le_trans (max_le hred (Nat.zero_le _)) ?_
+        omega
+      · rw [ite_eq_right hf]
+        have hpentry := hp i j hij
+        simp only [cdrm] at hpentry
+        rw [ite_eq_right hf] at hpentry
+        have h1 : 2 * tf + 1 - hammingDist (C (u i)) (C (u j)) ≤
+            hammingDist (p i) (p j) := le_trans (le_max_left _ _) hpentry
+        have h2 : hammingDist (C (u i)) (C (u j)) - hammingDist (u i) (u j) ≤
+            hammingDist (redPart (C (u i))) (redPart (C (u j))) := by
+          rw [hsplit]
+          omega
+        have h3 : 2 * tf + 1 - hammingDist (u i) (u j) ≤
+            hammingDist (redPart (C (u i))) (redPart (C (u j))) +
+              hammingDist (p i) (p j) := by
+          omega
+        exact max_le h3 (Nat.zero_le _)
+  have hmain := hgen (sInf {r₂ : ℕ | IsDCode (F := F) (cdrm f C tf u) r₂})
+    (Nat.sInf_mem hne2)
+  have hle := N_le_of_isDCode hmain
+  rw [Nat.add_comm] at hle
+  simpa only [N] using hle
 
 /-- `#corollary 4#` (§IV) — "for any function `f : F_q^k → Im(f)`,
 `r_f(k,t_d,t_f) ≤ N(D_{C,f}(t_f : u₁,…,u_{q^k})) + n − k`, where `C` is an
-`[n, k, 2t_d+1]` error-correcting code". -/
+`[n, k, 2t_d+1]` error-correcting code".
+
+The two hypotheses that the paper leaves to `#definition 6#` and its proof are
+explicit here: `hdf` is the side condition `d_d ≤ d_f` (needed to invoke
+`#theorem 2#`; `ISSUES.md` §11(a)) and `hCsys` is the systematic form of `C` used
+by `#theorem 5#` (`ISSUES.md` §13).  The proof is one line: `#theorem 2#` turns
+`r_f` into `N(D_f)` over the whole message space, and `#theorem 5#` bounds that by
+the CDRM. -/
 theorem optimalRedundancyData_le_N_cdrm_add {k r : ℕ} (f : Word F k → α) (td tf : ℕ)
     (C : Word F k → Word F (k + r))
-    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+    (hCsys : IsSystematic C)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w))
+    (hdf : 2 * td + 1 ≤ 2 * tf + 1) :
     optimalRedundancyData f (2 * td + 1) (2 * tf + 1) ≤
       N (F := F) (ι := Word F k) (cdrm f C tf fun v => v) + r := by
-  sorry
+  rw [optimalRedundancyData_eq_N_drmData f td tf hdf]
+  exact N_drmData_le_N_cdrm_add f td tf C (fun v : Word F k => v) hCsys hC
 
 /-- `#theorem 6#` (§IV) — "let `C` be an `[n, k, 2t_d+1]` code.  Then
-`N(D_{C,f}(t_f : u₁, u₂, …, u_M)) ≤ N(M, 2(t_f − t_d))`". -/
+`N(D_{C,f}(t_f : u₁, u₂, …, u_M)) ≤ N(M, 2(t_f − t_d))`".
+
+Proof (the paper's): every entry of the CDRM is at most `2(t_f − t_d)`
+(`cdrm_le`), so a code for the *constant* matrix `2(t_f−t_d)` is a `D`-code for the
+CDRM, whence `N(D_{C,f}) ≤ N(M, 2(t_f−t_d))`.  Making that step in Lean needs the
+optimum to be attained, so the proof splits on whether the constant matrix has a
+code at all: if it has one, `Nat.sInf_mem` supplies it; if not, the alphabet is a
+single letter (`exists_isDCode_const`), all messages coincide, the CDRM is `0` and
+`N(D_{C,f}) = 0 ≤ N(M, 2(t_f−t_d))`. -/
 theorem N_cdrm_le_Nconst {k r m : ℕ} (f : Word F k → α) (td tf : ℕ)
     (C : Word F k → Word F (k + r)) (u : Fin m → Word F k)
     (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
   N (F := F) (ι := Fin m) (cdrm f C tf u) ≤ Nconst (F := F) m (2 * (tf - td)) := by
-  sorry
+  classical
+  have hentry := cdrm_le f td tf C u hC
+  by_cases hne : ∃ r : ℕ, IsDCode (F := F) (fun _ _ : Fin m => 2 * (tf - td)) r
+  · obtain ⟨p, hp⟩ := Nat.sInf_mem hne
+    exact N_le_of_isDCode ⟨p, fun i j hij => le_trans (hentry i j) (hp i j hij)⟩
+  · have hF : ∀ x y : F, x = y := by
+      intro x y
+      by_contra hxy
+      exact hne (exists_isDCode_const ⟨x, y, hxy⟩)
+    have huv : ∀ i j : Fin m, u i = u j := fun i j => funext fun t => hF _ _
+    have hzero : IsDCode (F := F) (cdrm f C tf u) 0 := by
+      refine ⟨fun _ => Fin.elim0, ?_⟩
+      intro i j hij
+      simp only [cdrm]
+      rw [ite_eq_left (by rw [huv i j])]
+      exact Nat.zero_le _
+    have hle : N (F := F) (ι := Fin m) (cdrm f C tf u) ≤ 0 := N_le_of_isDCode hzero
+    omega
 
 /-- `(internal, §III-A — used by `#theorem 7#`)` — the total redundancy `r_s` of
 the two-step construction: "the resulting mapping ... is an `(f : d_d, d_f)`-FCC
