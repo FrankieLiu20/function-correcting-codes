@@ -86,8 +86,8 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
 | `#definition 12#` | V | minimum-distance graph `G(C)`: vertices `C`, edges between codewords at distance `d_min(C)` | `minDistGraph` | stated |
-| `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with `|Im f| ≥ 2`, `d_f > d` | `not_isFCCData_of_connected` | todo |
-| `#theorem 9#` | V | if `G(C)` has `Q` components then no `f` with `|Im f| ≥ Q+1` and `d_f > d` works | `not_isFCCData_of_components` | stated |
+| `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with `|Im f| ≥ 2`, `d_f > d` (the encoding must have range exactly `C`, the paper's `(n,q^k,d)` code — `ISSUES.md` §14) | `not_isFCCData_of_connected` | proved |
+| `#theorem 9#` | V | if `G(C)` has `Q` components then no `f` with `|Im f| ≥ Q+1` and `d_f > d` works (same range condition) | `not_isFCCData_of_components` | proved |
 | `#theorem 10#` | V | `G(C)` is connected for every perfect `t`-error-correcting code | `isConnected_minDistGraph_of_perfect` | todo |
 | `#corollary 7#` | V | `r_f(k:d_d,d_f) ≥ n−k+1` when a perfect code of length `n` exists | `perfect_optimalRedundancyData_ge` | todo |
 | `#lemma 2#` | V | MDS codes: for all `u,v` there is `u'` with `d(u,u') = d` and `d(u',v) ≤ d(u,v)−1` | `exists_mds_neighbor` | todo |
@@ -356,7 +356,7 @@ the labels 3.1/3.2 refer to that one row).
 | 3.2 | `#theorem 3#`, `#corollary 1#`, `#theorem 1#`, `#corollary 2#`, `#remark 1#` | corollaries of 3.1 | `#theorem 3#` **done** (2026-09-20); `#corollary 1#`, `#theorem 1#`, `#corollary 2#` next |
 | 3.3 | `#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#corollary 6#` | the two-step construction machinery | todo |
 | 3.4 | `#theorem 4#` | the first "real" combinatorial argument (binary, three words) | todo |
-| 3.5 | `#definition 12#` + `#theorem 8#`, `#theorem 9#` | graph argument, independent of §IV | todo |
+| 3.5 | `#definition 12#` + `#theorem 8#`, `#theorem 9#` | graph argument, independent of §IV | **done** (2026-09-22) |
 | 3.6 | `#lemma 2#`, `#theorem 11#`, `#corollary 8#` | MDS connectivity | todo |
 | 3.7 | `#theorem 10#`, `#corollary 7#` | perfect codes (needs the packing/covering argument) | todo |
 | 3.8 | `#lemma 3#`, `#corollary 9#`–`#corollary 12#` | locally binary construction | todo |

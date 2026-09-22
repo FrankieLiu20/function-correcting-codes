@@ -130,9 +130,18 @@ in the same commit that does the work.
       (`flip`, `hammingDist_flip_self`, `hammingDist_flip_flip`,
       `eq_flip_of_hammingDist_eq_one`, `hammingDist_three_le_two_mul`,
       `exists_ne_eq_of_card_lt`).
-- [ ] 3.5 (next). `#definition 12#` (already stated) with `#theorem 8#` and
-      `#theorem 9#`: the minimum-distance graph `G(C)` and the obstruction to being
-      a strict FCC.  Check both statements against §V of the PDF first.
+- [x] 3.5. `#definition 12#` (already stated) with `#theorem 8#` and `#theorem 9#`:
+      the minimum-distance graph `G(C)` and the obstruction to being a strict FCC.
+      Checking them against §V found that both statements had to require the
+      encoding to have **range exactly `C`** (`Set.range enc = ↑C`, the paper's
+      `(n, q^k, d)` code) instead of merely `enc u ∈ C` — the latter is false
+      (`ISSUES.md` §14 has the counterexample).  Both are now proved, via the
+      internal lemma `connectedComponentMk_ne_of_isFCCData` (function values are
+      locally constant on `C`, hence constant on connected components).
+- [ ] 3.6 (next). `#lemma 2#` (`exists_mds_neighbor`), `#theorem 11#`
+      (`isConnected_minDistGraph_of_mds`) and `#corollary 8#`: the MDS case of
+      §V-B.  `#theorem 10#` (perfect codes) needs the packing/covering argument of
+      §V-B.  Check each statement against the PDF before proving.
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

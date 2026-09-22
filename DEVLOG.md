@@ -625,3 +625,41 @@ over the two elements).
 **Verification.**  `lake build` green, warning-free apart from the 34 `sorry`
 stubs; `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green
 (26 headline results).
+
+## 2026-09-22 (fifth session) — §V-A: `#theorem 8#` and `#theorem 9#`
+
+`sorry` 34 → 32; headline results 26 → 28.
+
+**Statement check first, and it mattered again (`ISSUES.md` §14).**  In §V the
+paper's `C` is a `(n, q^k, d)` code — exactly one codeword per message, "let `c_u`
+denote the codeword that corresponds to the message vector `u`" — so the encoding
+is a *bijection* onto `C`.  Our transcriptions only required `enc u ∈ C`, and that
+is **false**: `C = {000, 001, 100}` (a `V`, hence connected, with `d_min = 1`),
+`f` two-valued on `F₂¹`, `d_f = 2 > d = 1`, and `enc 0 = 001`, `enc 1 = 100` is a
+systematic `(f : 1, 2)`-FCC whose codewords all lie in `C` (the paper's setting is
+excluded because `|C| = 3 ≠ q^k = 2`).  Both statements now require the range to be
+exactly `C` (`Set.range enc = ↑C`), which is the paper's `(n, q^k, d)` code with
+its labelling.
+
+**The proof.**  The whole of §V-A is one observation plus propagation: a codeword
+cannot be the image of two messages carrying different values (`d_f ≤ d(x,x) = 0`),
+and two codewords at distance `d_min(C) = d < d_f` cannot be images of messages with
+different values either (`d_f ≤ d(x,y) = d`).  Hence the set of values carried by a
+codeword is a subsingleton and is *constant on connected components*; different
+values therefore live in different components.  `#theorem 8#` contradicts
+connectedness directly; `#theorem 9#` exhibits `Q + 1` pairwise different values
+(`|Im f| ≥ Q + 1`) and hence `Q + 1` distinct components, contradicting
+`componentCount = Q` (the count is `Nat.card G.ConnectedComponent`, and the
+injection `Fin (Q+1) → components` gives `Q + 1 ≤ Nat.card ...`).
+
+Implementation notes worth keeping: the propagation goes by induction on
+`SimpleGraph.Walk`, and the *explicit* constructor pattern `@cons x' z y' hxy p ih`
+is what names the intermediate vertex (`induction w with | cons ...` leaves it
+implicit, and then the membership hypotheses do not line up); the "same component ⇒
+reachable" bridge is `SimpleGraph.ConnectedComponent.exact`, and the counting is
+`Nat.card_le_card_of_injective` on `↥t ≤ Nat.card (minDistGraph C).ConnectedComponent`
+for a `Finset t` of `Q + 1` values.
+
+**Verification.**  `lake build` green, warning-free apart from the 32 `sorry`
+stubs; `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green
+(28 headline results).

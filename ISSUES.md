@@ -226,3 +226,33 @@ function `f ∘ C⁻¹` on the image.  The paper's clause "`n` denotes the minim
 possible length of a linear code ..." is a remark about which first step the
 scheme *uses*; both bounds hold for any systematic `[n,k,2t_d+1]` code, which is
 what the Lean statement assumes.
+
+## 14. `#theorem 8#`/`#theorem 9#`: the codeword set must be the *range* of the encoding
+
+**Found while checking §V against the PDF (2026-09-22); fixed and proved.**  In §V
+the paper works with a `(n, q^k, d)` code `C`: it has exactly `q^k` codewords, one
+per message ("let `c_u` denote the codeword that corresponds to the message vector
+`u ∈ F_q^k`"), so the encoding is a *bijection* onto `C`.  The first transcription
+weakened this to "all codewords lie in `C`" (`∀ u, enc u ∈ C`), and that makes both
+statements **false**:
+
+* counterexample: `k = 1`, `r = 2` (so `n = 3`), `F = F₂`, `C = {000, 001, 100}`,
+  `d = d_min(C) = 1` — the only pairs at distance one are `000–001` and `000–100`,
+  so `G(C)` is a `V`, hence connected — with `f` the two-valued function on `F₂¹`
+  (`|Im f| = 2`) and `d_f = 2 > d`.  The encoding `enc 0 = 001`, `enc 1 = 100` is
+  systematic, its codewords lie in `C`, and the only pair with different values is
+  at distance `3 ≥ 2 = d_f`, so it *is* an `(f : 1, 2)`-FCC whose codewords all lie
+  in `C` — although `G(C)` is connected.  (What the paper's setting excludes:
+  `|C| = 3 ≠ 2 = q^k`.)
+* the corrected statements require the range to be exactly `C`,
+  `Set.range enc = ↑C`, i.e. every codeword of `C` is used by the encoding.  That is
+  the paper's `(n, q^k, d)` code together with its labelling.
+
+With the correction both theorems are provable, and the proof shows where the
+hypothesis is used: function values are *locally constant* on `C` (two codewords at
+the minimum distance `d < d_f` cannot be images of messages with different values),
+so the set of values carried by a codeword is the same on every connected component
+— and that set is a subsingleton (one codeword cannot serve two values either,
+since `d_f ≤ d(x,x) = 0`).  Hence different function values force different
+components; `#theorem 8#` is the case `|Im f| ≥ 2` with `G(C)` connected, and
+`#theorem 9#` is the counting version with `Q` components and `|Im f| ≥ Q + 1`.
