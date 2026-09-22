@@ -40,3 +40,6 @@ optimalRedundancyData_ge_Nconst_sub
 optimalRedundancyData_le_N_cdrm_add
 two_step_redundancy_bounds
 two_mul_le_optimalRedundancyData
+# §V (non-existence of strict FCCs):
+not_isFCCData_of_components
+not_isFCCData_of_connected

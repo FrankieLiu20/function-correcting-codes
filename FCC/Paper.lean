@@ -1710,18 +1710,91 @@ not define that count for `SimpleGraph` — it is the natural next helper.
 `IsPerfect` and `IsMDS` are `(internal, §V-B)` definitions in `FCC/Basic.lean`,
 because §V-B introduces those two code classes in prose rather than numbered. -/
 
+omit [Fintype F] in
+/-- `(internal, §V-A — used by `#theorem 8#` and `#theorem 9#`)` — if an encoding
+uses *exactly* the codewords of `C` and is an `(f : d, d_f)`-FCC with
+`d = d_min(C)` and `d_f > d`, then two messages with different function values have
+their codewords in different connected components of `G(C)`.
+
+This is the graph-theoretic content of §V-A, and it is where the modelling of `C`
+matters: the paper's `C` is a `(n, q^k, d)` code, i.e. it has exactly one codeword
+per message, so the encoding is a bijection onto `C` (`Set.range enc = ↑C`).
+Asking only that the codewords *lie in* `C` would be too weak — `ISSUES.md` §14 has
+a counterexample.
+
+Proof: function values are locally constant on `C`.  If `x ≠ y` are codewords with
+`d(x,y) = d_min(C) = d < d_f`, they cannot be the images of messages with different
+values, since the FCC condition would give `d_f ≤ d(x,y) = d`.  Propagating this
+along a walk (every vertex of a walk from a codeword is a codeword) shows that the
+*set of values carried by* a codeword is the same for all codewords of a connected
+component; and that set is a subsingleton, because one codeword cannot serve two
+values either (`d_f ≤ d(x,x) = 0`).  Hence different values ⇒ different components. -/
+theorem connectedComponentMk_ne_of_isFCCData {k r d df : ℕ} {C : Finset (Word F (k + r))}
+    {enc : Word F k → Word F (k + r)} {f : Word F k → α}
+    (hmin : minDist C = d) (hfcc : IsFCCData f enc d df)
+    (hrange : Set.range enc = (↑C : Set (Word F (k + r)))) (hdf : d < df)
+    {p q : Word F k} (hpq : f p ≠ f q) :
+    (minDistGraph C).connectedComponentMk (enc p) ≠
+      (minDistGraph C).connectedComponentMk (enc q) := by
+  classical
+  have hsingle : ∀ x ∈ C, ∀ a1 a2, (∃ w, enc w = x ∧ f w = a1) →
+      (∃ w, enc w = x ∧ f w = a2) → a1 = a2 := by
+    rintro x _ a1 a2 ⟨u1, hu1, hf1⟩ ⟨u2, hu2, hf2⟩
+    by_contra hne
+    have hd := hfcc.2.2 u1 u2 (by rw [hf1, hf2]; exact hne)
+    rw [hu1, hu2, hammingDist_self] at hd
+    omega
+  have hadj : ∀ x ∈ C, ∀ y ∈ C, (minDistGraph C).Adj x y → ∀ a1 a2,
+      (∃ w, enc w = x ∧ f w = a1) → (∃ w, enc w = y ∧ f w = a2) → a1 = a2 := by
+    rintro x _ y _ hxy a1 a2 ⟨u1, hu1, hf1⟩ ⟨u2, hu2, hf2⟩
+    by_contra hne
+    have hd := hfcc.2.2 u1 u2 (by rw [hf1, hf2]; exact hne)
+    have hdist : hammingDist (enc u1) (enc u2) = d := by rw [hu1, hu2, hxy.2.2.2, hmin]
+    rw [hdist] at hd
+    omega
+  have hnonempty : ∀ x ∈ C, ∃ w, enc w = x := by
+    intro x hx
+    have : x ∈ Set.range enc := by rw [hrange]; exact hx
+    exact this
+  have hwalk : ∀ x y, ∀ w : (minDistGraph C).Walk x y, x ∈ C → y ∈ C → ∀ a1,
+      (∃ w, enc w = x ∧ f w = a1) → ∃ w, enc w = y ∧ f w = a1 := by
+    intro x y w
+    induction w with
+    | nil => intro _ _ a1 h; exact h
+    | @cons x' z y' hxy p ih =>
+      intro hx hy a1 h
+      obtain ⟨w2, hw2⟩ := hnonempty z hxy.2.2.1
+      have hval : a1 = f w2 := hadj x' hx z hxy.2.2.1 hxy a1 (f w2) h ⟨w2, hw2, rfl⟩
+      exact ih hxy.2.2.1 hy a1 ⟨w2, hw2, hval.symm⟩
+  intro heq
+  obtain ⟨w⟩ := SimpleGraph.ConnectedComponent.exact heq
+  have hpC : enc p ∈ (↑C : Set (Word F (k + r))) := by rw [← hrange]; exact ⟨p, rfl⟩
+  have hqC : enc q ∈ (↑C : Set (Word F (k + r))) := by rw [← hrange]; exact ⟨q, rfl⟩
+  obtain ⟨w', hw', hfw'⟩ := hwalk _ _ w hpC hqC (f p) ⟨p, rfl, rfl⟩
+  exact hpq (hsingle (enc q) hqC (f p) (f q) ⟨w', hw', hfw'⟩ ⟨q, rfl, rfl⟩)
+
+omit [Fintype F] in
 /-- `#theorem 8#` (§V-A) — "let `C` be a `(n, q^k, d)` code.  If the
 minimum-distance graph `G(C)` is a connected graph, then `C` cannot be an
 `(f : d, d_f)`-FCC for any `f : F_q^k → Im(f)` with `|Im(f)| ≥ 2` and `d_f > d`,
-equivalently `C` cannot be a strict `(f : d, d_f)`-FCC".  The encoding is
-required to have all its codewords in `C`, so that `G(C)` is the graph of the
-code under test. -/
+equivalently `C` cannot be a strict `(f : d, d_f)`-FCC".
+
+"`C` is an `(f : d, d_f)`-FCC" means the messages are encoded by *exactly* the
+codewords of `C` (the paper's `C` has `q^k` codewords, one per message), so the
+conclusion forbids an encoding whose range is `C` — `Set.range enc = ↑C`.  As noted
+in `ISSUES.md` §14, only asking `enc u ∈ C` would make the statement false.
+`hmin` records that `d = d_min(C)`. -/
 theorem not_isFCCData_of_connected {k r d df : ℕ} (C : Finset (Word F (k + r)))
     (hmin : minDist C = d) (hconn : (minDistGraph C).Preconnected) (f : Word F k → α)
     (h2 : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b)
     (hdf : d < df) :
-    ¬∃ enc : Word F k → Word F (k + r), IsFCCData f enc d df ∧ ∀ u, enc u ∈ C := by
-  sorry
+    ¬∃ enc : Word F k → Word F (k + r),
+      IsFCCData f enc d df ∧ Set.range enc = (↑C : Set (Word F (k + r))) := by
+  rintro ⟨enc, hfcc, hrange⟩
+  obtain ⟨a, b, hab, ⟨u, ha⟩, ⟨v, hb⟩⟩ := h2
+  have hpq : f u ≠ f v := by rw [ha, hb]; exact hab
+  exact connectedComponentMk_ne_of_isFCCData hmin hfcc hrange hdf hpq
+    (SimpleGraph.ConnectedComponent.sound (hconn (enc u) (enc v)))
 
 /-- `(internal, §V-A — used by `#theorem 9#`)` — the number `Q` of connected
 components of a graph: "if the minimum-distance graph `G(C)` has `Q` number of
@@ -1733,13 +1806,40 @@ noncomputable def componentCount {V : Type*} (G : SimpleGraph V) : ℕ :=
 /-- `#theorem 9#` (§V-A) — "let `C` be a `(n, q^k, d)` code.  If the
 minimum-distance graph `G(C)` has `Q` number of connected components, then `C`
 cannot be a `(f : d, d_f)`-FCC for any `f : F_q^k → Im(f)` with
-`|Im(f)| ≥ Q + 1` and `d_f > d`."  As in `#theorem 8#`, the encoding is required
-to have all its codewords in `C`. -/
+`|Im(f)| ≥ Q + 1` and `d_f > d`."  As in `#theorem 8#` the encoding must have range
+exactly `C` (`ISSUES.md` §14).
+
+Proof: by `connectedComponentMk_ne_of_isFCCData`, pairwise different function values
+have codewords in pairwise different components.  Choosing `Q + 1` messages with
+pairwise different values (possible because `|Im f| ≥ Q + 1`) therefore exhibits
+`Q + 1` distinct connected components, contradicting `componentCount = Q`. -/
 theorem not_isFCCData_of_components {k r d df Q : ℕ} (C : Finset (Word F (k + r)))
     (hmin : minDist C = d) (hQ : componentCount (minDistGraph C) = Q) (f : Word F k → α)
     (h2 : Q + 1 ≤ (Finset.univ.image f).card) (hdf : d < df) :
-    ¬∃ enc : Word F k → Word F (k + r), IsFCCData f enc d df ∧ ∀ u, enc u ∈ C := by
-  sorry
+    ¬∃ enc : Word F k → Word F (k + r),
+      IsFCCData f enc d df ∧ Set.range enc = (↑C : Set (Word F (k + r))) := by
+  rintro ⟨enc, hfcc, hrange⟩
+  obtain ⟨t, ht_sub, ht_card⟩ := Finset.exists_subset_card_eq h2
+  have hchoose : ∀ a : ↥t, ∃ u : Word F k, f u = (a : α) := by
+    intro a
+    obtain ⟨u, -, hu⟩ := Finset.mem_image.mp (ht_sub a.2)
+    exact ⟨u, hu⟩
+  let u : ↥t → Word F k := fun a => Classical.choose (hchoose a)
+  have hu : ∀ a : ↥t, f (u a) = (a : α) := fun a => Classical.choose_spec (hchoose a)
+  have hinj : Function.Injective fun a : ↥t =>
+      (minDistGraph C).connectedComponentMk (enc (u a)) := by
+    intro a b hab
+    by_contra hne
+    refine connectedComponentMk_ne_of_isFCCData hmin hfcc hrange hdf ?_ hab
+    rw [hu a, hu b]
+    exact fun h => hne (Subtype.ext h)
+  have hle : Nat.card ↥t ≤ Nat.card (minDistGraph C).ConnectedComponent :=
+    Nat.card_le_card_of_injective _ hinj
+  have ht : Nat.card ↥t = Q + 1 := by
+    rw [Nat.card_eq_fintype_card, ← Finset.card_univ, Finset.univ_eq_attach, Finset.card_attach,
+      ht_card]
+  have hQ' : Nat.card (minDistGraph C).ConnectedComponent = Q := hQ
+  omega
 
 /-- `#theorem 10#` (§V-B) — "the minimum-distance graph of a perfect `t`-error
 correcting code is connected". -/
