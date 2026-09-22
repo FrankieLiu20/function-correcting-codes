@@ -102,9 +102,30 @@ in the same commit that does the work.
       upper bound is attained by any CFDM `D`-code over `Im f`
       (`ISSUES.md` §13(d)).
 - [ ] 3.4 (next). `#theorem 4#` (`binary_optimalRedundancyData_ge`): over `F₂`,
-      `2 ≤ |Im f| ≤ k` gives `r_f(k,t_d,t_f) ≥ 2t_f + t_d`.  Check the printed
-      statement and proof against the PDF first (the section is §IV, after
-      `#theorem 3#`).
+      `2 ≤ |Im f| ≤ k` gives `r_f(k,t_d,t_f) ≥ 2t_f + t_d`.
+      **Statement checked against the PDF (2026-09-22): it matches as printed**
+      (`2 ≤ |Im f| ≤ k`, bound `2t_f + t_d`).  Proof plan, from the paper's
+      argument (pp. 4866–4867):
+      1. `exists_hammingDist_one_ne` gives `u₁` with a neighbour `u₂` at distance
+         one and `f u₂ ≠ f u₁`;
+      2. pigeonhole over the `k` neighbours `u₁ + eᵢ`: `f u₁` plus those `k` values
+         live in `Im f` of size `≤ k`, so either two neighbours share a value
+         (Case 1, with that value `≠ f u₁` since otherwise Case 2 applies) or some
+         neighbour has `f(u₁ + eᵢ) = f(u₁)` (Case 2);
+      3. in either case the three messages `u₁,u₂,u₃` are at pairwise distances
+         `1,1,2`, so the DRM of `#theorem 3#` reads
+         `[[0, 2t_f, 2t_f], [2t_f, 0, 2t_d−1], [2t_f, 2t_d−1, 0]]` (Case 1) or
+         `[[0, 2t_f, 2t_f−1], [2t_f, 0, 2t_d], [2t_f−1, 2t_d, 0]]` (Case 2);
+      4. for three *binary* words of length `r`, `d(p₁,p₂) + d(p₁,p₃) + d(p₂,p₃)
+         ≤ 2r` (each coordinate contributes at most `2`), which with the DRM
+         entries gives `4t_f + (2t_d−1) ≤ 2r` resp. `4t_f − 1 + 2t_d ≤ 2r`, hence
+         `r ≥ 2t_f + t_d`;
+      5. conclusion via the FCC attaining `r_f` (`exists_isFCCData`) and
+         `isDCode_drmData_of_isFCCData`, so no non-vacuity side condition is
+         needed (the same trick as the other lower bounds).
+      New internal bricks needed: distances of coordinate-flipped binary words
+      (`d(w, flip w i) = 1`, `d(flip w i, flip w j) = 2` for `i ≠ j`) and the
+      three-word sum bound `d(p₁,p₂) + d(p₁,p₃) + d(p₂,p₃) ≤ 2 * r`.
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.
