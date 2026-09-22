@@ -196,17 +196,33 @@ harmless generalization — and it is what makes `#corollary 4#` a one-liner.
 **(c) `#corollary 4#` also carries `hdf`.**  It combines `#theorem 2#` with
 `#theorem 5#`, so it inherits the standing `d_d ≤ d_f` of §IV (issue §11(a)).
 
-**(d) `#theorem 7#` does not yet say what the paper says.**  The paper bounds the
-redundancy `r_s` of the two-step *scheme* from both sides,
+**(d) `#theorem 7#` — reworked so that it says what the paper says (2026-09-22).**
+The paper bounds the redundancy `r_s` of the two-step *scheme* from both sides,
 `N(D_{C,f}(t_f : u₁,…,u_M)) + n − k ≤ r_s ≤ N(D_{C,f}(t_f : f₁,…,f_E)) + n − k`,
-with `r_s = (n−k) + r'` and `r'` the second-step redundancy.  Our
-`two_step_redundancy_bounds` asserts instead (i) the definitional unfolding of
-`schemeRedundancy` — a tautology standing in for the lower bound — and (ii)
-`N(CDRM(representatives)) + r ≤ N(CFDM over Im f) + r`.  Conjunct (ii) is a real
-statement (provable: a CFDM code is a CDRM code because
-`codedFDist f C a b ≤ d(c_{u_i},c_{u_j})`), but the *lower* bound on `r_s` is
-missing.  Making the theorem faithful requires the second step as a parameter of
-the scheme — an encoder on the codeword set `Im(C)` with the function
-`c_u ↦ f(u)` (i.e. `f ∘ C⁻¹`, well defined on `Im(C)` for injective `C`) — which
-is the §III-A construction not yet modelled.  Queued in `TODO.md` as the first
-task after phase 3.3; `#theorem 7#` therefore stays a `sorry` stub.
+with `r_s = (n−k) + r'` and `r'` the second-step block.  The first transcription
+asserted instead (i) the definitional unfolding of `schemeRedundancy` — a
+tautology standing in for the lower bound — and (ii) a comparison of two `N`'s,
+neither of which is the paper's statement.  It now reads:
+
+* the scheme is modelled by `twoStepCode C E` (the encoder `C_f(u) = C'_f(c_u)`
+  of §III-A: the codeword `C u` followed by the second block `E u`) and by
+  `IsSecondStep f C tf E`, which is the paper's Step 2 condition
+  `d(C'_f(c_u), C'_f(c_v)) ≥ d_f` for `f(u) ≠ f(v)`, i.e.
+  `d(C u,C v) + d(E u,E v) ≥ 2t_f+1`;
+* **lower bound**: every second step produces an `(f : 2t_d+1, 2t_f+1)`-FCC
+  (`twoStep_isFCCData`, the paper's "straightforward verification") whose total
+  redundancy `r_s = r + r'` is at least `N(D_{C,f}(u₁,…,u_M)) + n − k`: by Step 2
+  the block `E` is a `D`-code for the CDRM;
+* **upper bound**: any CFDM `D`-code of length `L` over the image values — the
+  index set of `#theorem 1#`, `ISSUES.md` §12 — gives a second step of block
+  length `L`, hence a scheme with `r_s = L + n − k`; taking `L := N(CFDM)` (which
+  exists in the paper's finite setting) is the printed upper bound.
+
+One further modelling note: the second step is a *block assignment*
+`E : Word F k → Word F r'` on the messages rather than a function on the codeword
+set `Im(C)`.  Since `C` has minimum distance `2t_d+1 ≥ 1` it is injective, so the
+two are the same data, and the message-indexed form avoids introducing a partial
+function `f ∘ C⁻¹` on the image.  The paper's clause "`n` denotes the minimum
+possible length of a linear code ..." is a remark about which first step the
+scheme *uses*; both bounds hold for any systematic `[n,k,2t_d+1]` code, which is
+what the Lean statement assumes.

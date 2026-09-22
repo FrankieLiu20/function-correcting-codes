@@ -544,3 +544,45 @@ is identically `0` and both sides are `0`.
 **Verification.**  `lake build` green, warning-free apart from the 36 `sorry`
 stubs; `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green
 (24 headline results).
+
+## 2026-09-22 (third session) — `#theorem 7#` reworked to the paper's statement, and proved
+
+`sorry` 36 → 35; headline results 24 → 25.
+
+**Statement check first (as requested).**  §III-A of the paper ("A General Method
+for Constructing `(f : D_d, d_f)`-FCCs") is a two-step scheme: Step 1 selects an
+`[n,k,d_d]` linear code with generator matrix `G` (`c_u = uG`); Step 2 builds an
+FCC **on the codeword set** `{c_u}`, i.e. a systematic `C'_f : C → F_q^{n+r'}`
+with `d(C'_f(c_{u₁}), C'_f(c_{u₂})) ≥ d_f` whenever `f(u₁) ≠ f(u₂)`; then
+`C_f(u) = C'_f(c_u)` is an `(f : d_d, d_f)`-FCC with total redundancy
+`r_s = n − k + r'`.  The old Lean statement of `#theorem 7#` captured none of
+this literally: it compared two `N`'s and its first conjunct was a definitional
+unfolding of `schemeRedundancy`.  Reworked (`ISSUES.md` §13(d)):
+
+* `twoStepCode C E` — the encoder `C_f(u) = (C u, E u)`, with `E` the second
+  block; its shape is `k + (r + r')` so that `schemeRedundancy r r'` is the total
+  redundancy (the reassociation `(k+r)+r' = k+(r+r')` is absorbed by
+  `hammingDist_comp_cast`);
+* `IsSecondStep f C tf E` — the paper's Step 2 condition for the *composite*
+  codewords: `d(C u, C v) + d(E u, E v) ≥ 2t_f + 1` when `f u ≠ f v`.  Note it is
+  genuinely weaker than "the block alone separates the values", which is why the
+  CDRM/CFDM enter at all;
+* `twoStep_isFCCData` — the paper's "straightforward verification": Step 1's
+  minimum distance gives `2t_d+1` for `u₁ ≠ u₂`, Step 2 gives `2t_f+1`;
+* the two bounds are now the paper's:
+  * lower: for **every** second step, `N(D_{C,f}(u₁,…,u_M)) + n − k ≤ r_s` —
+    because Step 2 makes the block `E` a `D`-code for the CDRM;
+  * upper: **any** CFDM `D`-code of length `L` over the image values `Im(f)` gives
+    a second step of block length `L`, hence a scheme with `r_s = L + (n−k)`;
+    taking `L := N(CFDM)` (available in the paper's finite setting) is the printed
+    upper bound.  This is where the new `codedFDist_le`
+    (`d_C(a,b) ≤ d(C u,C v)` for a witness pair) is used.
+
+The paper's clause "`n` denotes the minimum possible length of a linear code with
+dimension `k` and minimum distance `≥ 2t_d+1`" is a remark about *which* first
+step the scheme uses; both bounds hold for any systematic `[n,k,2t_d+1]` code, so
+it is not a hypothesis of the Lean statement (recorded in the docstring).
+
+**Verification.**  `lake build` green, warning-free apart from the 35 `sorry`
+stubs; `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green
+(25 headline results).

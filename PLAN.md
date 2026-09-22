@@ -78,7 +78,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#corollary 5#` | IV | binary version with the explicit `t_d log k` redundancy of `C` (carries the [1, App.] bound as a hypothesis) | `binary_optimalRedundancyData_le` | stated |
 | `#theorem 6#` | IV | `N(D_{C,f}(t_f:u₁,…,u_M)) ≤ N(M, 2(t_f−t_d))` | `N_cdrm_le_Nconst` | proved |
 | `#corollary 6#` | IV | `N(M,2(t_f−t_d)) ≤ 4(t_f−t_d)−2 )/(1−√…)` for `t_f−t_d ≥ 5`, `M ≤ 4(t_f−t_d)²`; and `N(4,2(t_f−t_d)) = 3(t_f−t_d)` | `N_cdrm_le_bounded` (first part needs `#lemma 1#`) | stated |
-| `#theorem 7#` | IV | for `C` an optimal-length `[n,k,2t_d+1]` linear code: `N(CDRM) + n−k ≤ r_s ≤ N(CFDM) + n−k` | `two_step_redundancy_bounds` | stated |
+| `#theorem 7#` | IV | for a systematic `[n,k,2t_d+1]` code `C`: the two-step scheme (`r_s = (n−k) + r'`, modelled by `twoStepCode`/`IsSecondStep`) satisfies `N(CDRM) + n−k ≤ r_s`, and `r_s = N(CFDM) + n−k` is achieved by any CFDM `D`-code | `two_step_redundancy_bounds` | proved |
 | `#remark 1#` | IV | design remark (`N(D)` as the reduction target) | — | recorded here only |
 
 #### §V Non-existence of strict `(f:d_d,d_f)`-FCCs

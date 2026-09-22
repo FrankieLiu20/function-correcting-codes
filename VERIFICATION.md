@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 24 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 36 (was 49: eleven paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 25 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 35 (was 49: twelve paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -133,6 +133,10 @@ Proved:
   (`N_drmData_le_N_cdrm_add`), `#corollary 4#`
   (`optimalRedundancyData_le_N_cdrm_add`) and `#theorem 6#`
   (`N_cdrm_le_Nconst`);
+* §IV: `#theorem 7#` (`two_step_redundancy_bounds`), reworked to the paper's
+  two-sided bound on the scheme redundancy `r_s` (the scheme is modelled by
+  `twoStepCode`/`IsSecondStep`, and `twoStep_isFCCData` is the paper's
+  "straightforward verification") — `ISSUES.md` §13(d);
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,
@@ -160,8 +164,8 @@ Two further statement deviations were found while comparing §IV with the paper
 and are recorded in `ISSUES.md` §13: `#theorem 5#`/`#corollary 4#` now carry the
 *systematic form* of `C` that the paper's proof assumes (`hCsys`; the WLOG is
 justified for linear codes, not for our arbitrary labelling map), and
-`#theorem 7#` is still a proxy for the paper's two-sided bound on the scheme
-redundancy `r_s` (queued for rework, `ISSUES.md` §13(d)).
+`#theorem 7#` was a proxy for the paper's two-sided bound on the scheme
+redundancy `r_s` and has since been reworked and proved (`ISSUES.md` §13(d)).
 
 ## Not formalized (and why)
 
