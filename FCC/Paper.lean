@@ -651,12 +651,24 @@ noncomputable def cfdm {k ℓ : ℕ} (f : Word F k → α) (C : Word F k → Wor
     α → α → ℕ :=
   fun a b => if a = b then 0 else max (2 * tf + 1 - codedFDist f C a b) 0
 
+omit [Fintype F] [DecidableEq α] in
+/-- `(internal, §III — used by `#lemma 8#` and `#theorem 7#`)` — the coded distance
+is at most the distance of any *witness pair*: if `f(u) = a` and `f(v) = b` then
+`d_C(a,b) ≤ d(C u, C v)`.  This is what makes a CFDM code usable as a second step
+in §III-A: the codeword pair `(c_u,c_v)` is one of the pairs the minimum defining
+`d_C(f(u),f(v))` ranges over. -/
+theorem codedFDist_le {k ℓ : ℕ} (f : Word F k → α) (C : Word F k → Word F ℓ) {a b : α}
+    {u v : Word F k} (hu : f u = a) (hv : f v = b) :
+    codedFDist f C a b ≤ hammingDist (C u) (C v) :=
+  Nat.sInf_le ⟨u, v, hu, hv, rfl⟩
+
 /-! ## §III — A construction procedure for FCCs with data protection
 
-TODO: `#definition 6#`, `#definition 7#`, `#definition 8#`, `#definition 9#`.
-
-The construction method of §III-A itself carries no number; it is formalized
-through `#theorem 5#` and `#corollary 4#` (§IV) together with the concrete
+Definitions 6–9 are above.  The construction method of §III-A itself carries no
+number; it is modelled in §IV by `twoStepCode` (the encoder `C_f(u) = C'_f(c_u)`)
+and `IsSecondStep` (the "Step 2" condition on the second block), and its two
+guarantees are `#theorem 5#`/`#corollary 4#` (the CDRM bound) and `#theorem 7#`
+(the two-sided bound on the scheme's total redundancy), together with the concrete
 constructions of §VI–§VII.
 -/
 
@@ -1425,35 +1437,150 @@ theorem N_cdrm_le_Nconst {k r m : ℕ} (f : Word F k → α) (td tf : ℕ)
 /-- `(internal, §III-A — used by `#theorem 7#`)` — the total redundancy `r_s` of
 the two-step construction: "the resulting mapping ... is an `(f : d_d, d_f)`-FCC
 with total redundancy `r_s = n − k + r'`", i.e. the redundancy `r` of the first
-code plus the length `r'` of the second (FCC) step.  The scheme of `#theorem 7#`
-uses an optimal second step, so `r' = N(CDRM)`. -/
+code plus the length `r'` of the second (FCC) step. -/
 def schemeRedundancy (r r' : ℕ) : ℕ := r + r'
 
-/-- `#theorem 7#` (§IV) — "let `C` be an `[n, k, 2t_d+1]` linear code, where `n`
-denotes the minimum possible length of a linear code with dimension `k` and
+/-- `(internal, §III-A)` — the encoder `C_f(u) = C'_f(c_u)` of the two-step
+construction of §III-A: the codeword `c_u = C u` (length `k + r`, `r = n − k`)
+followed by the second-step block `E u` (length `r'`).  The length of the result is
+`(k + r) + r' = k + (r + r')`; the statement below uses the `k + (r + r')` shape so
+that `schemeRedundancy r r'` is the total redundancy, and the distance lemmas undo
+the reassociation with `hammingDist_comp_cast`. -/
+def twoStepCode {k r r' : ℕ} (C : Word F k → Word F (k + r)) (E : Word F k → Word F r') :
+    Word F k → Word F (k + (r + r')) :=
+  fun u j => Fin.append (C u) (E u) (Fin.cast (Nat.add_assoc k r r').symm j)
+
+/-- `(internal, §III-A — the "Step 2" condition of `#theorem 7#`)` — the second step
+of the two-step construction: "construct an FCC based on the set `{c_u}` ... define a
+systematic encoding `C'_f` such that for any `u₁, u₂` with `f(u₁) ≠ f(u₂)`,
+`d(C'_f(c_{u₁}), C'_f(c_{u₂})) ≥ d_f`".  With `C'_f(c_u) = (c_u, E u)` this is
+`d(C u₁, C u₂) + d(E u₁, E u₂) ≥ d_f = 2t_f+1`; note that the second step is *not*
+required to separate the function values by itself (the codeword already helps),
+which is exactly why the CDRM/CFDM bounds below are of the form they are. -/
+def IsSecondStep {k r : ℕ} (f : Word F k → α) (C : Word F k → Word F (k + r)) (tf : ℕ)
+    {r' : ℕ} (E : Word F k → Word F r') : Prop :=
+  ∀ u v : Word F k, f u ≠ f v →
+    2 * tf + 1 ≤ hammingDist (C u) (C v) + hammingDist (E u) (E v)
+
+omit [Fintype F] [DecidableEq F] in
+/-- `(internal, §III-A)` — the composite encoder is systematic: the first `k`
+coordinates of `C_f(u)` are the message `u`, because the first step is. -/
+theorem twoStepCode_systematic {k r r' : ℕ} {C : Word F k → Word F (k + r)}
+    (hC : IsSystematic C) (E : Word F k → Word F r') : IsSystematic (twoStepCode C E) := by
+  intro u i
+  have hidx : Fin.cast (Nat.add_assoc k r r').symm (Fin.castAdd (r + r') i)
+      = Fin.castAdd r' (Fin.castAdd r i) := Fin.ext (by simp)
+  simp only [twoStepCode, hidx, Fin.append_left]
+  exact hC u i
+
+/-- `(internal, §III-A)` — the Hamming distance of two composite codewords is the
+sum of the two steps' distances: `d(C_f(u), C_f(v)) = d(C u, C v) + d(E u, E v)`. -/
+theorem hammingDist_twoStepCode {k r r' : ℕ} (C : Word F k → Word F (k + r))
+    (E : Word F k → Word F r') (u v : Word F k) :
+    hammingDist (twoStepCode C E u) (twoStepCode C E v) =
+      hammingDist (C u) (C v) + hammingDist (E u) (E v) := by
+  have hu : twoStepCode C E u = fun j => Fin.append (C u) (E u)
+      (Fin.cast (Nat.add_assoc k r r').symm j) := rfl
+  have hv : twoStepCode C E v = fun j => Fin.append (C v) (E v)
+      (Fin.cast (Nat.add_assoc k r r').symm j) := rfl
+  rw [hu, hv]
+  rw [hammingDist_comp_cast (Nat.add_assoc k r r').symm, hammingDist_append]
+
+omit [DecidableEq α] in
+/-- `(internal, §III-A)` — the paper's "it is straightforward to verify that the
+encoding `C_f` ... satisfies the properties of an `(f : d_d, d_f)`-FCC": if the first
+step has minimum distance `2t_d+1` and the second step satisfies Step 2, then
+`C_f = twoStepCode C E` is an `(f : 2t_d+1, 2t_f+1)`-FCC of redundancy `r + r'`.
+For `u₁ ≠ u₂` the codeword part alone gives `≥ d(c_{u₁},c_{u₂}) ≥ 2t_d+1`, and for
+`f(u₁) ≠ f(u₂)` Step 2 gives `2t_f+1` for the sum. -/
+theorem twoStep_isFCCData {k r r' : ℕ} (f : Word F k → α) (td tf : ℕ)
+    (C : Word F k → Word F (k + r)) (hCsys : IsSystematic C)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w))
+    (E : Word F k → Word F r') (hE : IsSecondStep f C tf E) :
+    IsFCCData f (twoStepCode C E) (2 * td + 1) (2 * tf + 1) := by
+  refine ⟨twoStepCode_systematic hCsys E, ?_, ?_⟩
+  · intro u v huv
+    have h := hC u v huv
+    rw [hammingDist_twoStepCode]
+    omega
+  · intro u v hf
+    have h := hE u v hf
+    rw [hammingDist_twoStepCode]
+    exact h
+
+/-- `#theorem 7#` (§IV, §III-A) — "let `C` be an `[n, k, 2t_d+1]` linear code, where
+`n` denotes the minimum possible length of a linear code with dimension `k` and
 minimum distance at least `2t_d + 1`.  Then, the redundancy `r_s` of the proposed
 scheme is bounded as
 `N(D_{C,f}(t_f : u₁,…,u_M)) + n − k ≤ r_s ≤ N(D_{C,f}(t_f : f₁,…,f_E)) + n − k`".
 
-With our `schemeRedundancy`, `r_s = r + N(CDRM)` (the scheme takes the second
-step optimal, `r' = N(CDRM)`); the two-sided bound is then the statement that the
-CDRM of a set of representatives is sandwiched by the CFDM of the whole function,
-whose `≤` half is the content of the theorem.  The representatives enter through
-`hsurj`/`hattain` exactly as in `#corollary 2#`.
+The scheme is modelled by its two steps (§III-A): the data-protection code `C`
+(redundancy `r = n − k`) and the second step `E` (block length `r'`), so that
+`r_s = schemeRedundancy r r' = r + r'` and the encoder is `twoStepCode C E`.  Both
+inequalities are stated at the level the paper states them:
 
-The CFDM is indexed by the *image* of `f` (the paper's `f₁, …, f_E`), i.e. by
-`Set.range f`; indexing it by the whole alphabet `α` would be wrong for the same
-reason as in `#theorem 1#` (`ISSUES.md` §12). -/
-theorem two_step_redundancy_bounds {k r E : ℕ} (f : Word F k → α) (tf : ℕ)
-    (C : Word F k → Word F (k + r)) (u : Fin E → Word F k)
-    (hsurj : ∀ v : Word F k, ∃ i : Fin E, f (u i) = f v)
-    (hattain : ∀ i j, f (u i) ≠ f (u j) →
-      hammingDist (u i) (u j) = fDist f (f (u i)) (f (u j))) :
-    schemeRedundancy r (N (F := F) (ι := Fin E) (cdrm f C tf u)) + 0 =
-        r + N (F := F) (ι := Fin E) (cdrm f C tf u) ∧
-      N (F := F) (ι := Fin E) (cdrm f C tf u) + r ≤
-        N (F := F) (ι := Set.range f) (fun a b => cfdm f C tf a.1 b.1) + r := by
-  sorry
+* **every** second step `E` (satisfying Step 2) produces an
+  `(f : 2t_d+1, 2t_f+1)`-FCC (`twoStep_isFCCData`) whose redundancy is at least
+  `N(D_{C,f}(t_f : u₁,…,u_M)) + n − k` — the lower bound, because the second step's
+  block is a `D`-code for the CDRM by Step 2;
+* taking the second step optimal for the CFDM attains `N(D_{C,f}(t_f : f₁,…,f_E))`
+  — the upper bound: **any** CFDM `D`-code of length `L` (over the image values
+  `Im f = {f₁,…,f_E}`, the paper's index set — see `ISSUES.md` §12) yields a second
+  step of block length `L`, hence a scheme with `r_s = L + n − k`.  In the paper's
+  finite setting the CFDM code set is non-empty, so `L := N(CFDM)` is available;
+  stating it as "any CFDM code" keeps the Lean statement free of that side
+  condition.
+
+The printed clause "`n` denotes the minimum possible length ..." is a remark about
+which first step the scheme *uses* (an optimal `[n,k,2t_d+1]` code); both bounds
+hold for any `[n,k,2t_d+1]` code in systematic form, which is what the statement
+assumes. -/
+theorem two_step_redundancy_bounds {k r : ℕ} (f : Word F k → α) (td tf : ℕ)
+    (C : Word F k → Word F (k + r)) (hCsys : IsSystematic C)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+    (∀ (r' : ℕ) (E : Word F k → Word F r'), IsSecondStep f C tf E →
+        IsFCCData f (twoStepCode C E) (2 * td + 1) (2 * tf + 1) ∧
+          N (F := F) (ι := Word F k) (cdrm f C tf fun v => v) + r ≤
+            schemeRedundancy r r') ∧
+      (∀ (L : ℕ) (q : Set.range f → Word F L),
+        (∀ a b : Set.range f, a ≠ b →
+          cfdm f C tf a.1 b.1 ≤ hammingDist (q a) (q b)) →
+        ∃ E : Word F k → Word F L,
+          IsSecondStep f C tf E ∧ schemeRedundancy r L = r + L) := by
+  classical
+  refine ⟨?_, ?_⟩
+  · intro r' E hE
+    refine ⟨twoStep_isFCCData f td tf C hCsys hC E hE, ?_⟩
+    have hcode : IsDCode (F := F) (cdrm f C tf fun v => v) r' := by
+      refine ⟨E, ?_⟩
+      intro u v huv
+      simp only [cdrm]
+      by_cases hf : f u = f v
+      · rw [ite_eq_left hf]
+        exact Nat.zero_le _
+      · rw [ite_eq_right hf]
+        refine max_le ?_ (Nat.zero_le _)
+        have := hE u v hf
+        omega
+    have hle := N_le_of_isDCode hcode
+    simp only [schemeRedundancy]
+    omega
+  · intro L q hq
+    refine ⟨fun u => q ⟨f u, ⟨u, rfl⟩⟩, ?_, rfl⟩
+    intro u v hf
+    show 2 * tf + 1 ≤ hammingDist (C u) (C v) +
+      hammingDist (q ⟨f u, ⟨u, rfl⟩⟩) (q ⟨f v, ⟨v, rfl⟩⟩)
+    have hidx : (⟨f u, ⟨u, rfl⟩⟩ : Set.range f) ≠ ⟨f v, ⟨v, rfl⟩⟩ :=
+      fun hh => hf (Subtype.ext_iff.mp hh)
+    have hq' := hq ⟨f u, ⟨u, rfl⟩⟩ ⟨f v, ⟨v, rfl⟩⟩ hidx
+    simp only [cfdm] at hq'
+    rw [ite_eq_right hf] at hq'
+    have h1 : 2 * tf + 1 - codedFDist f C (f u) (f v) ≤
+        hammingDist (q ⟨f u, ⟨u, rfl⟩⟩) (q ⟨f v, ⟨v, rfl⟩⟩) :=
+      le_trans (le_max_left _ _) hq'
+    have h2 : codedFDist f C (f u) (f v) ≤ hammingDist (C u) (C v) :=
+      codedFDist_le f C rfl rfl
+    omega
 
 /-! ## §V — Non-existence of strict `(f : d_d, d_f)`-FCCs
 

@@ -37,4 +37,5 @@ optimalRedundancyData_eq_N_drmData
 optimalRedundancyData_ge_N_subset
 optimalRedundancyData_ge_Nconst_sub
 optimalRedundancyData_le_N_cdrm_add
+two_step_redundancy_bounds
 two_mul_le_optimalRedundancyData
