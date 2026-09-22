@@ -78,14 +78,21 @@ in the same commit that does the work.
 - [x] 3.14. Non-vacuity of the FCC set (`exists_isFCCData`, by repeating the
       message `max d_d d_f` times) — which is what let `#theorem 2#` drop its
       `hex` hypothesis (`ISSUES.md` §11(b)) and makes the optimum attained.
-- [ ] 3.2 (next). `#corollary 1#` (`optimalRedundancy_ge_drm`,
-      `two_mul_le_optimalRedundancy`), `#theorem 1#` (`optimalRedundancy_le_fdm`),
-      `#corollary 2#` (`optimalRedundancy_eq_fdm`) — the §II analogues of
-      `#theorem 2#`/`#theorem 3#` without data protection.
-- [ ] 3.2 (statement fix, **do first**). Re-index the FDM of `#theorem 1#` and
-      `#corollary 2#` by the image of `f` (`ι := Set.range f`) instead of by the
-      ambient `α`: as transcribed they are false for an infinite `α`, see
-      `ISSUES.md` §12 (with the counterexample and the provable replacement).
+- [x] 3.2. `#corollary 1#` (`optimalRedundancy_ge_drm`,
+      `two_mul_le_optimalRedundancy`), `#theorem 1#` (`optimalRedundancy_le_fdm`)
+      and `#corollary 2#` (`optimalRedundancy_eq_fdm`) — the §II analogues of
+      `#theorem 2#`/`#theorem 3#` without data protection — with the internal
+      bricks `exists_isFCC`, `isDCode_drm_of_isFCC` (`hammingDist_eq_msg_add_red`,
+      `N_le_of_isDCode`, `fDist_le`, `optimalRedundancy_le_of` moved up so that
+      the §II statements can cite them).
+- [x] 3.2 (statement fix). Re-index the FDM/CFDM of `#theorem 1#` and
+      `#theorem 7#` by `Im(f)` (`ι := Set.range f`) instead of by the ambient
+      `α`, which was false for infinite `α` (`ISSUES.md` §12).  `#corollary 2#`
+      was not affected.
+- [ ] 3.3 (next). `#theorem 5#` (`N_drmData_le_N_cdrm_add`), `#corollary 4#`
+      (`optimalRedundancyData_le_N_cdrm_add`), `#theorem 6#` (`N_cdrm_le_Nconst`)
+      and `#theorem 7#` (`two_step_redundancy_bounds`, now with the corrected
+      CFDM index set) — the two-step construction machinery of §III-A.
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

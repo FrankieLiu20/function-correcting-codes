@@ -112,7 +112,7 @@ phase 3.0), `#example 5#`'s `N(D) = 6` (Plotkin, phase 3.11), and
 `#example 11#`, `#example 15#`, `#example 16#`, `#example 17#` (§VIII bounds or
 a value quoted from [1]).
 
-## Phase 3.2 — `#theorem 2#` and `#theorem 3#` proved (2026-09-20)
+## Phase 3.2 — the §II and §IV lower bounds proved (2026-09-20/22)
 
 Verified:
 
@@ -120,26 +120,37 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 17 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 43 (was 49; four paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 21 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 39 (was 49: eight paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
 
+* §II (the `(f,t)`-FCC bounds quoted from [1]): `#corollary 1#` in both parts
+  (`optimalRedundancy_ge_drm`, `two_mul_le_optimalRedundancy`), `#theorem 1#`
+  (`optimalRedundancy_le_fdm`) and `#corollary 2#` (`optimalRedundancy_eq_fdm`);
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,
   `N_drmData_le_of_isFCCData`, `optimalRedundancyData_le_of_isDCode`;
 * `#theorem 3#` in all three parts: `optimalRedundancyData_ge_N_subset`,
   `two_mul_le_optimalRedundancyData`, `optimalRedundancyData_ge_Nconst_sub`;
-* the non-vacuity brick `exists_isFCCData` (phase 3.14), on which the lower
-  bounds rest: an `(f : d_d, d_f)`-FCC always exists (`C u = (u, u, …, u)`).
+* the non-vacuity bricks `exists_isFCCData` (§III, phase 3.14) and `exists_isFCC`
+  (§II), on which every lower bound rests: an `(f, d_d, d_f)`-FCC always exists
+  (`C u = (u, u, …, u)`).
 
 Statement-level caveat for this result: the paper's implicit `d_d ≤ d_f` is an
 explicit hypothesis of `#theorem 2#` (it is used by the proof, and without it the
 identity is false); see `ISSUES.md` §11 and `Notation.md` §3.5.  The existence of
 an FCC, which the `sInf`-based `r_f` needs, is no longer a hypothesis: it is
 proved (`exists_isFCCData`).  `#theorem 3#` needs no extra hypothesis at all.
+
+Two statements had to be **corrected**, not merely proved: `#theorem 1#` and the
+upper-bound half of `#theorem 7#` indexed their FDM/CFDM by the whole alphabet
+`α`, which is false for infinite `α`; both now index by `Im(f)` (`Set.range f`),
+the paper's `f₁, …, f_E` — see `ISSUES.md` §12 for the counterexample and the
+reasoning.  `#corollary 1#`/`#corollary 2#` were re-checked and are faithful as
+printed (their DRMs are indexed by messages).
 
 ## Not formalized (and why)
 

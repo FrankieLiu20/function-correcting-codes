@@ -139,34 +139,38 @@ This removes `hex` from `#theorem 2#` and is what makes every lower bound of §I
 Only (a) remains as a hypothesis, and only of `#theorem 2#` and of the internal
 `optimalRedundancyData_le_of_isDCode`; no other row of the catalogue is affected.
 
-## 12. `#theorem 1#`/`#corollary 2#`: the FDM has to be indexed by `Im(f)`
+## 12. `#theorem 1#` and `#theorem 7#`: the FDM/CFDM must be indexed by `Im(f)`
 
-**Found while preparing the §II proofs (2026-09-20); the two statements need a
-fix before they can be proved.**  The paper's §II results of [1] index the FDM by
-the *image* of `f`: `D_f(t, f₁, …, f_E)` with `E = |Im(f)|`, a finite set.  Our
-transcriptions `optimalRedundancy_le_fdm` and `optimalRedundancy_eq_fdm` instead
-index `fdm f t` by the ambient alphabet `α`, so that `N` is taken over `α` — and
-in our signatures `α` is an arbitrary type.  As stated they are **false for
-infinite `α`**:
+**Found while preparing the §II proofs (2026-09-20), fixed 2026-09-22.**  The
+paper's matrices `D_f(t, f₁, …, f_E)` and `D_{C,f}(t_f, f₁, …, f_E)` are indexed
+by the *image* of `f` (`E = |Im(f)|`, the finitely many function values).  Two of
+our transcriptions instead handed `N` the matrix indexed by the ambient alphabet
+`α`, which in our signatures is an arbitrary type — `optimalRedundancy_le_fdm`
+(`#theorem 1#`, via `fdm`) and the upper-bound half of `two_step_redundancy_bounds`
+(`#theorem 7#`, via `cfdm`).  As stated they are **false for infinite `α`**:
 
-* `fDist f a b` is `0` when a preimage is empty (the blanket convention of
-  `#definition 4#`, issue §8), so for `a, b ∉ Im(f)` the FDM demands distance
-  `max(2t+1 − 0, 0) = 2t+1` between *distinct values*;
+* `fDist f a b = 0` (resp. `codedFDist f C a b = 0`) when a preimage is empty —
+  the blanket conventions of `#definition 4#`/`#definition 8#` (issue §8) — so
+  for `a, b ∉ Im(f)` the matrix demands distance `2t+1` between *distinct values*;
 * an infinite index set cannot be placed in the finite space `Word F r`, so the
-  FDM code set is empty and `N (fdm f t) = 0` by the `sInf ∅ = 0` convention
-  (issue §6) — while `r_f` can be positive;
+  code set is empty and `N = 0` by the `sInf ∅ = 0` convention (issue §6), while
+  the left-hand side can be positive;
 * concrete counterexample: `F = ZMod 2`, `k = 1`, `α = ℕ`, `f` the two-valued map
-  on the one-bit messages, `t = 1`.  Then `r_f = 2` (two messages at distance
-  `≥ 3` need length `≥ 3 = k + r`), but the right-hand side is `N (fdm f 1) = 0`.
+  on the one-bit messages, `t = 1`: `r_f = 2` (two messages at distance `≥ 3`
+  need length `≥ 3 = k + r`), while the `α`-indexed right-hand side is
+  `N (fdm f 1) = 0`.
 
-**Fix (queued as the next step of phase 3.2).**  Index the FDM by the image,
-i.e. state both results over `ι := Set.range f` (`{a : α // ∃ u, f u = a}`) with
-the matrix `fun a b => fdm f t a.1 b.1`.  That is the paper's
-`D_f(t, f₁, …, f_E)` literally, and with that index type the statements are
-provable with the phase-3.14 machinery: the FDM code set is nonempty — take a
-representative `u_a` of each image value (`fDist f a b ≤ d(u_a, u_b)`, and
-`d(u_a, u_b) ≥ 1` for `a ≠ b`) and repeat each representative `2t+1` times, giving
-distance `≥ 2t+1 ≥` every FDM entry — and the `optimalRedundancy_ge_drm`-style
-extraction runs on that code.  `#corollary 1#` (both halves) is unaffected: it
-indexes the DRM by the messages `u₁, …, u_m`, which is exactly what the paper
-does.
+**Fix (applied).**  Both statements now index the matrix by the image,
+`ι := Set.range f` (`{a : α // ∃ u, f u = a}`), with the matrix
+`fun a b => fdm f t a.1 b.1` (resp. `cfdm f C tf a.1 b.1`) — the paper's
+`f₁, …, f_E` literally.  The definitions `#definition 5#`/`#definition 9#` stay
+total functions on `α` (so that they need no subtype plumbing), and their
+docstrings now say that they are meant to be read on `Im(f)`, and why the
+whole-`α` index set is not merely unproved but wrong.
+
+**Not affected: `#corollary 1#` and `#corollary 2#`.**  Their right-hand sides are
+DRMs indexed by *messages* (`Fin m`, `Fin E`) — exactly what the paper does — so
+their statements were faithful as printed.  With the corrected `#theorem 1#` they
+are now proved too (the code set for the image-indexed FDM is nonempty: take a
+representative of each value and repeat it `2t+1` times, which is the same
+`repWord` device as in issue §11(b)).

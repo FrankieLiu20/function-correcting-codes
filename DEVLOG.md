@@ -445,3 +445,53 @@ optimum to be *attained* one may use `Nat.sInf_mem` / `Nat.find_spec`.
 **Verification.**  `lake build` green, warning-free apart from the 43 `sorry`
 stubs, `scripts/consistency_check.ps1 -Strict` green, `scripts/axioms_check.ps1`
 green (17 headline results, standard trusted base).
+
+## 2026-09-22 — the §II results proved, and two statements were *wrong* (fixed)
+
+`sorry` 43 → 39; headline results 17 → 21.
+
+**Two statements were wrong, not merely unproved (`ISSUES.md` §12).**
+`#theorem 1#` and the upper-bound half of `#theorem 7#` handed `N` the FDM / CFDM
+*indexed by the whole alphabet* `α`.  Because `fDist` (and `codedFDist`) are `0`
+on empty preimages (the blanket conventions of `#definition 4#`/`#definition 8#`,
+issue §8), every pair of values outside `Im(f)` then demands distance `2t+1`; an
+infinite `α` cannot be placed in the finite space `Word F r`, so the code set is
+empty, `N` collapses to `0` under the `sInf ∅ = 0` convention, and the inequality
+is false — counterexample in §12: `F = ZMod 2`, `k = 1`, `α = ℕ`, `t = 1`, where
+`r_f = 2` but the printed right-hand side is `0`.  Both are now indexed by
+`Im(f)` (`Set.range f`), the paper's `f₁, …, f_E`.  `#corollary 1#` and
+`#corollary 2#` were re-checked and are faithful as they stood: their right-hand
+sides are DRMs indexed by *messages*.
+
+**`#corollary 1#`, `#theorem 1#`, `#corollary 2#` are now proved.**  The §II
+half of the paper's framework needed its own bricks, and the file was
+reorganised so that they precede the statements that cite them (helpers may move,
+paper items may not):
+
+* `exists_isFCC` — an `(f,t)`-FCC always exists (write the message down `2t+1`
+  times): the §II analogue of `exists_isFCCData`, and the reason
+  `optimalRedundancy` is attained;
+* `isDCode_drm_of_isFCC` — an `(f,t)`-FCC extracted to a DRM `D`-code of the same
+  length (the §II analogue of `isDCode_drmData_of_isFCCData`);
+* `hammingDist_eq_msg_add_red`, `N_le_of_isDCode`, `fDist_le`,
+  `optimalRedundancy_le_of` and `exists_hammingDist_one_ne` were moved up from
+  the §IV block into an "(internal, §II)" block before the §II results.
+
+The proofs are the §II mirror images of `#theorem 2#`/`#theorem 3#`:
+`optimalRedundancy_ge_drm` restricts the optimal FCC to a subfamily;
+`two_mul_le_optimalRedundancy` uses the distance-one pair of
+`exists_hammingDist_one_ne` (on that pair the DRM reads `max(2t+1−1,0) = 2t`);
+`optimalRedundancy_le_fdm` turns an image-indexed FDM `D`-code `p` into the FCC
+`C u = (u, p_{f(u)})`; and `optimalRedundancy_eq_fdm` sends a `D`-code of a
+representative family to `C v = (v, p_{i(v)})` (the `hattain`/`hsurj`
+hypotheses) and, in the other direction, restricts the optimal FCC.
+
+**Why the corrected `#theorem 1#` is provable.**  The image-indexed FDM `D`-code
+set is nonempty: choose a representative `u_a` of each value `a ∈ Im(f)` and take
+`p a := u_a` repeated `2t+1` times (`repWord` again) — different values have
+different representatives, so the repeated words are at distance `≥ 2t+1 ≥` any
+FDM entry.  That is where the phase-3.14 machinery pays off a second time.
+
+**Verification.**  `lake build` green, warning-free apart from the 39 `sorry`
+stubs; `scripts/consistency_check.ps1 -Strict` green;
+`scripts/axioms_check.ps1` green (21 headline results).

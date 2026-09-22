@@ -48,10 +48,10 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#definition 3#` | II | Irregular-distance code (`D`-code) for `D ∈ ℕ^{M×M}`; `N(D)` = minimal length; `N(M,D)` for a constant matrix | `IsDCode`, `N`, `Nconst` | stated |
 | `#lemma 1#` | II | `N(M,D) ≤ 2(D−2)/(1−2/q)·ln D/D` for `D ≥ 10`, `M ≤ D²` | — | external ([10, Lem. 2]) |
 | `#definition 4#` | II | `d(fᵢ,fⱼ) = min{d(u₁,u₂) | f(u₁)=fᵢ, f(u₂)=fⱼ}` | `fDist` | stated |
-| `#definition 5#` | II | Function distance matrix (FDM), entries `max(2t+1−d(fᵢ,fⱼ),0)` off the diagonal | `fdm` | stated |
-| `#corollary 1#` | II | `r_f(k,t) ≥ N(D_f(t,u₁,…,u_m))` for any subset; and `≥ 2t` when `|Im f| ≥ 2` | `optimalRedundancy_ge_drm`, `two_mul_le_optimalRedundancy` | todo |
-| `#theorem 1#` | II | `r_f(k,t) ≤ N(FDM)` | `optimalRedundancy_le_fdm` | todo |
-| `#corollary 2#` | II | equality in `#theorem 1#` when a representative set realises the FDM | `optimalRedundancy_eq_fdm` | todo |
+| `#definition 5#` | II | Function distance matrix (FDM), entries `max(2t+1−d(fᵢ,fⱼ),0)` off the diagonal; defined on all of `α`, to be read on `Im(f)` | `fdm` | stated |
+| `#corollary 1#` | II | `r_f(k,t) ≥ N(D_f(t,u₁,…,u_m))` for any subset; and `≥ 2t` when `|Im f| ≥ 2` | `optimalRedundancy_ge_drm`, `two_mul_le_optimalRedundancy` | proved |
+| `#theorem 1#` | II | `r_f(k,t) ≤ N(FDM)`, the FDM indexed by `Im(f)` (`Set.range f`) — the whole-`α` index set is false for infinite `α`, `ISSUES.md` §12 | `optimalRedundancy_le_fdm` | proved |
+| `#corollary 2#` | II | equality in `#theorem 1#` when a representative set realises the FDM (stated over the DRM of the representatives, which `hattain` identifies with the FDM) | `optimalRedundancy_eq_fdm` | proved |
 | `#corollary 3#` | II | `r_wt(k,t) ≥ (10t³+30t²+20t+12)/(3t²+12t+12)` | — | external ([1, Cor. 3]) |
 
 #### §III A construction procedure for FCCs with data protection
