@@ -31,6 +31,7 @@ optimalRedundancy_ge_drm
 optimalRedundancy_le_fdm
 two_mul_le_optimalRedundancy
 # §IV (with data protection):
+binary_optimalRedundancyData_ge
 N_cdrm_le_Nconst
 N_drmData_le_N_cdrm_add
 optimalRedundancyData_eq_N_drmData

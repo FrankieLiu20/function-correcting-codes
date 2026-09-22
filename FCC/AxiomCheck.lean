@@ -48,6 +48,7 @@ namespace FCC
 #print axioms optimalRedundancyData_ge_N_subset
 #print axioms two_mul_le_optimalRedundancyData
 #print axioms optimalRedundancyData_ge_Nconst_sub
+#print axioms binary_optimalRedundancyData_ge
 #print axioms N_drmData_le_N_cdrm_add
 #print axioms optimalRedundancyData_le_N_cdrm_add
 #print axioms N_cdrm_le_Nconst

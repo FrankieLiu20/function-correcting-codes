@@ -1,4 +1,7 @@
 import FCC.Basic
+-- The binary results of §IV (`#theorem 4#`) are stated over `Word (ZMod 2) k`; this
+-- module needs `ZMod` for the coordinate-flip lemmas at the end.
+import Mathlib.Data.ZMod.Basic
 
 /-!
 # Counting words, spheres and balls
@@ -176,5 +179,173 @@ theorem hammingDist_repWord {F : Type*} [Fintype F] [DecidableEq F] {k : ℕ} (t
     rw [hammingDist_comp_cast (by rw [Nat.mul_succ, Nat.add_comm])
       (Fin.append u (repWord t u)) (Fin.append v (repWord t v))]
     rw [hammingDist_append, ih, Nat.succ_mul, Nat.add_comm]
+
+/-! ## Binary words: flipping coordinates
+
+`#theorem 4#` is the only binary-specific result of §IV: its proof moves around one
+message and its `k` neighbours `u + eᵢ`.  This section supplies the vocabulary it
+needs — `flip` (the neighbour `u + eᵢ`), the distance facts
+`d(u, u+eᵢ) = 1` and `d(u+eᵢ, u+eⱼ) = 2` for `i ≠ j`, the converse statement that a
+word at distance one from `u` *is* a flip of `u`, the fact that three binary words
+have pairwise distances summing to at most `2r` (each coordinate contributes to at
+most two of the three pairs), and the pigeonhole used on the `k` neighbours. -/
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — `a + 1 ≠ a` in `ZMod 2`. -/
+theorem zmod_two_add_one_ne_self (a : ZMod 2) : a + 1 ≠ a := fun h =>
+  one_ne_zero (add_left_cancel (show a + 1 = a + 0 by rw [add_zero]; exact h))
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — in `ZMod 2`, two different elements
+differ by one. -/
+theorem zmod_two_eq_add_one_of_ne {a b : ZMod 2} (h : a ≠ b) : a = b + 1 := by
+  revert h
+  revert a b
+  decide
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — toggle the `i`-th coordinate, i.e.
+the neighbour `u + eᵢ` of the standard basis vector `eᵢ`. -/
+def flip {k : ℕ} (w : Word (ZMod 2) k) (i : Fin k) : Word (ZMod 2) k :=
+  fun t => if t = i then w t + 1 else w t
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — flipping the same coordinate twice
+returns the word. -/
+theorem flip_flip {k : ℕ} (w : Word (ZMod 2) k) (i : Fin k) : flip (flip w i) i = w := by
+  funext t
+  by_cases ht : t = i
+  · rw [ht]
+    simp only [flip, ite_true]
+    rw [add_assoc, show (1 : ZMod 2) + 1 = 0 from by decide, add_zero]
+  · simp only [flip, ite_eq_right ht]
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — a neighbour is a different word. -/
+theorem flip_ne_self {k : ℕ} (w : Word (ZMod 2) k) (i : Fin k) : flip w i ≠ w := by
+  intro h
+  have h1 := congrFun h i
+  simp only [flip, ite_true] at h1
+  exact zmod_two_add_one_ne_self (w i) h1
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — `d(u, u+eᵢ) = 1`. -/
+theorem hammingDist_flip_self {k : ℕ} (w : Word (ZMod 2) k) (i : Fin k) :
+    hammingDist (flip w i) w = 1 := by
+  rw [hammingDist_eq_card_diffSet]
+  have hset : diffSet (flip w i) w = {i} := by
+    ext t
+    simp only [diffSet, Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_singleton]
+    constructor
+    · intro ht
+      by_contra hti
+      exact ht (by simp only [flip, ite_eq_right hti])
+    · intro hti
+      rw [hti]
+      simp only [flip, ite_true]
+      exact zmod_two_add_one_ne_self (w i)
+  rw [hset, Finset.card_singleton]
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — `d(u+eᵢ, u+eⱼ) = 2` for `i ≠ j`. -/
+theorem hammingDist_flip_flip {k : ℕ} (w : Word (ZMod 2) k) {i j : Fin k} (hij : i ≠ j) :
+    hammingDist (flip w i) (flip w j) = 2 := by
+  rw [hammingDist_eq_card_diffSet]
+  have hi : i ∈ diffSet (flip w i) (flip w j) := by
+    rw [diffSet, Finset.mem_filter]
+    refine ⟨Finset.mem_univ i, ?_⟩
+    simp only [flip, ite_true, ite_eq_right hij]
+    exact zmod_two_add_one_ne_self (w i)
+  have hj : j ∈ diffSet (flip w i) (flip w j) := by
+    rw [diffSet, Finset.mem_filter]
+    refine ⟨Finset.mem_univ j, ?_⟩
+    simp only [flip, ite_eq_right hij.symm, ite_true]
+    exact (zmod_two_add_one_ne_self (w j)).symm
+  have hsub : diffSet (flip w i) (flip w j) ⊆ {i, j} := by
+    intro t ht
+    rw [diffSet, Finset.mem_filter] at ht
+    rw [Finset.mem_insert, Finset.mem_singleton]
+    by_contra hcon
+    push Not at hcon
+    exact ht.2 (by simp only [flip, ite_eq_right hcon.1, ite_eq_right hcon.2])
+  have hcard2 : ({i, j} : Finset (Fin k)).card = 2 := by
+    rw [Finset.card_insert_of_notMem (by simpa using hij), Finset.card_singleton]
+  have hge : 2 ≤ (diffSet (flip w i) (flip w j)).card := by
+    have h2' : ({i, j} : Finset (Fin k)).card ≤ (diffSet (flip w i) (flip w j)).card :=
+      Finset.card_le_card (by
+        intro t ht
+        rw [Finset.mem_insert, Finset.mem_singleton] at ht
+        rcases ht with rfl | rfl
+        exacts [hi, hj])
+    rwa [hcard2] at h2'
+  have hle : (diffSet (flip w i) (flip w j)).card ≤ 2 := by
+    have h1' : (diffSet (flip w i) (flip w j)).card ≤ ({i, j} : Finset (Fin k)).card :=
+      Finset.card_le_card hsub
+    rwa [hcard2] at h1'
+  omega
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — in `ZMod 2` a word at distance one
+from `w` is a flip of `w` (the converse of `hammingDist_flip_self`). -/
+theorem eq_flip_of_hammingDist_eq_one {k : ℕ} {w v : Word (ZMod 2) k}
+    (h : hammingDist w v = 1) : ∃ i, v = flip w i := by
+  obtain ⟨i, hi⟩ : ∃ i, diffSet w v = {i} := by
+    have hc : (diffSet w v).card = 1 := by rw [← hammingDist_eq_card_diffSet]; exact h
+    exact Finset.card_eq_one.mp hc
+  refine ⟨i, ?_⟩
+  funext t
+  by_cases ht : t = i
+  · rw [ht]
+    have hmem : i ∈ diffSet w v := by rw [hi]; exact Finset.mem_singleton_self i
+    rw [diffSet, Finset.mem_filter] at hmem
+    have hswap : v i = w i + 1 := zmod_two_eq_add_one_of_ne hmem.2.symm
+    simp only [flip, ite_true]
+    exact hswap
+  · have hnot : t ∉ diffSet w v := by
+      rw [hi]
+      simpa [Finset.mem_singleton] using ht
+    rw [diffSet, Finset.mem_filter] at hnot
+    have heq : w t = v t := by
+      by_contra hne
+      exact hnot ⟨Finset.mem_univ t, hne⟩
+    simp only [flip, ite_eq_right ht]
+    exact heq.symm
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — any three binary words of length `r`
+have pairwise distances summing to at most `2r`: a coordinate contributes to at
+most two of the three pairs, since three pairwise different values cannot fit into
+`ZMod 2`. -/
+theorem hammingDist_three_le_two_mul {r : ℕ} (x y z : Word (ZMod 2) r) :
+    hammingDist x y + hammingDist x z + hammingDist y z ≤ 2 * r := by
+  have h1 : (diffSet x y).card = ∑ t : Fin r, (if x t ≠ y t then 1 else 0) := by
+    rw [diffSet, Finset.card_filter]
+  have h2 : (diffSet x z).card = ∑ t : Fin r, (if x t ≠ z t then 1 else 0) := by
+    rw [diffSet, Finset.card_filter]
+  have h3 : (diffSet y z).card = ∑ t : Fin r, (if y t ≠ z t then 1 else 0) := by
+    rw [diffSet, Finset.card_filter]
+  rw [hammingDist_eq_card_diffSet, hammingDist_eq_card_diffSet, hammingDist_eq_card_diffSet,
+    h1, h2, h3, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+  calc (∑ t : Fin r, ((if x t ≠ y t then 1 else 0) + (if x t ≠ z t then 1 else 0) +
+        (if y t ≠ z t then 1 else 0)))
+      ≤ ∑ _t : Fin r, 2 := by
+        refine Finset.sum_le_sum fun t _ => ?_
+        have hpt : ∀ a b c : ZMod 2,
+            ((if a ≠ b then (1 : ℕ) else 0) + (if a ≠ c then 1 else 0) +
+              (if b ≠ c then 1 else 0)) ≤ 2 := by decide
+        exact hpt (x t) (y t) (z t)
+    _ = 2 * r := by
+        rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul, Nat.mul_comm]
+
+/-- `(internal, §IV — used by `#theorem 4#`)` — pigeonhole: `k` values that all lie
+in a set of size `< k` are not pairwise different. -/
+theorem exists_ne_eq_of_card_lt {k : ℕ} {γ : Type*} [DecidableEq γ] {g : Fin k → γ}
+    {S : Finset γ} (hsub : ∀ i, g i ∈ S) (hcard : S.card < k) :
+    ∃ i j, i ≠ j ∧ g i = g j := by
+  by_contra hcon
+  push Not at hcon
+  have hinj : Function.Injective g := fun i j hij => by
+    by_contra hne
+    exact hcon i j hne hij
+  have hc : (Finset.univ.image g).card = k := by
+    rw [Finset.card_image_of_injective _ hinj, Finset.card_univ, Fintype.card_fin]
+  have hle : (Finset.univ.image g).card ≤ S.card := by
+    refine Finset.card_le_card ?_
+    intro a ha
+    rw [Finset.mem_image] at ha
+    obtain ⟨i, -, rfl⟩ := ha
+    exact hsub i
+  omega
 
 end FCC

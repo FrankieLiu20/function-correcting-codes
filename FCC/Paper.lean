@@ -1233,11 +1233,115 @@ theorem optimalRedundancyData_ge_Nconst_sub {k : ℕ} (f : Word F k → α) (td 
   omega
 
 /-- `#theorem 4#` (§IV) — over `F₂`: "for any function `f : F₂^k → Im(f)`, if
-`2 ≤ |Im(f)| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d`". -/
+`2 ≤ |Im(f)| ≤ k` then `r_f(k,t_d,t_f) ≥ 2t_f + t_d`" — the binary strengthening of
+`#theorem 3#`.
+
+Proof (the paper's, pp. 4866–4867): take a message `u₁` with a neighbour
+`u₂ = u₁ + e_j` at distance one and `f(u₂) ≠ f(u₁)` (`exists_hammingDist_one_ne`).
+The `k` neighbours `u₁ + eᵢ` together with `f(u₁)` take at most `|Im f| ≤ k` values,
+so either two neighbours share a value `≠ f(u₁)` (Case 1) or some neighbour has
+`f(u₁ + eᵢ) = f(u₁)` (Case 2).  In both cases the three messages involved are at
+pairwise distances `1, 1, 2`, so the corresponding redundancy blocks satisfy two
+bounds of `2t_f` and one of `2t_d − 1` (from the FCC conditions
+`d(Cu,Cv) ≥ 2t_f+1` resp. `2t_d+1` and the splitting identity).  Since three
+*binary* words of length `r` have pairwise distances summing to at most `2r`
+(`hammingDist_three_le_two_mul`), we get `4t_f + 2t_d − 1 ≤ 2r`, i.e.
+`r ≥ 2t_f + t_d`.  The FCC attaining `r_f` exists by `exists_isFCCData`. -/
 theorem binary_optimalRedundancyData_ge {k : ℕ} (f : Word (ZMod 2) k → α) (td tf : ℕ)
     (h2 : 2 ≤ (Finset.univ.image f).card) (hk : (Finset.univ.image f).card ≤ k) :
     2 * tf + td ≤ optimalRedundancyData f (2 * td + 1) (2 * tf + 1) := by
-  sorry
+  classical
+  obtain ⟨r, C, hC⟩ := exists_isFCCData f (2 * td + 1) (2 * tf + 1)
+  have hne : ∃ r' : ℕ, r' ∈ {r' : ℕ | ∃ C : Word (ZMod 2) k → Word (ZMod 2) (k + r'),
+      IsFCCData f C (2 * td + 1) (2 * tf + 1)} := ⟨r, C, hC⟩
+  rw [optimalRedundancyData, dite_eq_left hne]
+  have hspec := Nat.find_spec hne
+  simp only [Set.mem_ofPred_eq] at hspec
+  obtain ⟨C₀, hC₀⟩ := hspec
+  have hsys : IsSystematic C₀ := hC₀.1
+  have hex : ∃ u v : Word (ZMod 2) k, f u ≠ f v := by
+    obtain ⟨a, ha, b, hb, hab⟩ := Finset.one_lt_card.mp (by omega :
+      1 < (Finset.univ.image f).card)
+    rw [Finset.mem_image] at ha hb
+    obtain ⟨u, -, hu⟩ := ha
+    obtain ⟨v, -, hv⟩ := hb
+    exact ⟨u, v, by rw [hu, hv]; exact hab⟩
+  obtain ⟨u, v, huv⟩ := hex
+  obtain ⟨u₁, u₂, hd12, hf12⟩ := exists_hammingDist_one_ne f huv
+  by_cases hcase : ∃ i : Fin k, f (flip u₁ i) = f u₁
+  · -- Case 1 of the paper: a neighbour carries the value of `u₁`
+    obtain ⟨i, hi⟩ := hcase
+    obtain ⟨j, hj⟩ := eq_flip_of_hammingDist_eq_one hd12
+    have hji : j ≠ i := by
+      intro hji
+      exact hf12 (by rw [hj, hji, hi])
+    have e12 : 2 * tf ≤ hammingDist (redPart (C₀ u₁)) (redPart (C₀ u₂)) := by
+      have h := hC₀.2.2 u₁ u₂ hf12
+      rw [hammingDist_eq_msg_add_red hsys u₁ u₂, hd12] at h
+      omega
+    have e32 : 2 * tf - 1 ≤ hammingDist (redPart (C₀ u₂)) (redPart (C₀ (flip u₁ i))) := by
+      have hfe : f u₂ ≠ f (flip u₁ i) := by rw [hi]; exact hf12.symm
+      have h := hC₀.2.2 u₂ (flip u₁ i) hfe
+      have hd : hammingDist u₂ (flip u₁ i) = 2 := by
+        rw [hj]
+        exact hammingDist_flip_flip u₁ hji
+      rw [hammingDist_eq_msg_add_red hsys u₂ (flip u₁ i), hd] at h
+      omega
+    have e13 : 2 * td ≤ hammingDist (redPart (C₀ u₁)) (redPart (C₀ (flip u₁ i))) := by
+      have hne' : u₁ ≠ flip u₁ i := fun hh => flip_ne_self u₁ i hh.symm
+      have h := hC₀.2.1 u₁ (flip u₁ i) hne'
+      have hd : hammingDist u₁ (flip u₁ i) = 1 := by
+        rw [hammingDist_comm]
+        exact hammingDist_flip_self u₁ i
+      rw [hammingDist_eq_msg_add_red hsys u₁ (flip u₁ i), hd] at h
+      omega
+    have hsum := hammingDist_three_le_two_mul (redPart (C₀ u₁)) (redPart (C₀ u₂))
+      (redPart (C₀ (flip u₁ i)))
+    omega
+  · -- Case 2 of the paper: no neighbour carries the value of `u₁`
+    have hnot : ∀ i : Fin k, f (flip u₁ i) ≠ f u₁ := fun i hh => hcase ⟨i, hh⟩
+    have hsub : ∀ i : Fin k,
+        f (flip u₁ i) ∈ (Finset.univ.image f) \ {f u₁} := by
+      intro i
+      rw [Finset.mem_sdiff, Finset.mem_singleton]
+      exact ⟨Finset.mem_image.mpr ⟨flip u₁ i, Finset.mem_univ _, rfl⟩, hnot i⟩
+    have hlt : ((Finset.univ.image f) \ {f u₁}).card < k := by
+      have hmem : f u₁ ∈ Finset.univ.image f :=
+        Finset.mem_image.mpr ⟨u₁, Finset.mem_univ _, rfl⟩
+      have hc : ((Finset.univ.image f) \ {f u₁}).card = (Finset.univ.image f).card - 1 := by
+        rw [Finset.sdiff_singleton_eq_erase]
+        exact Finset.card_erase_of_mem hmem
+      omega
+    obtain ⟨i, j, hij, hval⟩ :=
+      exists_ne_eq_of_card_lt (g := fun i : Fin k => f (flip u₁ i)) hsub hlt
+    have e1i : 2 * tf ≤ hammingDist (redPart (C₀ u₁)) (redPart (C₀ (flip u₁ i))) := by
+      have h := hC₀.2.2 u₁ (flip u₁ i) (hnot i).symm
+      have hd : hammingDist u₁ (flip u₁ i) = 1 := by
+        rw [hammingDist_comm]
+        exact hammingDist_flip_self u₁ i
+      rw [hammingDist_eq_msg_add_red hsys u₁ (flip u₁ i), hd] at h
+      omega
+    have e1j : 2 * tf ≤ hammingDist (redPart (C₀ u₁)) (redPart (C₀ (flip u₁ j))) := by
+      have h := hC₀.2.2 u₁ (flip u₁ j) (hnot j).symm
+      have hd : hammingDist u₁ (flip u₁ j) = 1 := by
+        rw [hammingDist_comm]
+        exact hammingDist_flip_self u₁ j
+      rw [hammingDist_eq_msg_add_red hsys u₁ (flip u₁ j), hd] at h
+      omega
+    have eij : 2 * td - 1 ≤
+        hammingDist (redPart (C₀ (flip u₁ i))) (redPart (C₀ (flip u₁ j))) := by
+      have hne' : flip u₁ i ≠ flip u₁ j := by
+        intro hh
+        have hd0 : hammingDist (flip u₁ i) (flip u₁ j) = 0 := by rw [hh, hammingDist_self]
+        rw [hammingDist_flip_flip u₁ hij] at hd0
+        exact two_ne_zero hd0
+      have h := hC₀.2.1 (flip u₁ i) (flip u₁ j) hne'
+      have hd : hammingDist (flip u₁ i) (flip u₁ j) = 2 := hammingDist_flip_flip u₁ hij
+      rw [hammingDist_eq_msg_add_red hsys (flip u₁ i) (flip u₁ j), hd] at h
+      omega
+    have hsum := hammingDist_three_le_two_mul (redPart (C₀ u₁)) (redPart (C₀ (flip u₁ i)))
+      (redPart (C₀ (flip u₁ j)))
+    omega
 
 omit [Fintype F] in
 /-- `(internal, §IV — used by `#theorem 5#` and `#theorem 6#`)` — the CDRM entries
