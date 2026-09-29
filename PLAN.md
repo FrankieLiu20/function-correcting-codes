@@ -89,10 +89,10 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#theorem 8#` | V | if `G(C)` is connected then `C` is not a strict `(f:d,d_f)`-FCC for any `f` with `|Im f| ≥ 2`, `d_f > d` (the encoding must have range exactly `C`, the paper's `(n,q^k,d)` code — `ISSUES.md` §14) | `not_isFCCData_of_connected` | proved |
 | `#theorem 9#` | V | if `G(C)` has `Q` components then no `f` with `|Im f| ≥ Q+1` and `d_f > d` works (same range condition) | `not_isFCCData_of_components` | proved |
 | `#theorem 10#` | V | `G(C)` is connected for every perfect `t`-error-correcting code | `isConnected_minDistGraph_of_perfect` | todo |
-| `#corollary 7#` | V | `r_f(k:d_d,d_f) ≥ n−k+1` when a perfect code of length `n` exists | `perfect_optimalRedundancyData_ge` | todo |
-| `#lemma 2#` | V | MDS codes: for all `u,v` there is `u'` with `d(u,u') = d` and `d(u',v) ≤ d(u,v)−1` | `exists_mds_neighbor` | todo |
+| `#corollary 7#` | V | `r_f(k:d_d,d_f) ≥ n−k+1` when a perfect code of length `n` exists (sum up to `⌊(d_d−1)/2⌋` — the radius, `ISSUES.md` §15(a)) | `perfect_optimalRedundancyData_ge` | todo |
+| `#lemma 2#` | V | MDS codes: for all `u,v` there is `u'` with `d(u,u') = d` and `d(u',v) ≤ d(u,v)−1` (with `u ≠ v` explicit, `ISSUES.md` §15(c)) | `exists_mds_neighbor` | todo |
 | `#theorem 11#` | V | `G(C)` is connected for every MDS code | `isConnected_minDistGraph_of_mds` | todo |
-| `#corollary 8#` | V | `r_f(k:d_d,d_f) ≥ d` given an MDS `(n,q^k,d)` code | `mds_optimalRedundancyData_ge` | todo |
+| `#corollary 8#` | V | `r_f(k:d_d,d_f) ≥ d` given *existence* of an MDS `(n,q^k,d)` code and `|Im f| ≥ 2` (`ISSUES.md` §15(b)) | `mds_optimalRedundancyData_ge` | todo |
 
 #### §VI FCCs for specific functions
 

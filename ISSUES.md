@@ -256,3 +256,34 @@ so the set of values carried by a codeword is the same on every connected compon
 since `d_f ≤ d(x,x) = 0`).  Hence different function values force different
 components; `#theorem 8#` is the case `|Im f| ≥ 2` with `G(C)` connected, and
 `#theorem 9#` is the counting version with `Q` components and `|Im f| ≥ Q + 1`.
+
+## 15. §V-B: the Hamming-radius sum in `#corollary 7#`, and the hypotheses of `#corollary 8#`
+
+**Found while checking §V-B against the PDF (2026-09-29); both statements corrected.**
+
+**(a) `#corollary 7#`: the sum runs to `⌊(d_d−1)/2⌋`, not to `d_d/2`.**  The printed
+condition is `q^{n−k} = Σ_{i≤⌊(d_d−1)/2⌋} C(n,i)(q−1)^i`, i.e. the ball radius
+`(d_d−1)/2` (the number of errors a code of minimum distance `d_d` corrects).  The
+first transcription wrote `Finset.range (dd / 2 + 1)`, i.e. `i ≤ d_d/2`, which adds
+one spurious term when `d_d` is even (`d_d = 4`: `⌊3/2⌋ = 1` versus `4/2 = 2`).  That
+made the hypothesis strictly stronger than the paper's.  Fixed to
+`Finset.range ((dd - 1) / 2 + 1)`.
+
+**(b) `#corollary 8#`: the hypothesis is the *existence* of an MDS code, and
+`|Im(f)| ≥ 2` is needed.**  The paper writes "Assume there exists an MDS `(n, q^k, d)_q`
+code, i.e. `n = k + d − 1`".  The first transcription kept only the parameter
+relation `n = k + d − 1` and dropped `|Im(f)| ≥ 2`; as stated the corollary is
+**false**:
+
+* with a *constant* `f` (`|Im f| = 1`) the function-correcting condition is vacuous,
+  so an `(f : d, d_f)`-FCC only needs data protection at distance `d`.  Concretely
+  `F = F₂`, `k = 1`, `d = 2`, `n = k + d − 1 = 2`: the encoding `u ↦ (u,u)` is
+  systematic with `d(C0,C1) = 2 = d`, so a scheme of redundancy `1 < 2 = d` exists
+  and `d ≤ r_f` fails;
+* and the parameter relation alone does not give a code to apply `#theorem 8#`/`#theorem 11#`
+  to — for some triples with `n = k + d − 1` no MDS code exists at all (e.g. `q = 2`,
+  `n = 4`, `d = 3`: the Hamming bound forbids `M = 4`).
+
+The statement now takes `hmds : ∃ C : Finset (Word F n), IsMDS C d ∧ C.card = q^k`
+(the paper's "there exists an MDS code", which by `IsMDS` forces `n = k + d − 1`) and
+`h2 : |Im f| ≥ 2` (as in `#theorem 8#`).

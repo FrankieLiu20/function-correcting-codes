@@ -140,8 +140,31 @@ in the same commit that does the work.
       locally constant on `C`, hence constant on connected components).
 - [ ] 3.6 (next). `#lemma 2#` (`exists_mds_neighbor`), `#theorem 11#`
       (`isConnected_minDistGraph_of_mds`) and `#corollary 8#`: the MDS case of
-      §V-B.  `#theorem 10#` (perfect codes) needs the packing/covering argument of
-      §V-B.  Check each statement against the PDF before proving.
+      §V-B.  Statements checked against the PDF (2026-09-29): `#lemma 2#` matches
+      with `u ≠ v` explicit; `#corollary 8#` now takes the existence of an MDS code
+      plus `|Im f| ≥ 2` (`ISSUES.md` §15(b)).
+      **Proof plan for `#lemma 2#`** (the paper's, with one shortcut):
+      1. the *projection property* comes for free from the min-distance condition
+         alone: two codewords agreeing on `n − d + 1` coordinates would be at
+         distance `≤ d − 1 < d = d_min(C)`, hence equal; with `|C| = q^{n−d+1}` the
+         projection onto any `J` of size `n − d + 1` is bijective onto `J → F`;
+      2. take `J` of size `n − d + 1` containing all coordinates where `u` and `v`
+         agree (possible: that set has size `n − d(u,v) ≤ n − d = |J| − 1`), pick
+         `j ∈ J` where they differ, and let `u'` be the codeword agreeing with `u`
+         on `J \ {j}` and with `v` at `j`;
+      3. `d(u,u') ≤ 1 + |Jᶜ| = d` and `u' ≠ u`, so `d(u,u') = d`; and `u'` agrees
+         with `v` on the `≥ n − d(u,v) + 1` coordinates of `(Sᶜ ∪ {j})`, so
+         `d(u',v) ≤ d(u,v) − 1`.
+      **Then `#theorem 11#`** follows by strong induction on `d(u,v)`: apply
+      `#lemma 2#` to get a neighbour `u'` with `d(u',v) < d(u,v)` and concatenate the
+      edge `u–u'` with the inductive path.  `#corollary 8#` then combines
+      `#theorem 11#` with `#theorem 8#` (any `(f : d, d_f)`-FCC of redundancy `r'`
+      has an MDS codeword set of length `k + r'`, so `#theorem 8#` forces
+      `r' ≥ d`).
+- [ ] 3.7. `#theorem 10#` (perfect codes: `G(C)` connected) and `#corollary 7#`
+      (`r_f ≥ n − k + 1`): needs the packing/covering argument of §V-B — the balls
+      of radius `t` around codewords partition the space (`IsPerfect`), which is
+      already how `IsPerfect` is stated.
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

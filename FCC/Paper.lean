@@ -1850,7 +1850,22 @@ theorem isConnected_minDistGraph_of_perfect {F : Type*} [Zero F] [Fintype F] [De
 
 /-- `#lemma 2#` (§V-B) — "let `C` be an MDS code with parameters `(n, M, d)_q`,
 and let `u, v ∈ C`.  Then there exists `u' ∈ C` such that `d(u,u') = d` (i.e.
-`u'` is a neighbour of `u` in `G(C)`) and `d(u',v) ≤ d(u,v) − 1`". -/
+`u'` is a neighbour of `u` in `G(C)`) and `d(u',v) ≤ d(u,v) − 1`".
+
+`u ≠ v` is made explicit: the paper's proof uses `d(u,v) ≥ d > 0`, and for `u = v`
+the conclusion `d(u',u) ≤ d(u,u) − 1 = 0` would contradict `d(u,u') = d ≥ 1`.
+
+Proof (the paper's, which also gives the *projection property* for free): if two
+codewords of `C` agree on `n − d + 1` coordinates then they are at distance
+`≤ d − 1 < d = d_min(C)` and hence equal, so the projection onto any `J` of size
+`n − d + 1` is injective on `C`, and since `|C| = q^{n−d+1}` it is bijective.
+Take `J` of size `n − d + 1` containing every coordinate on which `u` and `v`
+agree, pick `j ∈ J` where they differ, and let `u'` be the codeword whose
+projection agrees with `u` except at `j`, where it agrees with `v`.  Then `u'`
+differs from `u` only at `j` and outside `J` (so `d(u,u') ≤ 1 + (d−1) = d`, and
+`u' ≠ u` forces equality), while `u'` agrees with `v` on all of the at least
+`n − d(u,v) + 1` coordinates where `u` already agreed or at `j` (so
+`d(u',v) ≤ d(u,v) − 1`). -/
 theorem exists_mds_neighbor {n d : ℕ} (C : Finset (Word F n)) (h : IsMDS C d)
     {u v : Word F n} (hu : u ∈ C) (hv : v ∈ C) (huv : u ≠ v) :
     ∃ u' ∈ C, u' ≠ u ∧ hammingDist u u' = d ∧ hammingDist u' v ≤ hammingDist u v - 1 := by
@@ -1865,10 +1880,14 @@ theorem isConnected_minDistGraph_of_mds {n d : ℕ} (C : Finset (Word F n))
 /-- `#corollary 7#` (§V-B) — "let `f : F_q^k → Im(f)` be a function.  Then for an
 `(f : d_d, d_f)`-FCC with `d_f > d_d` we have `r_f(k : d_d, d_f) ≥ n − k + 1`,
 where `n` is the integer satisfying
-`q^{n−k} = Σ_{i≤⌊(d_d−1)/2⌋} C(n,i)(q−1)^i`". -/
+`q^{n−k} = Σ_{i≤⌊(d_d−1)/2⌋} C(n,i)(q−1)^i`".
+
+The sum runs up to `⌊(d_d−1)/2⌋`, i.e. the ball radius `(d_d−1)/2` in `ℕ`
+(`(dd - 1) / 2`): the radius `d_d/2` used in the first transcription added one
+spurious term for even `d_d` — `ISSUES.md` §15(a). -/
 theorem perfect_optimalRedundancyData_ge {k n dd df : ℕ} (f : Word F k → α)
     (hperf : Fintype.card F ^ (n - k) =
-      ∑ i ∈ Finset.range (dd / 2 + 1), n.choose i * (Fintype.card F - 1) ^ i)
+      ∑ i ∈ Finset.range ((dd - 1) / 2 + 1), n.choose i * (Fintype.card F - 1) ^ i)
     (hlt : dd < df) :
     n - k + 1 ≤ optimalRedundancyData f dd df := by
   sorry
@@ -1876,9 +1895,23 @@ theorem perfect_optimalRedundancyData_ge {k n dd df : ℕ} (f : Word F k → α)
 /-- `#corollary 8#` (§V-B) — "let `f : F_q^k → Im(f)` be a function.  Assume
 there exists an MDS `(n, q^k, d)_q` code, i.e. `n = k + d − 1`.  Then for an
 `(f : d, d_f)`-FCC with `d_f > d` we have `r_f(k : d, d_f) ≥ n − k + 1 = d`,
-equivalently any such FCC must have length `≥ k + d`". -/
+equivalently any such FCC must have length `≥ k + d`".
+
+Two hypotheses that the printed statement leaves implicit are made explicit
+(`ISSUES.md` §15(b)):
+
+* `hmds` is the paper's "there exists an MDS `(n, q^k, d)_q` code" — an actual
+  code `C` of length `n`, minimum distance `d` and `q^k` codewords (which forces
+  `n = k + d − 1` by `IsMDS`).  The parameter relation alone is *not* enough: for
+  some triples with `n = k + d − 1` no MDS code exists, and the argument needs the
+  code (its `G(C)` is connected by `#theorem 11#`, so `#theorem 8#` applies);
+* `h2` is `|Im(f)| ≥ 2` (as in `#theorem 8#`): for a *constant* `f` the claim is
+  false — with `F = F₂`, `k = 1`, `d = 2`, `n = 2`, the encoding `u ↦ (u,u)` has
+  redundant part of length `1 < 2 = d`, so `r_f ≤ d − 1`. -/
 theorem mds_optimalRedundancyData_ge {k n d df : ℕ} (f : Word F k → α)
-    (hmds : n = k + d - 1) (hlt : d < df) :
+    (hmds : ∃ C : Finset (Word F n), IsMDS C d ∧ C.card = Fintype.card F ^ k)
+    (h2 : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b)
+    (hlt : d < df) :
     d ≤ optimalRedundancyData f d df := by
   sorry
 

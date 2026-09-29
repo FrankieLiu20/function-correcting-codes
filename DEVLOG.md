@@ -663,3 +663,39 @@ for a `Finset t` of `Q + 1` values.
 **Verification.**  `lake build` green, warning-free apart from the 32 `sorry`
 stubs; `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green
 (28 headline results).
+
+## 2026-09-29 — integrity audit, repository cleanup, and §V-B statement fixes
+
+**Audit (the user suspected an accidental change).**  Nothing was damaged.
+Evidence: `git status` clean, HEAD = `677691e` = remote `main`, no stray branches /
+tags / PRs, all 31 tracked files present, and the full pipeline re-run green
+(`lake build` exit 0 with 32 `sorry`s, `consistency_check.ps1 -Strict` green with
+73 rows and the module graph, `axioms_check.ps1` green with 28 headline results);
+the last CI runs on GitHub are green; the OneDrive side (notes + four papers) is
+intact.
+
+**One pre-existing defect found and fixed.**  The restructure that moved every
+module into `FCC/` had left two stale copies at the package root: `Basic.lean`
+(7 declarations vs 9 today) and `Paper.lean` (112 vs 156), both still tracked by
+git but not part of the library (the root module `FCC.lean` imports only `FCC/*`),
+so a reader could mistake the outdated root `Paper.lean` for the deliverable.  Both
+are removed, and `scripts/consistency_check.ps1` now **fails** if any `.lean` file
+other than `FCC.lean` sits at the package root, so this cannot come back unnoticed.
+
+**§V-B statements checked against the PDF — two corrections (`ISSUES.md` §15).**
+
+* `#corollary 7#`: the printed sum runs to `⌊(d_d−1)/2⌋` (the ball radius); the
+  transcription used `d_d/2`, adding one spurious term for even `d_d`.  Fixed.
+* `#corollary 8#`: the paper assumes the *existence* of an MDS `(n, q^k, d)` code,
+  and the claim needs `|Im f| ≥ 2`.  With only the parameter relation and no
+  `|Im f| ≥ 2` the statement is false: for constant `f`, `F = F₂`, `k = 1`,
+  `d = 2`, `n = 2`, the encoding `u ↦ (u,u)` has redundancy `1 < 2 = d`.  The
+  statement now takes `∃ C, IsMDS C d ∧ C.card = q^k` plus `|Im f| ≥ 2`.
+* `#lemma 2#` matches the paper with `u ≠ v` made explicit (the paper's proof uses
+  `d(u,v) ≥ d > 0`); its proof plan, including the observation that the *projection
+  property* of MDS codes follows from the minimum-distance condition alone, is
+  written out in `TODO.md` §3.6.
+
+`#theorem 10#` (`G(C)` connected for perfect codes) and `#corollary 8#` are the
+remaining §V-B proofs; `todo`/`proved` columns in `PLAN.md` are unchanged (32
+`sorry`s, 12 paper items proved).
