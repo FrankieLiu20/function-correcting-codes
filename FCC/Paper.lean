@@ -1695,7 +1695,17 @@ Definition 12 is below.  Still to come: `#theorem 8#`, `#theorem 9#`,
 /-- `#definition 12#` (§V) — the minimum-distance graph `G(C)`: "the graph whose
 vertex set is `C` and two distinct vertices `c₁, c₂ ∈ C` are adjacent if and only
 if `d(c₁, c₂) = d_min(C)`, where `d_min(C)` denotes the minimum distance of the
-code `C`". -/
+code `C`".
+
+The paper's graph has vertex set `C`; in Lean it is more convenient to use the
+ambient space `Word F n` as the vertex type and to fold the condition `x, y ∈ C` into
+adjacency, so that no subtype is needed downstream.  The two graphs have the same
+paths between codewords — any walk that starts at a codeword consists of codewords,
+because every edge joins two of them — and that is how "`G(C)` is connected" is
+stated from here on: *every two codewords are joined by a walk*
+(`∀ u ∈ C, ∀ v ∈ C, (minDistGraph C).Reachable u v`), not `(minDistGraph C).Preconnected`,
+which would also demand that words outside `C` — isolated vertices — be reachable
+(`ISSUES.md` §16). -/
 def minDistGraph {n : ℕ} (C : Finset (Word F n)) : SimpleGraph (Word F n) where
   Adj x y := x ≠ y ∧ x ∈ C ∧ y ∈ C ∧ hammingDist x y = minDist C
   symm := ⟨fun x y ⟨hxy, hx, hy, hd⟩ =>
@@ -1785,7 +1795,8 @@ conclusion forbids an encoding whose range is `C` — `Set.range enc = ↑C`.  A
 in `ISSUES.md` §14, only asking `enc u ∈ C` would make the statement false.
 `hmin` records that `d = d_min(C)`. -/
 theorem not_isFCCData_of_connected {k r d df : ℕ} (C : Finset (Word F (k + r)))
-    (hmin : minDist C = d) (hconn : (minDistGraph C).Preconnected) (f : Word F k → α)
+    (hmin : minDist C = d)
+    (hconn : ∀ u ∈ C, ∀ v ∈ C, (minDistGraph C).Reachable u v) (f : Word F k → α)
     (h2 : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b)
     (hdf : d < df) :
     ¬∃ enc : Word F k → Word F (k + r),
@@ -1793,15 +1804,21 @@ theorem not_isFCCData_of_connected {k r d df : ℕ} (C : Finset (Word F (k + r))
   rintro ⟨enc, hfcc, hrange⟩
   obtain ⟨a, b, hab, ⟨u, ha⟩, ⟨v, hb⟩⟩ := h2
   have hpq : f u ≠ f v := by rw [ha, hb]; exact hab
+  have hxu : enc u ∈ (↑C : Set (Word F (k + r))) := by rw [← hrange]; exact ⟨u, rfl⟩
+  have hxv : enc v ∈ (↑C : Set (Word F (k + r))) := by rw [← hrange]; exact ⟨v, rfl⟩
   exact connectedComponentMk_ne_of_isFCCData hmin hfcc hrange hdf hpq
-    (SimpleGraph.ConnectedComponent.sound (hconn (enc u) (enc v)))
+    (SimpleGraph.ConnectedComponent.sound (hconn (enc u) hxu (enc v) hxv))
 
 /-- `(internal, §V-A — used by `#theorem 9#`)` — the number `Q` of connected
-components of a graph: "if the minimum-distance graph `G(C)` has `Q` number of
-connected components".  (`Nat.card` of the quotient of vertices by reachability,
-so no `Fintype` instance on the quotient is needed.) -/
-noncomputable def componentCount {V : Type*} (G : SimpleGraph V) : ℕ :=
-  Nat.card G.ConnectedComponent
+components of `G(C)`: "if the minimum-distance graph `G(C)` has `Q` number of
+connected components".  Since `minDistGraph C` carries the ambient word space as
+its vertex type (see `#definition 12#`), the components of the paper's graph —
+whose vertex set is `C` — are exactly the components that *meet* `C`, i.e. the
+range of `x ↦ connectedComponentMk x` for `x ∈ C`.  (`Nat.card`, so no `Fintype`
+instance on the quotient type is needed; see `ISSUES.md` §16.) -/
+noncomputable def componentCount {n : ℕ} (C : Finset (Word F n)) : ℕ :=
+  Nat.card ↥(Set.range fun x : ↥C =>
+    (minDistGraph C).connectedComponentMk (x : Word F n))
 
 /-- `#theorem 9#` (§V-A) — "let `C` be a `(n, q^k, d)` code.  If the
 minimum-distance graph `G(C)` has `Q` number of connected components, then `C`
@@ -1814,7 +1831,7 @@ have codewords in pairwise different components.  Choosing `Q + 1` messages with
 pairwise different values (possible because `|Im f| ≥ Q + 1`) therefore exhibits
 `Q + 1` distinct connected components, contradicting `componentCount = Q`. -/
 theorem not_isFCCData_of_components {k r d df Q : ℕ} (C : Finset (Word F (k + r)))
-    (hmin : minDist C = d) (hQ : componentCount (minDistGraph C) = Q) (f : Word F k → α)
+    (hmin : minDist C = d) (hQ : componentCount C = Q) (f : Word F k → α)
     (h2 : Q + 1 ≤ (Finset.univ.image f).card) (hdf : d < df) :
     ¬∃ enc : Word F k → Word F (k + r),
       IsFCCData f enc d df ∧ Set.range enc = (↑C : Set (Word F (k + r))) := by
@@ -1826,26 +1843,36 @@ theorem not_isFCCData_of_components {k r d df Q : ℕ} (C : Finset (Word F (k + 
     exact ⟨u, hu⟩
   let u : ↥t → Word F k := fun a => Classical.choose (hchoose a)
   have hu : ∀ a : ↥t, f (u a) = (a : α) := fun a => Classical.choose_spec (hchoose a)
+  -- the components that meet `C`, i.e. the components of the paper's `G(C)`
+  let W : Set (minDistGraph C).ConnectedComponent :=
+    Set.range fun x : ↥C => (minDistGraph C).connectedComponentMk (x : Word F (k + r))
   have hinj : Function.Injective fun a : ↥t =>
-      (minDistGraph C).connectedComponentMk (enc (u a)) := by
+      (⟨(minDistGraph C).connectedComponentMk (enc (u a)),
+        ⟨⟨enc (u a), by
+            have h : enc (u a) ∈ Set.range enc := ⟨u a, rfl⟩
+            rw [hrange] at h
+            exact h⟩, rfl⟩⟩ : ↥W) := by
     intro a b hab
+    have hcomp := congrArg Subtype.val hab
     by_contra hne
-    refine connectedComponentMk_ne_of_isFCCData hmin hfcc hrange hdf ?_ hab
+    refine connectedComponentMk_ne_of_isFCCData hmin hfcc hrange hdf ?_ hcomp
     rw [hu a, hu b]
     exact fun h => hne (Subtype.ext h)
-  have hle : Nat.card ↥t ≤ Nat.card (minDistGraph C).ConnectedComponent :=
+  have hle : Nat.card ↥t ≤ Nat.card ↥W :=
     Nat.card_le_card_of_injective _ hinj
+  have hW : Nat.card ↥W = Q := by
+    have : Nat.card ↥W = componentCount C := rfl
+    rw [this, hQ]
   have ht : Nat.card ↥t = Q + 1 := by
     rw [Nat.card_eq_fintype_card, ← Finset.card_univ, Finset.univ_eq_attach, Finset.card_attach,
       ht_card]
-  have hQ' : Nat.card (minDistGraph C).ConnectedComponent = Q := hQ
   omega
 
 /-- `#theorem 10#` (§V-B) — "the minimum-distance graph of a perfect `t`-error
 correcting code is connected". -/
 theorem isConnected_minDistGraph_of_perfect {F : Type*} [Zero F] [Fintype F] [DecidableEq F]
     {n t : ℕ} (C : Finset (Word F n)) (h : IsPerfect C t) :
-    (minDistGraph C).Preconnected := by
+    ∀ u ∈ C, ∀ v ∈ C, (minDistGraph C).Reachable u v := by
   sorry
 
 /-- `#lemma 2#` (§V-B) — "let `C` be an MDS code with parameters `(n, M, d)_q`,
@@ -1869,13 +1896,197 @@ differs from `u` only at `j` and outside `J` (so `d(u,u') ≤ 1 + (d−1) = d`, 
 theorem exists_mds_neighbor {n d : ℕ} (C : Finset (Word F n)) (h : IsMDS C d)
     {u v : Word F n} (hu : u ∈ C) (hv : v ∈ C) (huv : u ≠ v) :
     ∃ u' ∈ C, u' ≠ u ∧ hammingDist u u' = d ∧ hammingDist u' v ≤ hammingDist u v - 1 := by
-  sorry
+  classical
+  have hmin : minDist C = d := h.2
+  have hcard : C.card = Fintype.card F ^ (n - d + 1) := h.1
+  have hduv : d ≤ hammingDist u v := by
+    rw [← hmin]
+    exact minDist_le hu hv huv
+  have hSn : hammingDist u v ≤ n := by
+    have := hammingDist_le_card_fintype (x := u) (y := v)
+    rwa [Fintype.card_fin] at this
+  -- `d ≥ 1`: the minimum distance is attained at a pair of distinct codewords
+  have hd1 : 1 ≤ d := by
+    have hne_min : ∃ d' : ℕ,
+        d' ∈ {d' : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d'} :=
+      ⟨hammingDist u v, ⟨u, hu, v, hv, huv, rfl⟩⟩
+    rw [← hmin, minDist, dite_eq_left hne_min]
+    obtain ⟨x, hx, y, hy, hxy, hval⟩ := Nat.find_spec hne_min
+    have := hammingDist_pos.mpr hxy
+    omega
+  -- the coordinates where `u` and `v` agree
+  set S := diffSet u v with hS
+  have hScard : S.card = hammingDist u v := by rw [hS, hammingDist_eq_card_diffSet]
+  set S' := Sᶜ with hS'
+  have hS'card : S'.card = n - hammingDist u v := by
+    rw [hS', Finset.card_compl, Fintype.card_fin, hScard]
+  -- a set `J` of `n - d + 1` coordinates containing all of them
+  obtain ⟨J, hS'J, -, hJcard⟩ :=
+    Finset.exists_subsuperset_card_eq (s := S') (t := Finset.univ) (n := n - d + 1) (by simp)
+      (by omega) (by rw [Finset.card_univ, Fintype.card_fin]; omega)
+  -- `J ∩ S` is non-empty (it has `k - |S'| ≥ 1` elements)
+  have hJS : (J ∩ S).Nonempty := by
+    have hdisj : Disjoint (J ∩ S) S' := by
+      rw [Finset.disjoint_left]
+      intro i hi hiS'
+      have hiS : i ∈ S := (Finset.mem_inter.mp hi).2
+      rw [hS', Finset.mem_compl] at hiS'
+      exact hiS' hiS
+    have hunion : (J ∩ S) ∪ S' = J := by
+      ext i
+      constructor
+      · intro hi
+        rw [Finset.mem_union] at hi
+        rcases hi with hi | hi
+        · exact (Finset.mem_inter.mp hi).1
+        · exact hS'J hi
+      · intro hi
+        rw [Finset.mem_union]
+        by_cases hiS : i ∈ S
+        · exact Or.inl (Finset.mem_inter.mpr ⟨hi, hiS⟩)
+        · exact Or.inr (by rw [hS', Finset.mem_compl]; exact hiS)
+    have hc : (J ∩ S).card + S'.card = J.card := by
+      rw [← Finset.card_union_of_disjoint hdisj, hunion]
+    exact Finset.card_pos.mp (by omega)
+  obtain ⟨j, hjj⟩ := hJS
+  have hjJ : j ∈ J := (Finset.mem_inter.mp hjj).1
+  have hjS : j ∈ S := (Finset.mem_inter.mp hjj).2
+  have hujvj : u j ≠ v j := by
+    have := hjS
+    rw [hS, diffSet, Finset.mem_filter] at this
+    exact this.2
+  -- the projection of `C` onto `J` is bijective
+  have hproj : ∀ t : {i // i ∈ J} → F, ∃ u' ∈ C, ∀ i : {i // i ∈ J}, u' i.1 = t i := by
+    intro t
+    let φ : ↥C → ({i // i ∈ J} → F) := fun x i => (x : Word F n) i.1
+    have hφinj : Function.Injective φ := by
+      intro x y hxy
+      by_contra hne
+      have hdist : d ≤ hammingDist (x : Word F n) (y : Word F n) := by
+        rw [← hmin]
+        exact minDist_le x.2 y.2 (fun hh => hne (Subtype.ext hh))
+      have hsub : diffSet (x : Word F n) (y : Word F n) ⊆ Jᶜ := by
+        intro i hi
+        rw [diffSet, Finset.mem_filter] at hi
+        rw [Finset.mem_compl]
+        intro hiJ
+        exact hi.2 (congrFun hxy ⟨i, hiJ⟩)
+      have h1 : (diffSet (x : Word F n) (y : Word F n)).card ≤ Jᶜ.card :=
+        Finset.card_le_card hsub
+      rw [hammingDist_eq_card_diffSet] at hdist
+      rw [Finset.card_compl, Fintype.card_fin, hJcard] at h1
+      omega
+    have hcard_eq : Fintype.card ↥C = Fintype.card ({i // i ∈ J} → F) := by
+      rw [Fintype.card_coe, Fintype.card_fun, Fintype.card_coe, hJcard, hcard]
+    have hsurj : Function.Surjective φ := by
+      by_contra hnot
+      have := Fintype.card_lt_of_injective_not_surjective φ hφinj hnot
+      omega
+    obtain ⟨x, hx⟩ := hsurj t
+    exact ⟨x, x.2, fun i => congrFun hx i⟩
+  -- the codeword `u'` agreeing with `u` on `J \ {j}` and with `v` at `j`
+  obtain ⟨u', hu'C, hu'J⟩ := hproj (fun i => if (i : Fin n) = j then v i.1 else u i.1)
+  have hne' : u' ≠ u := by
+    intro hcon
+    have h1 := hu'J ⟨j, hjJ⟩
+    simp only [ite_true] at h1
+    rw [hcon] at h1
+    exact hujvj h1
+  refine ⟨u', hu'C, hne', ?_, ?_⟩
+  · -- `d(u,u') = d`
+    have hle : hammingDist u u' ≤ d := by
+      rw [hammingDist_eq_card_diffSet]
+      have hsub : diffSet u u' ⊆ {j} ∪ Jᶜ := by
+        intro i hi
+        rw [diffSet, Finset.mem_filter] at hi
+        rw [Finset.mem_union]
+        by_cases hij : i = j
+        · exact Or.inl (Finset.mem_singleton.mpr hij)
+        · refine Or.inr ?_
+          rw [Finset.mem_compl]
+          intro hiJ
+          have h1 := hu'J ⟨i, hiJ⟩
+          rw [ite_eq_right hij] at h1
+          exact hi.2 h1.symm
+      calc (diffSet u u').card ≤ ({j} ∪ Jᶜ).card := Finset.card_le_card hsub
+        _ ≤ ({j} : Finset (Fin n)).card + Jᶜ.card := Finset.card_union_le _ _
+        _ = 1 + (d - 1) := by
+            rw [Finset.card_singleton, Finset.card_compl, Fintype.card_fin, hJcard]
+            omega
+        _ ≤ d := by omega
+    have hge : d ≤ hammingDist u u' := by
+      rw [← hmin]
+      exact minDist_le hu hu'C hne'.symm
+    omega
+  · -- `d(u',v) ≤ d(u,v) - 1`
+    rw [hammingDist_eq_card_diffSet]
+    have hsub : diffSet u' v ⊆ (S' ∪ {j})ᶜ := by
+      intro i hi
+      rw [diffSet, Finset.mem_filter] at hi
+      rw [Finset.mem_compl, Finset.mem_union, Finset.mem_singleton]
+      rintro (hiS' | hij)
+      · have hiS'c : i ∉ S := by
+          have hmem : i ∈ S' := hiS'
+          rw [hS', Finset.mem_compl] at hmem
+          exact hmem
+        have hij' : i ≠ j := fun h => hiS'c (by rw [h]; exact hjS)
+        have h1 := hu'J ⟨i, hS'J hiS'⟩
+        simp only [hij', ite_false] at h1
+        have h2 : u i = v i := by
+          by_contra hne
+          exact hiS'c (by rw [hS, diffSet, Finset.mem_filter]; exact ⟨Finset.mem_univ i, hne⟩)
+        exact hi.2 (h1.trans h2)
+      · subst hij
+        have h1 := hu'J ⟨i, hjJ⟩
+        simp only [ite_true] at h1
+        exact hi.2 h1
+    calc (diffSet u' v).card ≤ (S' ∪ {j})ᶜ.card := Finset.card_le_card hsub
+      _ = n - (S' ∪ {j}).card := by rw [Finset.card_compl, Fintype.card_fin]
+      _ = n - (S'.card + 1) := by
+          rw [Finset.card_union_of_disjoint]
+          · rw [Finset.card_singleton, Nat.add_comm]
+          · rw [Finset.disjoint_left]
+            intro i hi hi2
+            rw [Finset.mem_singleton] at hi2
+            rw [hS', Finset.mem_compl] at hi
+            exact hi (by rw [hi2]; exact hjS)
+      _ ≤ hammingDist u v - 1 := by
+          rw [hS'card]
+          omega
 
 /-- `#theorem 11#` (§V-B) — "the minimum-distance graph of any MDS code is
-connected". -/
+connected", i.e. every two codewords of `C` are joined by a walk in `G(C)` (see
+`#definition 12#` for why connectedness is stated this way). -/
 theorem isConnected_minDistGraph_of_mds {n d : ℕ} (C : Finset (Word F n))
-    (h : IsMDS C d) : (minDistGraph C).Preconnected := by
-  sorry
+    (h : IsMDS C d) : ∀ u ∈ C, ∀ v ∈ C, (minDistGraph C).Reachable u v := by
+  classical
+  have hmin : minDist C = d := h.2
+  have key : ∀ m : ℕ, ∀ u ∈ C, ∀ v ∈ C, hammingDist u v ≤ m →
+      (minDistGraph C).Reachable u v := by
+    intro m
+    induction m with
+    | zero =>
+      intro u hu v hv hm
+      have hzero : hammingDist u v = 0 := by omega
+      rw [hammingDist_eq_zero] at hzero
+      rw [hzero]
+    | succ m ih =>
+      intro u hu v hv hm
+      by_cases hle : hammingDist u v ≤ m
+      · exact ih u hu v hv hle
+      · have hd : hammingDist u v = m + 1 := by omega
+        have huv : u ≠ v := by
+          intro hcon
+          rw [hcon, hammingDist_self] at hd
+          omega
+        obtain ⟨u', hu'C, hne', hduu', hdec⟩ := exists_mds_neighbor C h hu hv huv
+        have hadj : (minDistGraph C).Adj u u' :=
+          ⟨hne'.symm, hu, hu'C, by rw [hduu', hmin]⟩
+        have hreach1 : (minDistGraph C).Reachable u u' := hadj.reachable
+        have hlt : hammingDist u' v ≤ m := by omega
+        exact hreach1.trans (ih u' hu'C v hv hlt)
+  intro u hu v hv
+  exact key (hammingDist u v) u hu v hv le_rfl
 
 /-- `#corollary 7#` (§V-B) — "let `f : F_q^k → Im(f)` be a function.  Then for an
 `(f : d_d, d_f)`-FCC with `d_f > d_d` we have `r_f(k : d_d, d_f) ≥ n − k + 1`,

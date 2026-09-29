@@ -41,5 +41,7 @@ optimalRedundancyData_le_N_cdrm_add
 two_step_redundancy_bounds
 two_mul_le_optimalRedundancyData
 # §V (non-existence of strict FCCs):
+exists_mds_neighbor
+isConnected_minDistGraph_of_mds
 not_isFCCData_of_components
 not_isFCCData_of_connected
