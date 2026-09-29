@@ -241,6 +241,18 @@ foreach ($f in $leanFiles) {
 }
 if ($orphans -eq 1) { $failed = 1 } else { Write-Host '  ok: all FCC modules are imported' }
 
+$strays = @(Get-ChildItem -Filter *.lean | Where-Object { $_.Name -ne 'FCC.lean' })
+if ($strays.Count -gt 0) {
+  foreach ($s in $strays) {
+    Write-Host "  stray .lean file at the package root: $($s.Name)"
+  }
+  Write-Host '  FAIL: the package root holds only the root module FCC.lean; modules live under FCC/'
+  Write-Host '        (a stale copy at the root is not built and can be mistaken for the deliverable)'
+  $failed = 1
+} else {
+  Write-Host '  ok: the package root holds only the root module FCC.lean'
+}
+
 $sorryCount = 0
 foreach ($f in $leanFiles) {
   foreach ($line in Get-Content -LiteralPath $f.FullName -Encoding UTF8) {
