@@ -138,29 +138,26 @@ in the same commit that does the work.
       (`ISSUES.md` §14 has the counterexample).  Both are now proved, via the
       internal lemma `connectedComponentMk_ne_of_isFCCData` (function values are
       locally constant on `C`, hence constant on connected components).
-- [ ] 3.6 (next). `#lemma 2#` (`exists_mds_neighbor`), `#theorem 11#`
-      (`isConnected_minDistGraph_of_mds`) and `#corollary 8#`: the MDS case of
-      §V-B.  Statements checked against the PDF (2026-09-29): `#lemma 2#` matches
-      with `u ≠ v` explicit; `#corollary 8#` now takes the existence of an MDS code
-      plus `|Im f| ≥ 2` (`ISSUES.md` §15(b)).
-      **Proof plan for `#lemma 2#`** (the paper's, with one shortcut):
-      1. the *projection property* comes for free from the min-distance condition
-         alone: two codewords agreeing on `n − d + 1` coordinates would be at
-         distance `≤ d − 1 < d = d_min(C)`, hence equal; with `|C| = q^{n−d+1}` the
-         projection onto any `J` of size `n − d + 1` is bijective onto `J → F`;
-      2. take `J` of size `n − d + 1` containing all coordinates where `u` and `v`
-         agree (possible: that set has size `n − d(u,v) ≤ n − d = |J| − 1`), pick
-         `j ∈ J` where they differ, and let `u'` be the codeword agreeing with `u`
-         on `J \ {j}` and with `v` at `j`;
-      3. `d(u,u') ≤ 1 + |Jᶜ| = d` and `u' ≠ u`, so `d(u,u') = d`; and `u'` agrees
-         with `v` on the `≥ n − d(u,v) + 1` coordinates of `(Sᶜ ∪ {j})`, so
-         `d(u',v) ≤ d(u,v) − 1`.
-      **Then `#theorem 11#`** follows by strong induction on `d(u,v)`: apply
-      `#lemma 2#` to get a neighbour `u'` with `d(u',v) < d(u,v)` and concatenate the
-      edge `u–u'` with the inductive path.  `#corollary 8#` then combines
-      `#theorem 11#` with `#theorem 8#` (any `(f : d, d_f)`-FCC of redundancy `r'`
-      has an MDS codeword set of length `k + r'`, so `#theorem 8#` forces
-      `r' ≥ d`).
+- [x] 3.6 (part 1). `#lemma 2#` (`exists_mds_neighbor`) and `#theorem 11#`
+      (`isConnected_minDistGraph_of_mds`): the MDS case of
+      §V-B.  Proved 2026-09-29.  While proving them, two modelling points were
+      found and fixed (`ISSUES.md` §16): `minDistGraph`'s vertex type is the
+      ambient word space (so "connected" must be stated as codeword reachability,
+      not `Preconnected`), and `componentCount` had to be redefined to count the
+      components meeting `C`.
+- [ ] 3.6 (part 2, next). `#corollary 8#` (`mds_optimalRedundancyData_ge`):
+      combine `#theorem 11#` with `#theorem 8#` — every `(f : d, d_f)`-FCC of
+      redundancy `r'` has an MDS codeword set of length `k + r'` (`|C| = q^k`,
+      minimum distance `≥ d`, so Singleton equality), which `#theorem 8#` forbids
+      unless `r' ≥ d`.  (Statement already fixed for `ISSUES.md` §15(b).)
+
+      The proofs of `#lemma 2#` and `#theorem 11#` are done (2026-09-29) and use the
+      shortcut recorded here previously: the *projection property* of MDS codes
+      follows from the minimum-distance condition alone — two codewords agreeing on
+      `n − d + 1` coordinates are at distance `≤ d − 1 < d`, hence equal — so the
+      projection onto any `J` of size `n − d + 1` is injective on `C` and, with
+      `|C| = q^{n−d+1}`, bijective; then `#theorem 11#` iterates `#lemma 2#` by
+      induction on `d(u,v)`.
 - [ ] 3.7. `#theorem 10#` (perfect codes: `G(C)` connected) and `#corollary 7#`
       (`r_f ≥ n − k + 1`): needs the packing/covering argument of §V-B — the balls
       of radius `t` around codewords partition the space (`IsPerfect`), which is

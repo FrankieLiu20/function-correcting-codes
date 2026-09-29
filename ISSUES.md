@@ -287,3 +287,27 @@ relation `n = k + d − 1` and dropped `|Im(f)| ≥ 2`; as stated the corollary 
 The statement now takes `hmds : ∃ C : Finset (Word F n), IsMDS C d ∧ C.card = q^k`
 (the paper's "there exists an MDS code", which by `IsMDS` forces `n = k + d − 1`) and
 `h2 : |Im f| ≥ 2` (as in `#theorem 8#`).
+
+## 16. `minDistGraph` has the ambient word space as its vertex type
+
+**Found while proving `#lemma 2#`/`#theorem 11#` (2026-09-29); the connectivity
+statements were corrected.**  The paper's `G(C)` has vertex set `C` ("the graph
+whose vertex set is `C`"), whereas our `minDistGraph C : SimpleGraph (Word F n)`
+uses the ambient space as the vertex type and folds `x, y ∈ C` into the adjacency
+relation.  The two graphs have the same paths *between codewords* — a walk starting
+at a codeword runs through codewords only, because every edge joins two of them —
+but the connectivity *predicate* differs: `(minDistGraph C).Preconnected` also
+demands that words outside `C` be reachable, and those are isolated, so it is false
+for every proper code.  Hence:
+
+* "`G(C)` is connected" is stated as *codeword reachability*,
+  `∀ u ∈ C, ∀ v ∈ C, (minDistGraph C).Reachable u v`, in `#theorem 8#`/`#theorem 9#`
+  (hypothesis) and `#theorem 10#`/`#theorem 11#` (conclusion).  This is exactly
+  "the graph on vertex set `C` is connected", so nothing is weakened;
+* `componentCount` (internal, used by `#theorem 9#`) now counts the components of
+  the paper's graph, i.e. the components of `minDistGraph C` that meet `C`:
+  `Nat.card ↥(Set.range fun x : ↥C => (minDistGraph C).connectedComponentMk x)`.
+  The previous version counted *all* components of the ambient graph, which
+  included one isolated component per word outside `C`; that made `#theorem 9#`'s
+  hypothesis `componentCount = Q` strictly stronger than the paper's (its `Q` was
+  `q^n − |C|` too large).

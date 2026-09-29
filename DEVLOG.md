@@ -699,3 +699,39 @@ other than `FCC.lean` sits at the package root, so this cannot come back unnotic
 `#theorem 10#` (`G(C)` connected for perfect codes) and `#corollary 8#` are the
 remaining §V-B proofs; `todo`/`proved` columns in `PLAN.md` are unchanged (32
 `sorry`s, 12 paper items proved).
+
+## 2026-09-29 (second session) — §V-B: `#lemma 2#` and `#theorem 11#` proved
+
+`sorry` 32 → 30; headline results 28 → 30.
+
+**`#lemma 2#`** (an MDS code has, for every pair of codewords `u ≠ v`, a neighbour
+`u'` of `u` with `d(u',v) ≤ d(u,v) − 1`).  The proof is the paper's, with one
+shortcut worth remembering: the *projection property* of MDS codes needs no linear
+algebra — if two codewords agree on `n − d + 1` coordinates then they are at
+distance `≤ d − 1 < d = d_min(C)` and hence equal, so the projection onto any `J`
+of size `n − d + 1` is injective on `C`; since `|C| = q^{n−d+1}` it is bijective, by
+`Fintype.card_lt_of_injective_not_surjective`.  Choose `J` through
+`Finset.exists_subsuperset_card_eq` (a superset of the agreement set, of size
+`n − d + 1`), pick `j ∈ J ∩ S` where `u` and `v` differ, and let `u'` be the
+codeword agreeing with `u` on `J \ {j}` and with `v` at `j`; then
+`d(u,u') ≤ 1 + |Jᶜ| = d` with `u' ≠ u` forces `d(u,u') = d`, and `Sᶜ ∪ {j}` are
+agreements of `u'` and `v`, giving `d(u',v) ≤ d(u,v) − 1`.
+
+**`#theorem 11#`** then follows by induction on `d(u,v)`: `#lemma 2#` supplies a
+neighbour `u'` of `u` with `d(u',v) < d(u,v)`, and the walk is the edge `u–u'`
+followed by the inductive one.
+
+**Two modelling corrections found on the way (`ISSUES.md` §16).**  `minDistGraph C`
+has the *ambient word space* as its vertex type (only codewords carry edges), so
+`(minDistGraph C).Preconnected` is false for every proper code — it demands that the
+isolated non-codewords be reachable.  "`G(C)` is connected" is therefore stated as
+codeword reachability `∀ u ∈ C, ∀ v ∈ C, Reachable u v` in `#theorem 8#`/`#theorem 9#`
+(hypotheses, re-proved) and `#theorem 10#`/`#theorem 11#` (conclusions).  And
+`componentCount` had counted *all* components of the ambient graph (one extra
+isolated component per non-codeword, making `#theorem 9#`'s `Q` about `q^n − |C|`
+too large); it now counts the components that meet `C`.
+
+**Verification.**  `lake build` green, warning-free apart from the 30 `sorry` stubs;
+`consistency_check.ps1 -Strict` green; `axioms_check.ps1` green (30 headline
+results).  Next: `#corollary 8#`, then `#theorem 10#`/`#corollary 7#` (perfect
+codes).
