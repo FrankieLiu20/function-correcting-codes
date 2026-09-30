@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 31 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 30 (was 49: seventeen paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 32 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 29 (was 49: eighteen paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -148,7 +148,13 @@ Proved:
   (`ISSUES.md` §16);
 * the **Singleton bound** `card_le_pow_minDist` (`|C| ≤ q^{n − d_min + 1}`), which
   the paper quotes from [17] and which is proved here from the projection argument
-  (`FCC/Balls.lean`), in preparation for `#corollary 8#`;
+  (`FCC/Balls.lean`); it is one of the two ingredients of `#corollary 8#`;
+* §V-B (MDS optimality): `#corollary 8#` (`mds_optimalRedundancyData_ge`) — if an
+  MDS `(n, q^k, d)` code exists and `|Im f| ≥ 2`, then `d ≤ r_f(k : d, d_f)` for
+  `d < d_f`.  A hypothetical optimum with redundancy `r < d` has an injective
+  encoding, so its codeword set `C'` has `q^k` words and `d_min(C') ≥ d`; for
+  `r = d − 1` Singleton forces `C'` to be MDS and `#theorem 11#`/`#theorem 8#`
+  rule it out, while for `r ≤ d − 2` the Singleton bound and `q ≥ 2` do;
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,

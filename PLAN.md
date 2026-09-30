@@ -92,7 +92,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#corollary 7#` | V | `r_f(k:d_d,d_f) ≥ n−k+1` when a perfect code of length `n` exists (sum up to `⌊(d_d−1)/2⌋` — the radius, `ISSUES.md` §15(a)) | `perfect_optimalRedundancyData_ge` | todo |
 | `#lemma 2#` | V | MDS codes: for all `u,v` there is `u'` with `d(u,u') = d` and `d(u',v) ≤ d(u,v)−1` (with `u ≠ v` explicit, `ISSUES.md` §15(c)) | `exists_mds_neighbor` | proved |
 | `#theorem 11#` | V | `G(C)` is connected for every MDS code (codeword reachability, `ISSUES.md` §16) | `isConnected_minDistGraph_of_mds` | proved |
-| `#corollary 8#` | V | `r_f(k:d_d,d_f) ≥ d` given *existence* of an MDS `(n,q^k,d)` code and `|Im f| ≥ 2` (`ISSUES.md` §15(b)) | `mds_optimalRedundancyData_ge` | todo |
+| `#corollary 8#` | V | `r_f(k:d_d,d_f) ≥ d` given *existence* of an MDS `(n,q^k,d)` code and `|Im f| ≥ 2` (`ISSUES.md` §15(b)) | `mds_optimalRedundancyData_ge` | proved |
 
 #### §VI FCCs for specific functions
 
@@ -357,7 +357,7 @@ the labels 3.1/3.2 refer to that one row).
 | 3.3 | `#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#corollary 6#` | the two-step construction machinery | todo |
 | 3.4 | `#theorem 4#` | the first "real" combinatorial argument (binary, three words) | todo |
 | 3.5 | `#definition 12#` + `#theorem 8#`, `#theorem 9#` | graph argument, independent of §IV | **done** (2026-09-22) |
-| 3.6 | `#lemma 2#`, `#theorem 11#`, `#corollary 8#` | MDS connectivity | todo |
+| 3.6 | `#lemma 2#`, `#theorem 11#`, `#corollary 8#` | MDS connectivity | **done** (2026-09-30) — Singleton bound as `card_le_pow_minDist` |
 | 3.7 | `#theorem 10#`, `#corollary 7#` | perfect codes (needs the packing/covering argument) | todo |
 | 3.8 | `#lemma 3#`, `#corollary 9#`–`#corollary 12#` | locally binary construction | todo |
 | 3.9 | `#lemma 5#`, `#theorem 12#`, `#lemma 6#` | locally bounded + Hamming weight | todo |

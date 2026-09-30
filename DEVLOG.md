@@ -759,3 +759,39 @@ makes the claim trivial).  If `r ≤ d − 2`, Singleton gives `q^k = |C'| ≤
 q^{k + r − d + 1}` with exponent `< k`, contradicting `q ≥ 2`.  If `r = d − 1` then
 `C'` has length `k + d − 1 = n` and is MDS (`|C'| = q^{n − d + 1}` and
 `d_min(C') = d`), so `#theorem 11#` + `#theorem 8#` contradict the FCC's existence.
+
+## 2026-09-30 (second session) — `#corollary 8#` proved; §V-B's MDS half complete
+
+`mds_optimalRedundancyData_ge`: if an MDS `(n, q^k, d)` code exists and `|Im f| ≥ 2`,
+then `d ≤ r_f(k : d, d_f)` for `d < d_f`.  The proof follows the plan recorded
+above, with two cases on the optimum `r = optimalRedundancyData f d df`:
+
+* `r = d − 1`: the encodings `C₂` attaining the optimum are injective
+  (`hammingDist_self` + data protection), so its codeword set `C'` — the image of
+  the finite message space — satisfies `|C'| = q^k` and `d ≤ d_min(C')`; the
+  Singleton bound on `C'` (length `k + d − 1 = n`, using an MDS pair to get
+  `d ≤ n`) then forces equality on both counts, i.e. `C'` *is* MDS, and
+  `#theorem 11#` + `#theorem 8#` rule the FCC out;
+* `r ≤ d − 2`: Singleton gives `q^k ≤ q^{k + r − d + 1}`, whose exponent is
+  `< k`, contradicting `q ≥ 2` (`Nat.pow_lt_pow_right`).
+
+**Lessons.**
+
+1. **Unfold `optimalRedundancyData` on the hypothesis, not with it.**  The
+   `dite` in its definition blocks rewriting once the `Prop` side condition is
+   around; `rw [optimalRedundancyData, dite_eq_left hne] at hsmall` makes the
+   `Nat.find`-form available, whereas `rw [hsmall, Nat.find_spec …]` does not.
+2. **`card_le_pow_minDist` needed `1 ≤ q` explicitly.**  With the alphabet as an
+   instance-argument `[Nonempty F]` the `n = 0` branch of the proof picks up an
+   inconsistency the tactic could not unify; taking `(hq : 1 ≤ Fintype.card F)`
+   as an explicit hypothesis keeps the bound honest (it is false for the empty
+   alphabet, `n = 0`) and makes both call sites immediate.
+3. Registering the result as a headline theorem (32 audited) caught nothing, but
+   the axiom audit now covers the whole of §V-B.
+
+**Verification.**  `lake build` green; `consistency_check.ps1 -Strict` green
+(78 markers, 73 rows stated, 29 `sorry` statements, all modules imported); the
+package root holds only `FCC.lean`.  With §V-B's MDS half (`#lemma 2#`,
+`#theorem 11#`, `#corollary 8#`) complete, the remaining piece of §V-B is its
+perfect-code half, 3.7 (`#theorem 10#`, `#corollary 7#`), which needs the
+packing argument that `IsPerfect` already encodes.

@@ -145,11 +145,13 @@ in the same commit that does the work.
       ambient word space (so "connected" must be stated as codeword reachability,
       not `Preconnected`), and `componentCount` had to be redefined to count the
       components meeting `C`.
-- [ ] 3.6 (part 2, next). `#corollary 8#` (`mds_optimalRedundancyData_ge`):
-      combine `#theorem 11#` with `#theorem 8#` — every `(f : d, d_f)`-FCC of
-      redundancy `r'` has an MDS codeword set of length `k + r'` (`|C| = q^k`,
-      minimum distance `≥ d`, so Singleton equality), which `#theorem 8#` forbids
-      unless `r' ≥ d`.  (Statement already fixed for `ISSUES.md` §15(b).)
+- [x] 3.6 (part 2, done 2026-09-30). `#corollary 8#` (`mds_optimalRedundancyData_ge`):
+      combines `#theorem 11#` with `#theorem 8#` — an `(f : d, d_f)`-FCC of
+      redundancy `r'` has codeword set `C'` with `|C'| = q^k` (injectivity) and
+      `d_min(C') ≥ d` (data protection); for `r' = d − 1` Singleton forces
+      `d_min(C') = d` and `|C'| = q^{n−d+1}`, so `C'` is MDS and `#theorem 8#`
+      forbids it, while for `r' ≤ d − 2` the Singleton bound `card_le_pow_minDist`
+      and `q ≥ 2` forbid it directly.  (Statement fixed for `ISSUES.md` §15(b).)
 
       The proofs of `#lemma 2#` and `#theorem 11#` are done (2026-09-29) and use the
       shortcut recorded here previously: the *projection property* of MDS codes
@@ -161,7 +163,7 @@ in the same commit that does the work.
       **Singleton bound done (2026-09-30)**: `card_le_pow_minDist` in
       `FCC/Balls.lean` (`|C| ≤ q^{n − d_min + 1}`, proved from the projection
       argument; it assumes a non-empty alphabet, as the paper's `F_q` is a field).
-      **Remaining proof of `#corollary 8#`**: let `C₂` attain the optimum with
+      **Proof of `#corollary 8#` as implemented (2026-09-30)**: let `C₂` attain the optimum with
       redundancy `r = optimalRedundancyData f d df` and let `C'` be its codeword set
       (an image of `Word F k`, hence `|C'| = q^k` by injectivity, and
       `d_min(C') ≥ d` by data protection; `q ≥ 2` because two distinct function
@@ -171,7 +173,7 @@ in the same commit that does the work.
       (cardinality plus `d_min = d`, the latter from Singleton and `d_min ≥ d`), so
       `#theorem 11#` makes `G(C')` connected and `#theorem 8#` rules the FCC out —
       contradiction again.  Hence `d ≤ optimalRedundancyData f d df`.
-- [ ] 3.7. `#theorem 10#` (perfect codes: `G(C)` connected) and `#corollary 7#`
+- [ ] 3.7 (next). `#theorem 10#` (perfect codes: `G(C)` connected) and `#corollary 7#`
       (`r_f ≥ n − k + 1`): needs the packing/covering argument of §V-B — the balls
       of radius `t` around codewords partition the space (`IsPerfect`), which is
       already how `IsPerfect` is stated.
