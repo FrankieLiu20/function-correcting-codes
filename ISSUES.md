@@ -442,3 +442,28 @@ Plotkin double counting `three_binary_le` — three binary words at pairwise dis
 `≥ 2t` have length `≥ 3t`, since at each coordinate three binary letters disagree in
 `a(3−a) ≤ 2` of the three pairs, so the three distances sum to at most `2n` while
 they sum to at least `3 · 2t`.
+
+## 20. `#theorem 12#` needs systematicity, `t_d ≤ t_f` and `q ≥ 2`
+
+**Found while proving `#theorem 12#` (2026-09-30).**  The printed statement is
+"for any `(2t_f, λ)`-bounded function `f` satisfying the contiguous block condition
+given in Lemma 4, and a systematic `[n,k,2t_d+1]` linear error-correcting code `C`,
+`r_f(k,t_d,t_f) ≤ n − k + N(λ, 2(t_f − t_d))`".  The proof (the two-step
+construction of §III-A with second step `p_u := c'_{Col_f(u)}`) needs three things
+the transcription had left implicit:
+
+* **systematicity** of `C` — Case 1 (`d(u,v) ≥ 2t_f+1`) concludes
+  `d(C u, C v) ≥ d(u,v)` from it (`hammingDist_eq_msg_add_red`), exactly as in
+  `#lemma 3#`; the statement now carries `hCsys : IsSystematic C`;
+* **`t_d ≤ t_f`** — the arithmetic `(2t_d+1) + 2(t_f−t_d) = 2t_f+1` of Case 2 needs
+  it; it is the standing `d_d ≤ d_f` of `#definition 6#` (`htd`);
+* **`q ≥ 2`** — the second step uses a code of length *exactly*
+  `N(λ, 2(t_f−t_d))`, obtained from the attainment of `N`, which needs two distinct
+  letters (`exists_isDCode_const`, whence `[Nontrivial F]`; in the paper's field
+  this is automatic).
+
+The boundedness hypothesis `IsLocallyBounded f (2*t_f) lam` is retained for
+fidelity but not used in the proof: boundedness plus the contiguous block condition
+is what the *external* `#lemma 4#` turns into the colouring hypothesis `hcol`
+(hence the name `_hf`).  The paper's "particularly, for `q = 2` and `λ = 4`"
+(`r_f ≤ n − k + 3(t_f−t_d)`) is this bound combined with `#lemma 5#`.

@@ -995,3 +995,34 @@ the word *binary*: with an arbitrary alphabet the formula is false (for `q = 4`,
 `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 40 audited
 results.  Next: `#theorem 12#` (locally bounded functions, with the external
 `#lemma 4#` colouring as the hypothesis `hcol`) and `#lemma 6#` (Hamming weight).
+
+## 2026-09-30 (eighth session) — §VI-B: `#theorem 12#` (locally bounded) proved
+
+`locallyBounded_redundancy_le`: with the colouring `Col_f` that the external
+`#lemma 4#` produces, a systematic first-step code of minimum distance `2t_d+1`
+and `t_d ≤ t_f`, the two-step construction with second step
+`p_u := c'_{Col_f(u)}` — `c'` an optimal `λ`-word code of minimum distance
+`2(t_f − t_d)` — is an `(f : 2t_d+1, 2t_f+1)`-FCC of redundancy
+`r + N(λ, 2(t_f − t_d))`.
+
+The optimal second-step code of length *exactly* `N(λ, 2(t_f−t_d))` comes from the
+attainment of `N` (`Nat.sInf_mem` after the non-emptiness supplied by
+`exists_isDCode_const`), i.e. `N` is used through the phase-3.0 API rather than as
+an abstract minimum.  The two cases are the paper's: `d(u,v) ≥ 2t_f+1` is handled by
+the *systematicity* of the first step (`d(u,v) ≤ d(C u, C v)`), and `d(u,v) ≤ 2t_f`
+by the colouring (`Col_f(u) ≠ Col_f(v)`, so the two second blocks are distinct
+codewords of `c'`, at distance `≥ 2(t_f−t_d)`), giving
+`(2t_d+1) + 2(t_f−t_d) = 2t_f+1`.
+
+**Statement corrections (`ISSUES.md` §20).**  Three hypotheses the transcription had
+left implicit: `hCsys : IsSystematic C` (Case 1), `htd : t_d ≤ t_f` (the standing
+`d_d ≤ d_f` of `#definition 6#`, needed for the Case-2 arithmetic) and
+`[Nontrivial F]` (`q ≥ 2`, needed because the second-step code of length `N(λ,·)`
+is obtained by attainment, which requires two distinct letters).  The boundedness
+hypothesis is kept but unused (`_hf`): it is `#lemma 4#` (external) that turns it
+into `hcol`.
+
+**Verification.**  `lake build` green (only the 20 remaining `sorry` stubs warn);
+`consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 41 audited
+results.  Next: `#lemma 6#` (the Hamming weight function; its statement needs the
+paper's *second* bound `N(q^k, 2t_d+1) + N(2t_f+1, 2(t_f−t_d)) − k` added).

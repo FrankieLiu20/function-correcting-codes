@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 40 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 21 (was 49: twenty-six paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 41 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 20 (was 49: twenty-seven paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -193,6 +193,13 @@ Proved:
   `hammingDist_repWord`); lower bound: the Plotkin double counting
   `three_binary_le` (three binary words at pairwise distance `≥ 2t` need length
   `≥ 3t`).
+* §VI-B (locally bounded functions): `#theorem 12#`
+  (`locallyBounded_redundancy_le`) — with the `#lemma 4#` colouring `hcol`, a
+  systematic first-step code of minimum distance `2t_d+1` and `t_d ≤ t_f`, the
+  two-step construction with `p_u := c'_{Col_f(u)}` (a code of length
+  `N(λ, 2(t_f−t_d))`, from the attainment of `N`) gives
+  `r_f ≤ r + N(λ, 2(t_f−t_d))`.  The three hypotheses the printed statement left
+  implicit (systematicity, `t_d ≤ t_f`, `q ≥ 2`) are `ISSUES.md` §20.
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,

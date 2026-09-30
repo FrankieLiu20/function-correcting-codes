@@ -225,10 +225,20 @@ in the same commit that does the work.
       the Plotkin double counting `three_binary_le` gives the lower bound (three
       binary words at pairwise distance `≥ 2t` need length `≥ 3t`, as at each
       coordinate three binary letters disagree in `a(3−a) ≤ 2` of the three pairs).
-- [ ] 3.9 (part 2, next). `#theorem 12#` (locally bounded functions; the colouring
-      of `#lemma 4#` enters as the hypothesis `hcol`) and `#lemma 6#` (the Hamming
-      weight function; the paper gives two bounds, the second using
-      `N(q^k, 2t_d+1)`).
+- [x] 3.9 (part 2, done 2026-09-30). `#theorem 12#` (`locallyBounded_redundancy_le`):
+      for a `(2t_f,λ)`-bounded `f` with the `#lemma 4#` colouring, a *systematic*
+      first-step code of minimum distance `2t_d+1` and `t_d ≤ t_f`, the two-step
+      construction with second step `u ↦ c'_{Col_f(u)}` (a code of length
+      `N(λ,2(t_f−t_d))`, obtained from the attainment of `N`) gives
+      `r_f ≤ r + N(λ,2(t_f−t_d))`.  The three hypotheses the printed statement left
+      implicit are in `ISSUES.md` §20 (systematicity, `t_d ≤ t_f`, `q ≥ 2`).
+      `_hf` (local boundedness) is kept for fidelity — it is `#lemma 4#` (external)
+      that turns it into `hcol`.
+- [ ] 3.9 (part 3, next). `#lemma 6#` (the Hamming weight function).  The paper
+      states **two** bounds; the transcription has only the first, so the second —
+      `r_f ≤ N(q^k, 2t_d+1) + N(2t_f+1, 2(t_f−t_d)) − k` — must be added to the
+      statement first.  Its proof uses `d(u,v) ≥ |wt u − wt v|` and the two codes
+      directly.
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.
