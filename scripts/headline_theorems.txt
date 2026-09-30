@@ -62,3 +62,6 @@ locallyBinary_mds_optimal
 Nconst_four_two
 # §VI-B (locally bounded functions):
 locallyBounded_redundancy_le
+# §VI-C (Hamming weight functions):
+hammingWeight_redundancy_le
+hammingWeight_redundancy_le_optimal

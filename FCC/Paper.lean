@@ -3107,21 +3107,68 @@ theorem hammingWeight_redundancy_le [Nontrivial F] {k r td tf : ℕ} (C : Word F
     (htd : td ≤ tf) :
     optimalRedundancyData (fun u : Word F k => wt u) (2 * td + 1) (2 * tf + 1) ≤
       r + Nconst (F := F) (2 * tf + 1) (2 * (tf - td)) := by
-  sorry
+  classical
+  -- an optimal `2t_f+1`-word code of length `N(2t_f+1, 2(t_f−t_d))`
+  have hne : ({r' : ℕ |
+      IsDCode (F := F) (fun _ _ : Fin (2 * tf + 1) => 2 * (tf - td)) r'}).Nonempty :=
+    exists_isDCode_const (m := 2 * tf + 1) (D₀ := 2 * (tf - td)) (exists_pair_ne F)
+  obtain ⟨w, hw⟩ := Nat.sInf_mem hne
+  -- the residue index of a message and the second-step encoder
+  let idx : Word F k → Fin (2 * tf + 1) :=
+    fun u => ⟨(wt u) % (2 * tf + 1), Nat.mod_lt _ (by omega)⟩
+  let p : Word F k → Word F (Nconst (F := F) (2 * tf + 1) (2 * (tf - td))) :=
+    fun u => w (idx u)
+  have hp : ∀ u v : Word F k, idx u ≠ idx v → 2 * (tf - td) ≤ hammingDist (p u) (p v) :=
+    fun u v h => hw _ _ h
+  refine optimalRedundancyData_le_of (C := twoStepCode C p)
+    (twoStep_isFCCData (fun u : Word F k => wt u) td tf C hCsys hC p ?_)
+  intro u v hfuv
+  have huv : u ≠ v := fun h => hfuv (by rw [h])
+  have hkey : (2 * td + 1) + 2 * (tf - td) = 2 * tf + 1 := by omega
+  by_cases hmod : idx u = idx v
+  · -- equal residues: the weights differ by at least the modulus
+    have hdiff : 2 * tf + 1 ≤ hammingDist u v := by
+      have hwne : wt u ≠ wt v := fun h => hfuv (by simpa using h)
+      have hidxval : (wt u) % (2 * tf + 1) = (wt v) % (2 * tf + 1) := by
+        simpa [idx] using congrArg Fin.val hmod
+      rcases le_total (wt v) (wt u) with hle | hle
+      · have hge : 2 * tf + 1 ≤ wt u - wt v := by
+          by_contra hcon
+          exact mod_ne_of_sub_lt hle hwne (by omega) hidxval
+        have := wt_le_wt_add_hammingDist u v
+        omega
+      · have hge : 2 * tf + 1 ≤ wt v - wt u := by
+          by_contra hcon
+          exact mod_ne_of_sub_lt hle (Ne.symm hwne) (by omega) hidxval.symm
+        have hw1 := wt_le_wt_add_hammingDist v u
+        rw [hammingDist_comm] at hw1
+        omega
+    have h1 : hammingDist u v ≤ hammingDist (C u) (C v) := by
+      have := hammingDist_eq_msg_add_red hCsys u v
+      rw [this]
+      exact Nat.le_add_right _ _
+    omega
+  · have hpv : 2 * (tf - td) ≤ hammingDist (p u) (p v) := hp u v hmod
+    have hcu : 2 * td + 1 ≤ hammingDist (C u) (C v) := hC u v huv
+    omega
 
 /-- `#lemma 6#` (§VI-C), second bound — "or `r_f(k, t_d, t_f) ≤ N(q^k, 2t_d+1) +
 N(2t_f+1, 2(t_f − t_d)) − k`": instead of a *given* systematic code, one takes an
 optimal `q^k`-word code of minimum distance `2t_d+1` (of length
 `N(q^k, 2t_d+1)`, hence redundancy `N(q^k, 2t_d+1) − k`) as the first step.
 
-As in `#corollary 9#`–`#corollary 12#` (`ISSUES.md` §18) the optimal code has to
-come with its systematic form; the proof (next session) will bundle it, and the
-unbundled statement is recorded here in the paper's shape (`ISSUES.md` §21). -/
-theorem hammingWeight_redundancy_le_optimal [Nontrivial F] {k td tf : ℕ} (htd : td ≤ tf) :
+As in `#corollary 9#`–`#corollary 12#` (`ISSUES.md` §18) that optimal code has to
+come with its systematic form, so — exactly as there — the systematic encoder of
+the optimal length is bundled in the hypothesis `hcode`; the proof is then the
+first bound applied to it (`ISSUES.md` §21). -/
+theorem hammingWeight_redundancy_le_optimal [Nontrivial F] {k td tf : ℕ} (htd : td ≤ tf)
+    (hcode : ∃ E : Word F k → Word F (k + (Nconst (F := F) (Fintype.card F ^ k) (2 * td + 1) - k)),
+      IsSystematic E ∧ ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (E v) (E w)) :
     optimalRedundancyData (fun u : Word F k => wt u) (2 * td + 1) (2 * tf + 1) ≤
       (Nconst (F := F) (Fintype.card F ^ k) (2 * td + 1) - k) +
         Nconst (F := F) (2 * tf + 1) (2 * (tf - td)) := by
-  sorry
+  obtain ⟨E, hEsys, hE⟩ := hcode
+  exact hammingWeight_redundancy_le E hEsys hE htd
 
 end SectionVIStatements
 

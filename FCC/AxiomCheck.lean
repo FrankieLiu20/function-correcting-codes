@@ -69,5 +69,7 @@ namespace FCC
 #print axioms locallyBinary_mds_optimal
 #print axioms Nconst_four_two
 #print axioms locallyBounded_redundancy_le
+#print axioms hammingWeight_redundancy_le
+#print axioms hammingWeight_redundancy_le_optimal
 
 end FCC
