@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 35 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 26 (was 49: twenty-one paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 39 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 22 (was 49: twenty-five paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -182,6 +182,11 @@ Proved:
   function ball) is an `(f : d_d, d_f)`-FCC of redundancy `r + (d_f − d_d)`.  The
   marking is order-free (`ballMark`/`pickElem`, `ISSUES.md` §18), and the paper's
   Case 1 uses the systematicity `d(u,v) ≤ d(C u, C v)`.
+* §VI-A (corollaries): `#corollary 9#`–`#corollary 12#` — the upper bounds at a
+  perfect (resp. MDS) first-step code and the matching optimality statements for
+  `d_f = d_d + 1`.  Their hypotheses bundle the paper's perfect/MDS code with its
+  systematic form (`ISSUES.md` §18); the upper halves are `#lemma 3#`, the lower
+  halves are `#corollary 7#`/`#corollary 8#`.
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,

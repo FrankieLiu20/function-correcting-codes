@@ -207,12 +207,15 @@ in the same commit that does the work.
       Two hypotheses were made explicit: `IsSystematic C` (the paper's own word —
       Case 1 of the proof needs `d(u,v) ≤ d(C u, C v)`) and `[Nontrivial F]` (the
       two parity blocks `1…1`/`0…0` must differ).
-- [ ] 3.8 (part 2, next). `#corollary 9#`–`#corollary 12#`.  Their statements must
-      be reworked first: the paper's hypothesis is a perfect *linear* / MDS code,
-      and the proof needs its *systematic form*, which requires the linear-code
-      theory of §VII (phase 3.10, still `sorry`).  Until then they carry the
-      systematic encoder explicitly, with the perfect/MDS code as the hypothesis
-      that supplies it (`ISSUES.md` §18).
+- [x] 3.8 (part 2, done 2026-09-30). `#corollary 9#`–`#corollary 12#`.  Their
+      statements carry the paper's perfect *linear* / MDS code **bundled with its
+      systematic form** `E` (an existential `hcode`), which is exactly what the
+      paper's linear algebra provides and what `#lemma 3#` consumes; `#corollary 9#`
+      and `#corollary 11#` are then one-line consequences of `#lemma 3#`, and the
+      optimality corollaries `#corollary 10#`/`#corollary 12#` add the matching
+      lower bounds `#corollary 7#`/`#corollary 8#` (with their hypothesis
+      `|Im f| ≥ 2`, `ISSUES.md` §17).  `ISSUES.md` §18 records the bundle and the
+      `set_option maxHeartbeats 1000000` these four declarations need.
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

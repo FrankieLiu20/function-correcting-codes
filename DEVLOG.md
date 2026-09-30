@@ -932,3 +932,40 @@ explicit, two of them applied now:
 `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 35 audited
 results.  Next: `#corollary 9#`–`#corollary 12#` (upper and optimality bounds for
 locally binary functions), then §VI-B/C.
+
+## 2026-09-30 (sixth session) — §VI-A complete: `#corollary 9#`–`#corollary 12#`
+
+The four corollaries are the paper's perfect/MDS instantiations of `#lemma 3#`:
+`#corollary 9#`/`#corollary 11#` bound `r_f` by `n − k + d_f − d_d` at a perfect
+(resp. MDS) first-step code, and `#corollary 10#`/`#corollary 12#` add the matching
+lower bounds (`#corollary 7#`/`#corollary 8#`) to conclude optimality for
+`d_f = d_d + 1`.
+
+**How the paper's "linear" hypothesis is handled (`ISSUES.md` §18).**  The proofs
+need the *systematic* form of the perfect/MDS code (its standard generator matrix),
+which the repository cannot yet produce — that is linear algebra for §VII.  The
+statements therefore carry the paper's code together with its systematic encoder as
+a single bundled existential
+
+```text
+hcode : ∃ (C : Finset (Word F (k+r))) (E : Word F k → Word F (k+r)),
+  IsPerfect C t ∧ C.card = q^k ∧ IsSystematic E ∧ Set.range E = ↑C ∧
+  ∀ v w, v ≠ w → d_d ≤ d(E v, E w)      -- (MDS twin: IsMDS C d_d, d_d = r + 1)
+```
+
+and the proof `obtain`s `E` and feeds it to `#lemma 3#` — exactly the paper's use of
+the systematic form.  When §VII lands, the extra components become derivable and the
+bundle can shrink.  The optimality corollaries carry `|Im f| ≥ 2` (their lower half
+is `#corollary 7#`/`#corollary 8#`, `ISSUES.md` §17) and `#corollary 10#` also
+`1 ≤ d_d`.
+
+**A build note.**  These four declarations (and, in particular, the `Finset`-valued
+Hamming-bound sums inside them) need more than Lean's default elaboration budget, so
+they are wrapped in `set_option maxHeartbeats 1000000` (restored to the default
+afterwards).  The `∃`-bundle also removed the unused-hypothesis warnings the first
+transcription produced.
+
+**Verification.**  `lake build` green (only the 22 remaining `sorry` stubs warn);
+`consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 39 audited
+results.  §VI-A is complete; §VI-B/C (`#lemma 5#`, `#theorem 12#`, `#lemma 6#`) is
+next.

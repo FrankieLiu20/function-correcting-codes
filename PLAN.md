@@ -101,10 +101,10 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#definition 13#` | VI-A | function ball `B_f(u,ρ) = {f(u') | d(u,u') ≤ ρ}` | `functionBall` | stated |
 | `#definition 14#` | VI-A | `ρ`-locally binary function: `|B_f(u,ρ)| ≤ 2` for all `u` | `IsLocallyBinary` | stated |
 | `#lemma 3#` | VI-A | for `(d_f−1)`-locally binary `f` and a systematic `[n,k,d_d]` code (`IsSystematic` and `1 < q` made explicit, `ISSUES.md` §18): `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d` (and `= 2(t_f−t_d)` in `t`-form) | `locallyBinary_redundancy_le` | proved |
-| `#corollary 9#` | VI-A | the same with a perfect linear code in step 1 | `locallyBinary_perfect_redundancy_le` | todo |
-| `#corollary 10#` | VI-A | optimality of the construction for `d_f = d_d+1` given a perfect code | `locallyBinary_perfect_optimal` | todo |
-| `#corollary 11#` | VI-A | with an MDS `(n,q^k,d_d = n−k+1)` code in step 1: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d = d_f−1` | `locallyBinary_mds_redundancy_le` | todo |
-| `#corollary 12#` | VI-A | optimality of the construction for `d_f = d_d+1` given an MDS code | `locallyBinary_mds_optimal` | todo |
+| `#corollary 9#` | VI-A | the same with a perfect linear code in step 1 (bundled with its systematic form, `ISSUES.md` §18) | `locallyBinary_perfect_redundancy_le` | proved |
+| `#corollary 10#` | VI-A | optimality of the construction for `d_f = d_d+1` given a perfect code (needs `\|Im f\| ≥ 2`, `1 ≤ d_d`, `ISSUES.md` §17/§18) | `locallyBinary_perfect_optimal` | proved |
+| `#corollary 11#` | VI-A | with an MDS `(n,q^k,d_d = n−k+1)` code in step 1: `r_f(k:d_d,d_f) ≤ n−k+d_f−d_d = d_f−1` (bundled systematic form, `ISSUES.md` §18) | `locallyBinary_mds_redundancy_le` | proved |
+| `#corollary 12#` | VI-A | optimality of the construction for `d_f = d_d+1` given an MDS code (needs `\|Im f\| ≥ 2`) | `locallyBinary_mds_optimal` | proved |
 | `#definition 15#` | VI-B | `(ρ,λ)`-bounded function: `|B_f(u,ρ)| ≤ λ` for all `u` | `IsLocallyBounded` | stated |
 | `#lemma 4#` | VI-B | contiguous-block condition ⇒ a colouring `Col_f : F₂^k → [λ]` separating `f`-values at distance `≤ ρ` | — | external ([14]): hypothesis of `#theorem 12#` |
 | `#lemma 5#` | VI-B | `N(4,2t) = 3t` | `Nconst_four_two` | todo |
@@ -359,7 +359,7 @@ the labels 3.1/3.2 refer to that one row).
 | 3.5 | `#definition 12#` + `#theorem 8#`, `#theorem 9#` | graph argument, independent of §IV | **done** (2026-09-22) |
 | 3.6 | `#lemma 2#`, `#theorem 11#`, `#corollary 8#` | MDS connectivity | **done** (2026-09-30) — Singleton bound as `card_le_pow_minDist` |
 | 3.7 | `#theorem 10#`, `#corollary 7#` | perfect codes (packing/covering argument) | **done** (2026-09-30) — `#theorem 10#` with `card_sphere`/`card_ball`, the packing bound and the covering lemma; `#corollary 7#` with the truncated-binomial monotonicity |
-| 3.8 | `#lemma 3#`, `#corollary 9#`–`#corollary 12#` | locally binary construction | `#lemma 3#` **done** (2026-09-30, with the order-free marking `ballMark`/`pickElem`); `#corollary 9#`–`#corollary 12#` next (their statements need the systematic form of the perfect/MDS code, `ISSUES.md` §18) |
+| 3.8 | `#lemma 3#`, `#corollary 9#`–`#corollary 12#` | locally binary construction | **done** (2026-09-30): `#lemma 3#` with the order-free marking `ballMark`/`pickElem`, and the four corollaries with the paper's perfect/MDS code bundled with its systematic form (`ISSUES.md` §18) |
 | 3.9 | `#lemma 5#`, `#theorem 12#`, `#lemma 6#` | locally bounded + Hamming weight | todo |
 | 3.10 | `#lemma 7#`–`#lemma 10#`, `#theorem 13#` | the linear/algebraic side | todo |
 | 3.11 | `#lemma 13#`, `#lemma 11#`, `#theorem 14#` | Plotkin bounds (double counting) | todo |

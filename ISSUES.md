@@ -397,6 +397,26 @@ corollaries will carry the systematic encoder explicitly, with the perfect/MDS c
 kept as the hypothesis that supplies it (`ISSUES.md` §18, continued in the next
 session).
 
+**Resolution (2026-09-30, same day).**  `#corollary 9#`–`#corollary 12#` are now
+stated with a single bundled hypothesis
+
+```text
+hcode : ∃ (C : Finset (Word F (k + r))) (E : Word F k → Word F (k + r)),
+  IsPerfect C t ∧ C.card = q^k ∧ IsSystematic E ∧ Set.range E = ↑C ∧
+  ∀ v w, v ≠ w → d_d ≤ d(E v, E w)          (and, for the MDS pair, IsMDS C d_d
+                                              and d_d = r + 1 in place of IsPerfect)
+```
+
+i.e. the paper's perfect/MDS code *together with* its systematic form; the
+proofs only use `E` (via `#lemma 3#`), exactly as the paper does.  When §VII's
+linear-code theory lands, the second and third components become derivable from
+the first and the bundle can be simplified.  The optimality corollaries
+(`#corollary 10#`, `#corollary 12#`) additionally carry `|Im f| ≥ 2` (their lower
+half is `#corollary 7#`/`#corollary 8#`, `ISSUES.md` §17) and `#corollary 10#`
+carries `1 ≤ d_d` for the same reason.  The `Finset`-valued statements need a
+larger elaboration budget (`set_option maxHeartbeats 1000000` around the four
+declarations).
+
 The same review confirmed that `IsPerfect C t` — minimum distance `≥ 2t+1` plus
 `q^n = |C| · |B(0,t)|` — is enough for everything `#theorem 10#` uses: it implies
 the balls of radius `t` around the codewords tile the space (`card_ball`,
