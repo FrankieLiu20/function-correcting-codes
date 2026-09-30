@@ -275,3 +275,9 @@ in the same commit that does the work.
       and `#corollary 14#`; they need the appendix's counting of unions of balls
       (`#theorem 17#`–`#theorem 19#`, `#lemma 14#`), which is also the next thing to
       do for `#lemma 13#`/`#theorem 14#` (Plotkin bounds, phase 3.11).
+- [x] Statement review of the appendix counts (2026-10-01): `#theorem 17#`,
+      `#lemma 14#`, `#theorem 18#`, `#theorem 19#` were re-read against the PDF and
+      match verbatim (`DEVLOG.md`); no change needed.  Their proofs are the next
+      step, starting with `#theorem 17#` (reduce the intersection to
+      `q·Σ_{i≤t−1}C(n−1,i)(q−1)^i` by splitting on the single differing coordinate,
+      then inclusion–exclusion with `card_ball`).

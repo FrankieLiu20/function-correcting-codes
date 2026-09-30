@@ -1098,3 +1098,24 @@ that different values give different messages), and apply the packing inequality
 axiom audits green with 44 audited headline results.  Next: the union-of-balls
 bounds (`#theorem 15#`/`#theorem 16#`, needing the appendix's `#theorem 17#`–`19#`
 and `#corollary 14#`) and the Plotkin family (`#lemma 13#`, `#theorem 14#`).
+
+## 2026-10-01 — statement review of the appendix counts (no changes needed)
+
+Before proving them, the four appendix statements were re-read against the PDF,
+line by line:
+
+* `#theorem 17#` — `|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i≤t−1}C(n−1,i)(q−1)^i`
+  for `d(u,v) = 1`: matches (our `range (t+1)`/`range t` are `i ≤ t`/`i ≤ t−1`);
+* `#lemma 14#` — over `F₂`, `d(u₁,u₂) = 2`:
+  `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)`: matches;
+* `#theorem 18#` — three words with pairwise distances `1,1,2`:
+  `3Σ_{i≤t}C(n,i) − 6Σ_{i≤t−1}C(n−1,i) + C(n−2,t−1) + 4Σ_{i≤t−2}C(n−2,i)`: matches;
+* `#theorem 19#` — over `F₂`, `d(u₁,u₂) = 3`, `t ≥ 2`:
+  `2Σ_{i≤t}C(n,i) − 8Σ_{i≤t−3}C(n−3,i) − 6C(n−3,t−2)`: matches.
+
+No statement change was needed this time (a first).  The proofs are the next step;
+the `d(u,v) = 1` case of `#theorem 17#` reduces to
+`|B(u,t) ∩ B(v,t)| = q·Σ_{i≤t−1}C(n−1,i)(q−1)^i`, because
+`d(x,u) + d(x,v) = 2·(disagreements outside the single differing coordinate) + 1`,
+so `x` lies in both balls iff it disagrees with `u` in at most `t−1` other
+coordinates (and the differing coordinate is free: `q` choices).
