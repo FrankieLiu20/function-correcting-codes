@@ -1026,3 +1026,32 @@ into `hcol`.
 `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 41 audited
 results.  Next: `#lemma 6#` (the Hamming weight function; its statement needs the
 paper's *second* bound `N(q^k, 2t_d+1) + N(2t_f+1, 2(t_f−t_d)) − k` added).
+
+## 2026-09-30 (ninth session) — §VI-C: `#lemma 6#`'s statements fixed (proofs next)
+
+`#lemma 6#` gives **two** bounds for the Hamming weight function `f(u) = wt(u)`;
+the transcription had only the first and had dropped the word *systematic*.
+Statement review (`ISSUES.md` §21) therefore:
+
+* added `hCsys : IsSystematic C` and `htd : t_d ≤ t_f` (and `[Nontrivial F]`) to the
+  first bound, exactly as in `#theorem 12#` (§20) — the case
+  `|f(u) − f(v)| > 2t_f` needs `d(u,v) ≤ d(C u, C v)`, and Case 1 needs the
+  key arithmetic `(2t_d+1) + 2(t_f−t_d) = 2t_f+1`;
+* added the paper's second bound as its own declaration
+  `hammingWeight_redundancy_le_optimal`:
+  `r_f ≤ (N(q^k, 2t_d+1) − k) + N(2t_f+1, 2(t_f−t_d))` — the first step is then an
+  *optimal* `q^k`-word code of minimum distance `2t_d+1`, so, as in §18, its
+  systematic form will be bundled in the proof.
+
+The proof of the first bound was developed to the last step and is recorded in
+`TODO.md`: the second step `p_u := c'_{f(u) mod (2t_f+1)}` (with `c'` of length
+exactly `N(2t_f+1, 2(t_f−t_d))`, from the attainment of `N`), the case split on
+`|wt u − wt v|` — `wt_le_wt_add_hammingDist` in the large-difference case, and the
+new internal residue lemma `mod_ne_of_sub_lt` (from `Nat.ModEq.dvd'`) in the
+small-difference case, where `mod (2t_f+1)` makes the two indices different.  What
+remains is a `Fin`-index/`let` bookkeeping step (`m := 2*t_f+1` versus
+`Fin (2*t_f+1)`) that blocked this session's build.
+
+**Verification.**  `lake build` green (the 21 `sorry` stubs warn — 20 plus the new
+second bound); `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with
+41 audited results.

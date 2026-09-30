@@ -467,3 +467,32 @@ fidelity but not used in the proof: boundedness plus the contiguous block condit
 is what the *external* `#lemma 4#` turns into the colouring hypothesis `hcol`
 (hence the name `_hf`).  The paper's "particularly, for `q = 2` and `λ = 4`"
 (`r_f ≤ n − k + 3(t_f−t_d)`) is this bound combined with `#lemma 5#`.
+
+## 21. `#lemma 6#`: two bounds, and the same implicit hypotheses as `#theorem 12#`
+
+**Statement fixed 2026-09-30 (proofs in progress).**  The paper's Lemma 6 gives
+**two** bounds for the Hamming weight function `f(u) = wt(u)` and a systematic
+`[n,k,2t_d+1]` code `C`:
+
+```text
+r_f ≤ n − k + N(2t_f+1, 2(t_f − t_d)),   or
+r_f ≤ N(q^k, 2t_d+1) + N(2t_f+1, 2(t_f − t_d)) − k,
+```
+
+while the transcription had only the first, and had dropped the word *systematic*.
+Both are now stated (`hammingWeight_redundancy_le`, `hammingWeight_redundancy_le_optimal`),
+with the same three explicit hypotheses as `#theorem 12#` (§20): `IsSystematic C`
+(the case `|f(u) − f(v)| > 2t_f` needs `d(u,v) ≤ d(C u, C v)`), `t_d ≤ t_f` (the
+standing `d_d ≤ d_f`), and `[Nontrivial F]` (`q ≥ 2`, for the attainment of `N`).
+The second bound replaces the given code by an *optimal* `q^k`-word code of
+minimum distance `2t_d+1`; as in §18, that code has to come with its systematic
+form, so its proof will bundle it (the statement above is the paper's shape).
+
+The proof machinery is already in place: the construction
+`p_u := c'_{f(u) mod (2t_f+1)}` (an optimal `2t_f+1`-word code `c'` of minimum
+distance `2(t_f−t_d)`, obtained from the attainment of `N`), the weight inequality
+`d(u,v) ≥ wt(u) − wt(v)` (`wt_le_wt_add_hammingDist`) in the case
+`|f(u) − f(v)| > 2t_f`, and the residue fact that two weights differing by less
+than the modulus have different residues (internal `mod_ne_of_sub_lt`, from
+`Nat.ModEq.dvd'`) in the case `0 < |f(u) − f(v)| ≤ 2t_f`.  What remains is the
+`Fin`-index bookkeeping of the second-step encoder.

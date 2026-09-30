@@ -109,7 +109,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#lemma 4#` | VI-B | contiguous-block condition ⇒ a colouring `Col_f : F₂^k → [λ]` separating `f`-values at distance `≤ ρ` | — | external ([14]): hypothesis of `#theorem 12#` |
 | `#lemma 5#` | VI-B | `N(4,2t) = 3t` — the paper's statement is *binary*, so it is over `F₂` (the general-alphabet transcription is false, `ISSUES.md` §19); proved here from the `{000,011,101,110}` construction + Plotkin | `Nconst_four_two` | proved |
 | `#theorem 12#` | VI-B | for `(2t_f,λ)`-bounded `f` (with the `#lemma 4#` colouring): `r_f ≤ n−k+N(λ,2(t_f−t_d))`, with `C` systematic and `t_d ≤ t_f` (`ISSUES.md` §20); for `q=2, λ=4`: `≤ n−k+3(t_f−t_d)` by `#lemma 5#` | `locallyBounded_redundancy_le` | proved |
-| `#lemma 6#` | VI-C | Hamming-weight function: `r_f ≤ n−k+N(2t_f+1,2(t_f−t_d))`, and `≤ N(q^k,2t_d+1)+N(2t_f+1,2(t_f−t_d))−k` | `hammingWeight_redundancy_le` | todo |
+| `#lemma 6#` | VI-C | Hamming-weight function: `r_f ≤ n−k+N(2t_f+1,2(t_f−t_d))`, and `≤ N(q^k,2t_d+1)+N(2t_f+1,2(t_f−t_d))−k` — with the systematic form and `t_d ≤ t_f` explicit (`ISSUES.md` §21) | `hammingWeight_redundancy_le`, `hammingWeight_redundancy_le_optimal` | stated (proofs next) |
 
 #### §VII Linear `(f:d_d,d_f)`-FCCs
 

@@ -121,7 +121,7 @@ Verified:
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
 | `scripts/axioms_check.ps1` | green — 41 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 20 (was 49: twenty-seven paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `sorry` in the library | 21 (was 49: twenty-seven paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
