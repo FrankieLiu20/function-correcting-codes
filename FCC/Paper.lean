@@ -2925,11 +2925,95 @@ theorem locallyBinary_mds_optimal [Nontrivial F] {k r dd : ℕ} (f : Word F k �
 -- restore the default budget for the declarations that follow
 set_option maxHeartbeats 200000
 
+/-! #### Internal scaffolding for `#lemma 5#`
+
+`#lemma 5#` is the *binary* bound `N(4,2t) = 3t`: the four odd words of `F₂³`
+(`base4`) repeated `t` times give the upper bound, and a Plotkin double counting
+(`three_binary_le`) gives the lower bound. -/
+
+/-- `(internal, §VI-B — the base code of `#lemma 5#`)` — the four words
+`000, 011, 101, 110` of `F₂³`, which are pairwise at distance `≥ 2`. -/
+def base4 : Fin 4 → Word F₂ 3 :=
+  ![![false, false, false], ![false, true, true], ![true, false, true], ![true, true, false]]
+
+/-- `(internal, §VI-B)` — the base code has minimum distance `2`. -/
+theorem base4_min_dist : ∀ i j : Fin 4, i ≠ j → 2 ≤ hammingDist (base4 i) (base4 j) := by
+  decide
+
+/-- `(internal, §VI-B — the lower bound of `#lemma 5#`)` — three binary words at
+pairwise distance `≥ 2t` have length `≥ 3t`.
+
+Double counting: the sum of the three pairwise distances is at most `2n` — at every
+coordinate three binary letters disagree in at most `a(3−a) ≤ 2` of the three pairs
+— while it is at least `3 · 2t` by hypothesis. -/
+theorem three_binary_le {n t : ℕ} (q : Fin 3 → Word F₂ n)
+    (hq : ∀ i j : Fin 3, i ≠ j → 2 * t ≤ hammingDist (q i) (q j)) :
+    3 * t ≤ n := by
+  classical
+  have hpercoord : ∀ c : Fin n,
+      (if q 0 c ≠ q 1 c then 1 else 0) + (if q 0 c ≠ q 2 c then 1 else 0)
+        + (if q 1 c ≠ q 2 c then 1 else 0) ≤ 2 := by
+    intro c
+    rcases Bool.eq_false_or_eq_true (q 0 c) with h0 | h0 <;>
+      rcases Bool.eq_false_or_eq_true (q 1 c) with h1 | h1 <;>
+      rcases Bool.eq_false_or_eq_true (q 2 c) with h2 | h2 <;>
+      (rw [h0, h1, h2]; decide)
+  have hlow : 3 * (2 * t) ≤ hammingDist (q 0) (q 1) + hammingDist (q 0) (q 2)
+      + hammingDist (q 1) (q 2) := by
+    have a := hq 0 1 (by decide)
+    have b := hq 0 2 (by decide)
+    have c := hq 1 2 (by decide)
+    omega
+  have hhigh : hammingDist (q 0) (q 1) + hammingDist (q 0) (q 2)
+      + hammingDist (q 1) (q 2) ≤ 2 * n := by
+    have e1 : hammingDist (q 0) (q 1)
+        = ∑ c ∈ Finset.univ, (if q 0 c ≠ q 1 c then 1 else 0) := by
+      rw [hammingDist_eq_card_diffSet, diffSet, Finset.card_filter]
+    have e2 : hammingDist (q 0) (q 2)
+        = ∑ c ∈ Finset.univ, (if q 0 c ≠ q 2 c then 1 else 0) := by
+      rw [hammingDist_eq_card_diffSet, diffSet, Finset.card_filter]
+    have e3 : hammingDist (q 1) (q 2)
+        = ∑ c ∈ Finset.univ, (if q 1 c ≠ q 2 c then 1 else 0) := by
+      rw [hammingDist_eq_card_diffSet, diffSet, Finset.card_filter]
+    rw [e1, e2, e3, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+    calc ∑ c ∈ Finset.univ, ((if q 0 c ≠ q 1 c then 1 else 0)
+          + (if q 0 c ≠ q 2 c then 1 else 0) + (if q 1 c ≠ q 2 c then 1 else 0))
+        ≤ ∑ _c ∈ Finset.univ, 2 := Finset.sum_le_sum fun c _ => hpercoord c
+      _ = 2 * n := by
+          simp [Finset.sum_const, Finset.card_univ, Fintype.card_fin, smul_eq_mul, mul_comm]
+  omega
+
 /-- `#lemma 5#` (§VI-B, quoted from [14]) — "let `N(λ, 2t)` be the minimum length
-of a binary error-correcting code with `λ` codewords and minimum distance `2t`.
-Then `N(4, 2t) = 3t`". -/
-theorem Nconst_four_two (t : ℕ) : Nconst (F := F) 4 (2 * t) = 3 * t := by
-  sorry
+of a **binary** error-correcting code with `λ` codewords and minimum distance `2t`.
+Then `N(4, 2t) = 3t`".
+
+The alphabet is essential: over an arbitrary alphabet the formula is false
+(`q = 4`, `t = 1`: a length-2 code with four codewords at pairwise distance `2`
+exists, e.g. `{(x, -x)}`), so the transcription over a general `F` was wrong and is
+now specialised to `F₂` — `ISSUES.md` §19.
+
+Proof (the quoted statement is [14, Lemma 5]; proved here): the four words
+`000, 011, 101, 110` are pairwise at distance `≥ 2`, so repeating them `t` times
+(`repWord`) gives a length-`3t` code with four codewords at distance `≥ 2t`;
+conversely, three binary words at pairwise distance `≥ 2t` need length `≥ 3t`,
+because at every coordinate the number of disagreeing pairs among three binary
+letters is `a(3−a) ≤ 2`, so the sum of the three distances is at most `2n`
+while it is at least `3 · 2t` (double counting, `three_binary_le`). -/
+theorem Nconst_four_two (t : ℕ) : Nconst (F := F₂) 4 (2 * t) = 3 * t := by
+  rw [Nconst]
+  refine N_eq_of (ι := Fin 4) (D := fun _ _ : Fin 4 => 2 * t) ?_ ?_
+  · refine ⟨fun i => repWord t (base4 i), ?_⟩
+    intro i j hij
+    rw [hammingDist_repWord]
+    have hb := base4_min_dist i j hij
+    calc 2 * t = t * 2 := by ring
+      _ ≤ t * hammingDist (base4 i) (base4 j) := Nat.mul_le_mul_left t hb
+  · intro r' hr' h
+    obtain ⟨p, hp⟩ := h
+    have h3 : 3 * t ≤ r' :=
+      three_binary_le (fun i : Fin 3 => p i.succ) fun i j hij =>
+        hp i.succ j.succ (fun hcon => hij (Fin.succ_inj.mp hcon))
+    omega
 
 /-- `#theorem 12#` (§VI-B) — "for any `(2t_f, λ)`-bounded function `f` satisfying
 the contiguous block condition given in `#lemma 4#`, and a systematic
