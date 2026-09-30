@@ -356,9 +356,10 @@ argument: two codewords that agree on `n − d_min + 1` coordinates are at dista
 most `d_min − 1`, hence equal. -/
 
 /-- `(internal, §V-B — used by `#corollary 8#`)` — the Singleton bound: a code of
-length `n` over a non-empty alphabet has at most `q^{n − d_min(C) + 1}` words. -/
-theorem card_le_pow_minDist {F : Type*} [Nonempty F] [Fintype F] [DecidableEq F] {n : ℕ}
-    {C : Finset (Word F n)} :
+length `n` over a non-empty alphabet (`1 ≤ q`) has at most `q^{n − d_min(C) + 1}`
+words.  (`1 ≤ q` is needed: for the empty alphabet and `n = 0` the bound fails.) -/
+theorem card_le_pow_minDist {F : Type*} [Fintype F] [DecidableEq F] {n : ℕ}
+    {C : Finset (Word F n)} (hq : 1 ≤ Fintype.card F) :
     C.card ≤ Fintype.card F ^ (n - minDist C + 1) := by
   classical
   by_cases hsmall : C.card ≤ 1
@@ -380,7 +381,7 @@ theorem card_le_pow_minDist {F : Type*} [Nonempty F] [Fintype F] [DecidableEq F]
     calc C.card ≤ Fintype.card (Word F n) := Finset.card_le_univ C
       _ = Fintype.card F ^ n := card_word n
       _ ≤ Fintype.card F ^ (n - 0 + 1) := by
-          refine Nat.pow_le_pow_right (Nat.one_le_iff_ne_zero.mpr Fintype.card_ne_zero) (by omega)
+          exact Nat.pow_le_pow_right hq (by omega)
   · -- at least two codewords: project onto `n - d_min + 1` coordinates
     obtain ⟨u, hu, v, hv, huv⟩ : ∃ u ∈ C, ∃ v ∈ C, u ≠ v := by
       obtain ⟨x, hx, y, hy, hxy⟩ := Finset.one_lt_card.mp (by omega : 1 < C.card)

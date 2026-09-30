@@ -46,3 +46,5 @@ exists_mds_neighbor
 isConnected_minDistGraph_of_mds
 not_isFCCData_of_components
 not_isFCCData_of_connected
+# §V-B (optimality of MDS codes):
+mds_optimalRedundancyData_ge

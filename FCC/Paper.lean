@@ -2106,13 +2106,165 @@ Two hypotheses that the printed statement leaves implicit are made explicit
   code (its `G(C)` is connected by `#theorem 11#`, so `#theorem 8#` applies);
 * `h2` is `|Im(f)| ≥ 2` (as in `#theorem 8#`): for a *constant* `f` the claim is
   false — with `F = F₂`, `k = 1`, `d = 2`, `n = 2`, the encoding `u ↦ (u,u)` has
-  redundant part of length `1 < 2 = d`, so `r_f ≤ d − 1`. -/
+  redundant part of length `1 < 2 = d`, so `r_f ≤ d − 1`.
+
+Proof: let `r` be the optimum and `C₂` an FCC attaining it (it exists by
+`exists_isFCCData`), with codeword set `C'` (the image of the finite message
+space).  Then `|C'| = q^k` (`C₂` is injective by data protection) and
+`d ≤ d_min(C')`, so by the Singleton bound (`card_le_pow_minDist`) the length
+`k + r` of `C'` satisfies `q^k ≤ q^{k + r − d + 1}`.  If `r ≤ d − 2` this
+contradicts `q ≥ 2` (the exponent is `< k`); if `r = d − 1` then `C'` has length
+`k + d − 1 = n` and is MDS, so `#theorem 11#` makes `G(C')` connected and
+`#theorem 8#` contradicts the existence of `C₂`.  (Two distinct values of `f` are
+attained, so the alphabet has at least two letters; `d = 0` makes the claim
+trivial.) -/
 theorem mds_optimalRedundancyData_ge {k n d df : ℕ} (f : Word F k → α)
     (hmds : ∃ C : Finset (Word F n), IsMDS C d ∧ C.card = Fintype.card F ^ k)
     (h2 : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b)
     (hlt : d < df) :
     d ≤ optimalRedundancyData f d df := by
-  sorry
+  classical
+  rcases Nat.eq_zero_or_pos d with hd0 | hdpos
+  · rw [hd0]
+    exact Nat.zero_le _
+  · -- two distinct function values are attained, so the alphabet has ≥ 2 letters
+    have h2keep : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b :=
+      h2
+    obtain ⟨a, b, hab, ⟨u₀, hu₀⟩, ⟨v₀, hv₀⟩⟩ := h2keep
+    have hneq : u₀ ≠ v₀ := fun hh => hab (by rw [← hu₀, hh, hv₀])
+    have hk1 : 1 ≤ k := by
+      by_contra hk
+      have hk0 : k = 0 := by omega
+      subst hk0
+      exact hneq (Subsingleton.elim u₀ v₀)
+    have hq2 : 2 ≤ Fintype.card F := by
+      by_contra hq
+      have hle1 : Fintype.card F ≤ 1 := by omega
+      have hcard2 : 2 ≤ Fintype.card (Word F k) := by
+        have hsub : ({u₀, v₀} : Finset (Word F k)) ⊆ Finset.univ := by simp
+        have h := Finset.card_le_card hsub
+        rw [Finset.card_insert_of_notMem (by simpa using hneq), Finset.card_singleton,
+          Finset.card_univ, card_word] at h
+        simpa using h
+      have : Fintype.card (Word F k) ≤ 1 := by
+        rw [card_word]
+        calc Fintype.card F ^ k ≤ 1 ^ k := Nat.pow_le_pow_left hle1 k
+          _ = 1 := one_pow k
+      omega
+    -- the given MDS code forces `n - d + 1 = k`
+    obtain ⟨C₀, hMDS₀, hcard₀⟩ := hmds
+    have hnk : n - d + 1 = k := by
+      have h1 : C₀.card = Fintype.card F ^ (n - d + 1) := hMDS₀.1
+      have hpow : Fintype.card F ^ (n - d + 1) = Fintype.card F ^ k := by rw [← h1, hcard₀]
+      exact Nat.pow_right_injective hq2 hpow
+    by_contra hcon
+    have hsmall : optimalRedundancyData f d df < d := by omega
+    -- the FCC attaining the optimum
+    obtain ⟨r₁, C₁, hC₁⟩ := exists_isFCCData f d df
+    have hne : ∃ r' : ℕ, r' ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'),
+        IsFCCData f C d df} := ⟨r₁, C₁, hC₁⟩
+    rw [optimalRedundancyData, dite_eq_left hne] at hsmall
+    obtain ⟨C₂, hC₂⟩ := Nat.find_spec hne
+    set C' : Finset (Word F (k + Nat.find hne)) := Finset.univ.image C₂ with hC'
+    have hinj : Function.Injective C₂ := by
+      intro x y hxy
+      by_contra hne'
+      have h := hC₂.2.1 x y hne'
+      rw [hxy, hammingDist_self] at h
+      omega
+    have hcard' : C'.card = Fintype.card F ^ k := by
+      rw [hC', Finset.card_image_of_injective _ hinj, Finset.card_univ, card_word]
+    have hmin' : d ≤ minDist C' := by
+      have hneC : ∃ d' : ℕ,
+          d' ∈ {d' : ℕ | ∃ x ∈ C', ∃ y ∈ C', x ≠ y ∧ hammingDist x y = d'} := by
+        refine ⟨hammingDist (C₂ u₀) (C₂ v₀), ⟨C₂ u₀, ?_, C₂ v₀, ?_, ?_, rfl⟩⟩
+        · rw [hC']; exact Finset.mem_image.mpr ⟨u₀, Finset.mem_univ _, rfl⟩
+        · rw [hC']; exact Finset.mem_image.mpr ⟨v₀, Finset.mem_univ _, rfl⟩
+        · exact fun hh => hneq (hinj hh)
+      rw [minDist, dite_eq_left hneC]
+      obtain ⟨x, hx, y, hy, hxy, hval⟩ := Nat.find_spec hneC
+      rw [hC', Finset.mem_image] at hx hy
+      obtain ⟨ux, -, rfl⟩ := hx
+      obtain ⟨uy, -, rfl⟩ := hy
+      have hxy' : ux ≠ uy := fun hh => hxy (by rw [hh])
+      have h := hC₂.2.1 ux uy hxy'
+      rwa [hval] at h
+    have hmin_le : minDist C' ≤ k + Nat.find hne := by
+      have hmem1 : C₂ u₀ ∈ C' := by
+        rw [hC']; exact Finset.mem_image.mpr ⟨u₀, Finset.mem_univ _, rfl⟩
+      have hmem2 : C₂ v₀ ∈ C' := by
+        rw [hC']; exact Finset.mem_image.mpr ⟨v₀, Finset.mem_univ _, rfl⟩
+      have hne2 : C₂ u₀ ≠ C₂ v₀ := fun hh => hneq (hinj hh)
+      refine le_trans (minDist_le hmem1 hmem2 hne2) ?_
+      have := hammingDist_le_card_fintype (x := C₂ u₀) (y := C₂ v₀)
+      rwa [Fintype.card_fin] at this
+    have hrange : Set.range C₂ = (↑C' : Set (Word F (k + Nat.find hne))) := by
+      rw [hC']
+      ext x
+      constructor
+      · rintro ⟨u, rfl⟩
+        exact Finset.mem_image.mpr ⟨u, Finset.mem_univ _, rfl⟩
+      · intro hx
+        obtain ⟨u, -, rfl⟩ := Finset.mem_image.mp hx
+        exact ⟨u, rfl⟩
+    by_cases hrd : Nat.find hne + 1 = d
+    · -- the optimum has redundancy exactly `d - 1` and its code is MDS
+      have hrd' : Nat.find hne = d - 1 := by omega
+      -- `d ≤ n`: the MDS code `C₀` has two distinct codewords
+      have hdC0 : d ≤ n := by
+        have hcard2 : 1 < C₀.card := by
+          rw [hcard₀]
+          calc 1 < Fintype.card F ^ 1 := by simpa using (show 1 < Fintype.card F by omega)
+            _ ≤ Fintype.card F ^ k := Nat.pow_le_pow_right (by omega) hk1
+        obtain ⟨x, hx, y, hy, hxy⟩ := Finset.one_lt_card.mp hcard2
+        have h1 : minDist C₀ ≤ hammingDist x y := minDist_le hx hy hxy
+        have h2' : hammingDist x y ≤ n := by
+          have := hammingDist_le_card_fintype (x := x) (y := y)
+          rwa [Fintype.card_fin] at this
+        rw [hMDS₀.2] at h1
+        omega
+      have hn' : k + Nat.find hne = n := by omega
+      have hminEq : minDist C' = d := by
+        refine le_antisymm ?_ hmin'
+        have hS : Fintype.card F ^ k ≤ Fintype.card F ^ (n - minDist C' + 1) := by
+          have h := card_le_pow_minDist (C := C') (by omega : 1 ≤ Fintype.card F)
+          rw [hcard'] at h
+          have hexp : (k + Nat.find hne) - minDist C' + 1 ≤ n - minDist C' + 1 := by omega
+          exact le_trans h (Nat.pow_le_pow_right (by omega : 1 ≤ Fintype.card F) hexp)
+        have hle : k ≤ n - minDist C' + 1 :=
+          (Nat.pow_le_pow_iff_right (by omega : 1 < Fintype.card F)).mp hS
+        have h1 : minDist C' ≤ n - k + 1 := by omega
+        have h2' : n - k + 1 = d := by omega
+        omega
+      have hMDS' : IsMDS C' d := by
+        refine ⟨?_, hminEq⟩
+        rw [hcard']
+        congr 1
+        omega
+      have hconn := isConnected_minDistGraph_of_mds C' hMDS'
+      exact not_isFCCData_of_connected C' hminEq hconn f h2 hlt ⟨C₂, hC₂, hrange⟩
+    · -- Singleton rules the redundancy out
+      have hr2 : Nat.find hne + 1 < d := by omega
+      have hS : C'.card ≤ Fintype.card F ^ ((k + Nat.find hne) - minDist C' + 1) :=
+        card_le_pow_minDist (by omega : 1 ≤ Fintype.card F)
+      rw [hcard'] at hS
+      have hmono : (k + Nat.find hne) - minDist C' + 1 ≤ k + Nat.find hne - d + 1 := by
+        omega
+      have hstep : Fintype.card F ^ ((k + Nat.find hne) - minDist C' + 1) ≤
+          Fintype.card F ^ (k + Nat.find hne - d + 1) :=
+        Nat.pow_le_pow_right (by omega : 1 ≤ Fintype.card F) hmono
+      have hfinal : Fintype.card F ^ k ≤ Fintype.card F ^ (k + Nat.find hne - d + 1) :=
+        le_trans hS hstep
+      have hdr : Nat.find hne + 2 ≤ d := by omega
+      have hx1 : Nat.find hne ≤ d := by omega
+      have hx2 : k + Nat.find hne - d = k - (d - Nat.find hne) := by omega
+      have hx3 : 2 ≤ d - Nat.find hne := by omega
+      have hx4 : k - (d - Nat.find hne) ≤ k - 2 := Nat.sub_le_sub_left hx3 k
+      have hdk : d ≤ k + Nat.find hne := le_trans hmin' hmin_le
+      have hkr : k + Nat.find hne - d ≤ k - 2 := by omega
+      have hexp : k + Nat.find hne - d + 1 < k := by omega
+      have := Nat.pow_lt_pow_right (by omega : 1 < Fintype.card F) hexp
+      exact absurd hfinal (not_le.mpr this)
 
 /-! ### Example 9 (`#example 9#`) — the minimum-distance graph of a 4-word code -/
 

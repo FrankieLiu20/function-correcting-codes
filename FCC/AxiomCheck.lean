@@ -59,5 +59,6 @@ namespace FCC
 #print axioms not_isFCCData_of_components
 #print axioms exists_mds_neighbor
 #print axioms isConnected_minDistGraph_of_mds
+#print axioms mds_optimalRedundancyData_ge
 
 end FCC
