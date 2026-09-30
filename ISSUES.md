@@ -361,6 +361,42 @@ bound on the optimum gives `A_t(k+r) ≤ q^r`; `k + r = n` makes the code perfec
 (then `#theorem 10#` + `#theorem 8#`), `k + r < n` contradicts the strict
 monotonicity `A_t(n) < A_t(k+r)·q^{n−k−r}`, and `t > k + r` forces `k = 0`.
 
+## 18. §VI-A: the construction of `#lemma 3#` needs *systematicity* and an order on the values
+
+**Found while proving `#lemma 3#` (2026-09-30); the first two are applied, the third is
+recorded for the corollaries.**  Three things the printed statement leaves implicit:
+
+* **`C` is used as a *systematic* encoding.**  The printed hypothesis is "a systematic
+  `[n,k,d_d]` linear error-correcting code `C`", but the transcription in
+  `FCC/Paper.lean` had kept only its minimum distance.  The construction needs more:
+  Case 1 of the proof (`d(u,v) ≥ d_f`) concludes `d(c_u,c_v) ≥ d_f` *from
+  systematicity* — for a systematic code the message coordinates alone force
+  `d(c_u,c_v) ≥ d(u,v)` (`hammingDist_eq_msg_add_red`) — which a minimum-distance
+  hypothesis does not give.  The statement now carries `hCsys : IsSystematic C`,
+  i.e. the paper's own word;
+* **the two parity blocks need `q ≥ 2`.**  The construction writes `1…1` or `0…0`
+  in `d_f − d_d` fresh coordinates; the paper's alphabet is the field `F_q`, so
+  `q ≥ 2` is automatic there, while our statements are over an arbitrary finite
+  alphabet.  `#lemma 3#` therefore assumes `[Nontrivial F]` (⟺ `1 < q`);
+* **the paper's `max B_f(u,d_f−1)` needs a total order on the value set**, which it
+  inherits from `Im(f) ⊆ ℕ` in [1].  Our value type `α` is arbitrary, so the
+  marking is defined through a *fixed global choice function of the set*
+  (`pickElem`), which is what the proof actually uses: for `d(u,v) ≤ d_f−1` with
+  `f(u) ≠ f(v)` the two function balls are *equal* two-element sets (both contain
+  `f u`, `f v` and have at most two elements), hence get the same marked value, so
+  exactly one of `f(u)`, `f(v)` is marked (`ballMark_ne`).  Nothing is weakened: no
+  order is needed for the argument.
+
+The same review found that `#corollary 9#`–`#corollary 12#` have a related problem:
+their hypothesis is a perfect *linear* code (resp. an MDS code), and the proof needs
+its **systematic form** — a linear-[n,k]-code has one (the paper invokes it in §VII:
+"any linear code is equivalent to a linear code with a generator matrix in standard
+form"), but this repository has no linear-code theory yet (definitions 16–18 and
+`#lemma 7#`–`#lemma 10#` are phases 3.10, still `sorry`).  Until then those
+corollaries will carry the systematic encoder explicitly, with the perfect/MDS code
+kept as the hypothesis that supplies it (`ISSUES.md` §18, continued in the next
+session).
+
 The same review confirmed that `IsPerfect C t` — minimum distance `≥ 2t+1` plus
 `q^n = |C| · |B(0,t)|` — is enough for everything `#theorem 10#` uses: it implies
 the balls of radius `t` around the codewords tile the space (`card_ball`,

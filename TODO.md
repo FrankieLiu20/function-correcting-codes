@@ -200,6 +200,19 @@ in the same commit that does the work.
       monotonicity `A_t(n) < A_t(k+r)·q^{n−k−r}` (the new lemmas
       `sum_range_choose_mul_pow_le_succ`/`lt_succ`/`lt_add` in `FCC/Balls.lean`),
       and `t > k + r` forces `k = 0`.
+- [x] 3.8 (part 1, done 2026-09-30). `#lemma 3#` (`locallyBinary_redundancy_le`) —
+      the two-step construction for a `(d_f−1)`-locally binary `f`, with the
+      paper's `max B_f(u,d_f−1)` replaced by a global choice function on finite
+      sets (`pickElem`/`ballMax`/`ballMark`; no order is needed, `ISSUES.md` §18).
+      Two hypotheses were made explicit: `IsSystematic C` (the paper's own word —
+      Case 1 of the proof needs `d(u,v) ≤ d(C u, C v)`) and `[Nontrivial F]` (the
+      two parity blocks `1…1`/`0…0` must differ).
+- [ ] 3.8 (part 2, next). `#corollary 9#`–`#corollary 12#`.  Their statements must
+      be reworked first: the paper's hypothesis is a perfect *linear* / MDS code,
+      and the proof needs its *systematic form*, which requires the linear-code
+      theory of §VII (phase 3.10, still `sorry`).  Until then they carry the
+      systematic encoder explicitly, with the perfect/MDS code as the hypothesis
+      that supplies it (`ISSUES.md` §18).
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

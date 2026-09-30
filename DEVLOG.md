@@ -892,3 +892,43 @@ only asks for the equation; proving it showed that the transcription also needs
 results.  §V (both `#theorem 8#`–`#theorem 11#` and `#corollary 7#`/`#corollary 8#`)
 is complete; §VI (locally binary/bounded functions, `#lemma 3#`, `#theorem 12#`,
 `#lemma 6#`) is next.
+
+## 2026-09-30 (fifth session) — §VI-A: `#lemma 3#` proved
+
+`locallyBinary_redundancy_le`: for a `(d_f−1)`-locally binary function `f` and a
+*systematic* code `C` of redundancy `r` and minimum distance `d_d`, the two-step
+construction gives an `(f : d_d, d_f)`-FCC of redundancy `r + (d_f − d_d)`.
+
+**The construction, order-free.**  The paper writes `p_u = 1…1` when
+`f(u) = max B_f(u, d_f−1)` and `0…0` otherwise.  Our value type has no order, so
+the marking uses a fixed global choice function on finite sets
+(`pickElem : (s : Finset α) → s.Nonempty → α`), which depends on the *set*
+`B_f(u,ρ)` only.  That is all the proof needs: if `d(u,v) ≤ ρ` and `f u ≠ f v` then
+both `f u` and `f v` lie in `B_f(u,ρ)`, which has at most two elements by local
+binarity, so `B_f(u,ρ) = {f u, f v}`; for the same reason
+`B_f(v,ρ) = {f u, f v}`, the two balls are *equal*, hence get the same marked value,
+and exactly one of `f u`, `f v` is marked (`ballMark_ne`).  Two parity blocks
+therefore differ in every coordinate whenever the marks differ
+(`hammingDist_locallyBinaryParity`), and the code realises the second step of
+§III-A (`twoStepCode`, `twoStepCode_systematic`, `hammingDist_twoStepCode`).
+
+**Statement corrections (`ISSUES.md` §18).**  Three implicit hypotheses were made
+explicit, two of them applied now:
+
+1. `hCsys : IsSystematic C` — the paper says "systematic `[n,k,d_d]` code"; the
+   transcription had kept only the minimum distance, but Case 1 of the proof
+   (`d(u,v) ≥ d_f`) needs `d(u,v) ≤ d(C u, C v)`, which is *systematicity*
+   (`hammingDist_eq_msg_add_red`), not minimum distance;
+2. `[Nontrivial F]` (⟺ `1 < q`) — the two parity blocks `1…1`/`0…0` must differ;
+   for the paper's field this is automatic;
+3. the paper's `max B_f(u,d_f−1)` needs an order on the values — replaced by the
+   global choice function, so no order is required (recorded, not a weakening).
+   The same review found that `#corollary 9#`–`#corollary 12#` need the *systematic
+   form* of their perfect/MDS code, which this repository cannot yet produce (the
+   linear-code theory is §VII, phase 3.10); those statements will carry the
+   systematic encoder explicitly next session.
+
+**Verification.**  `lake build` green (only the 26 `sorry` stubs warn);
+`consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 35 audited
+results.  Next: `#corollary 9#`–`#corollary 12#` (upper and optimality bounds for
+locally binary functions), then §VI-B/C.

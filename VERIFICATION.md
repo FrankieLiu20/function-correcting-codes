@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 34 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 27 (was 49: twenty paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 35 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 26 (was 49: twenty-one paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -175,6 +175,13 @@ Proved:
   monotonicity `A_t(n) < A_t(k+r)·q^{n−k−r}` of the truncated binomial sums
   (`sum_range_choose_mul_pow_lt_add`, built from the Pascal recurrence
   `sum_range_choose_mul_pow_succ`); the remaining case `t > k+r` forces `k = 0`.
+* §VI-A (locally binary functions): `#lemma 3#` (`locallyBinary_redundancy_le`) —
+  for a `(d_f−1)`-locally binary `f` and a systematic code `C` of redundancy `r`
+  and minimum distance `d_d`, the two-step construction (the codeword `C u`
+  followed by `1…1` or `0…0` according to whether `f(u)` is the marked value of its
+  function ball) is an `(f : d_d, d_f)`-FCC of redundancy `r + (d_f − d_d)`.  The
+  marking is order-free (`ballMark`/`pickElem`, `ISSUES.md` §18), and the paper's
+  Case 1 uses the systematicity `d(u,v) ≤ d(C u, C v)`.
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,
