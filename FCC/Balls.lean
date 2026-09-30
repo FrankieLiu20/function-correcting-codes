@@ -962,4 +962,62 @@ theorem mem_ball_inter_iff_of_dist_one {F : Type*} [Fintype F] [DecidableEq F] {
       · rw [keyv hv]; omega
       · rw [keyv' hv]; omega
 
+/-- `(internal, Appendix — the counting step of `#theorem 17#`)` — the number of
+words whose disagreements with `u`, *apart from the coordinate `c`*, form a
+prescribed set `S ∌ c`:
+
+`|{x | D(x,u) \ {c} = S}| = q · (q−1)^{|S|}`.
+
+Such an `x` either disagrees with `u` exactly on `S` (`(q−1)^{|S|}` words, by
+`card_sphere_fiber`) or exactly on `S ∪ {c}` (`(q−1)^{|S|+1}` words); the two cases
+are disjoint, and `(q−1)^{|S|} + (q−1)^{|S|+1} = q(q−1)^{|S|}`.  Summing over the
+`i`-subsets of `{c}ᶜ` (of which there are `C(n−1,i)`) gives the
+`q·Σ_{i≤t−1}C(n−1,i)(q−1)^i` of the appendix. -/
+theorem card_fiber_erase {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {n : ℕ}
+    (u : Word F n) {c : Fin n} {S : Finset (Fin n)} (hS : c ∉ S) :
+    (Finset.univ.filter (fun x : Word F n => (diffSet x u).erase c = S)).card
+      = Fintype.card F * (Fintype.card F - 1) ^ S.card := by
+  classical
+  have hsplit : (Finset.univ.filter (fun x : Word F n => (diffSet x u).erase c = S))
+      = (Finset.univ.filter (fun x : Word F n => diffSet x u = S))
+        ∪ (Finset.univ.filter (fun x : Word F n => diffSet x u = insert c S)) := by
+    ext x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union]
+    constructor
+    · intro hx
+      by_cases hmem : c ∈ diffSet x u
+      · right
+        rw [← Finset.insert_erase hmem, hx]
+      · left
+        rwa [Finset.erase_eq_of_notMem hmem] at hx
+    · rintro (h | h)
+      · rw [h, Finset.erase_eq_of_notMem hS]
+      · rw [h, Finset.erase_insert hS]
+  have hdisj : Disjoint (Finset.univ.filter (fun x : Word F n => diffSet x u = S))
+      (Finset.univ.filter (fun x : Word F n => diffSet x u = insert c S)) := by
+    rw [Finset.disjoint_left]
+    intro x h1 h2
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at h1 h2
+    rw [h1] at h2
+    have : c ∈ S := by
+      have heq : insert c S = S := by rw [← h2, h1]
+      rw [← heq]
+      exact Finset.mem_insert_self c S
+    exact hS this
+  have hq1 : 1 ≤ Fintype.card F := Fintype.card_pos_iff.mpr ⟨(0 : F)⟩
+  have hgoal : (Fintype.card F - 1) ^ S.card
+        + (Fintype.card F - 1) ^ S.card * (Fintype.card F - 1)
+      = Fintype.card F * (Fintype.card F - 1) ^ S.card := by
+    calc (Fintype.card F - 1) ^ S.card
+          + (Fintype.card F - 1) ^ S.card * (Fintype.card F - 1)
+        = (Fintype.card F - 1) ^ S.card * 1
+          + (Fintype.card F - 1) ^ S.card * (Fintype.card F - 1) := by rw [mul_one]
+      _ = (Fintype.card F - 1) ^ S.card * (1 + (Fintype.card F - 1)) := by rw [← mul_add]
+      _ = (Fintype.card F - 1) ^ S.card * Fintype.card F := by
+            rw [Nat.add_comm, Nat.sub_add_cancel hq1]
+      _ = Fintype.card F * (Fintype.card F - 1) ^ S.card := by rw [mul_comm]
+  rw [hsplit, Finset.card_union_of_disjoint hdisj, card_sphere_fiber, card_sphere_fiber,
+    Finset.card_insert_of_notMem hS, pow_succ]
+  exact hgoal
+
 end FCC
