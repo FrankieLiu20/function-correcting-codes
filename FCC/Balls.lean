@@ -882,4 +882,84 @@ theorem exists_diffSet_eq_singleton {F : Type*} [Fintype F] [DecidableEq F] {n :
   obtain ⟨c, hc⟩ := Finset.card_eq_one.mp hcard
   exact ⟨c, hc⟩
 
+/-- `(internal, Appendix — the characterisation behind `#theorem 17#`)` — if `u` and
+`v` differ only in the coordinate `c`, then `x` lies in both balls `B(u,t)` and
+`B(v,t)` **iff** it disagrees with `u` in at most `t−1` of the *other* coordinates.
+
+Writing `a` for that number of disagreements: outside `c` the two centres agree, so
+`x` agrees with both or with neither and these coordinates contribute `a` to each
+distance; at `c` the two centres differ, so exactly one or both of the distances
+picks up one more — never none.  Hence the two distances are `a+1, a` or `a+1, a+1`,
+and "both `≤ t`" is equivalent to `a + 1 ≤ t` in either case.  (The `+ 1 ≤ t` form
+also covers `t = 0`, where `a ≤ t − 1` would be wrong; this matches the printed
+empty sum in `#theorem 17#`.) -/
+theorem mem_ball_inter_iff_of_dist_one {F : Type*} [Fintype F] [DecidableEq F] {n t : ℕ}
+    {u v x : Word F n} {c : Fin n} (hc : diffSet u v = {c}) :
+    x ∈ ball u t ∩ ball v t ↔ ((diffSet x u).erase c).card + 1 ≤ t := by
+  classical
+  have hucv : u c ≠ v c := by
+    have : c ∈ diffSet u v := by rw [hc]; simp
+    simpa [diffSet] using this
+  have hout : ∀ j, j ≠ c → u j = v j := by
+    intro j hj
+    by_contra hne
+    have : j ∈ diffSet u v := by simp [diffSet, hne]
+    rw [hc] at this
+    simp only [Finset.mem_singleton] at this
+    exact hj this
+  have herase : (diffSet x v).erase c = (diffSet x u).erase c := by
+    ext j
+    by_cases hj : j = c
+    · subst hj; simp
+    · have h1 : u j = v j := hout j hj
+      simp only [Finset.mem_erase, ne_eq, hj, not_false_eq_true, true_and]
+      simp only [diffSet, Finset.mem_filter, Finset.mem_univ, true_and]
+      rw [h1]
+  have keyu : ∀ hmem : c ∈ diffSet x u,
+      hammingDist x u = ((diffSet x u).erase c).card + 1 := by
+    intro hmem
+    rw [hammingDist_eq_card_diffSet]
+    exact (Finset.card_erase_add_one hmem).symm
+  have keyu' : c ∉ diffSet x u →
+      hammingDist x u = ((diffSet x u).erase c).card := by
+    intro hmem
+    rw [hammingDist_eq_card_diffSet, Finset.erase_eq_of_notMem hmem]
+  have keyv : ∀ hmem : c ∈ diffSet x v,
+      hammingDist x v = ((diffSet x u).erase c).card + 1 := by
+    intro hmem
+    rw [hammingDist_eq_card_diffSet, ← herase]
+    exact (Finset.card_erase_add_one hmem).symm
+  have keyv' : c ∉ diffSet x v →
+      hammingDist x v = ((diffSet x u).erase c).card := by
+    intro hmem
+    rw [hammingDist_eq_card_diffSet, ← herase, Finset.erase_eq_of_notMem hmem]
+  have hnotboth : ¬ (c ∉ diffSet x u ∧ c ∉ diffSet x v) := by
+    rintro ⟨h1, h2⟩
+    have hx1 : x c = u c := by
+      by_contra hne
+      exact h1 (by simp [diffSet, hne])
+    have hx2 : x c = v c := by
+      by_contra hne
+      exact h2 (by simp [diffSet, hne])
+    exact hucv (by rw [← hx1, hx2])
+  simp only [Finset.mem_inter, ball, Finset.mem_filter, Finset.mem_univ, true_and]
+  constructor
+  · rintro ⟨h1, h2⟩
+    by_cases hu : c ∈ diffSet x u
+    · rw [keyu hu] at h1
+      omega
+    · have hv : c ∈ diffSet x v := by
+        by_contra hv
+        exact hnotboth ⟨hu, hv⟩
+      rw [keyv hv] at h2
+      omega
+  · intro hle
+    constructor
+    · by_cases hu : c ∈ diffSet x u
+      · rw [keyu hu]; omega
+      · rw [keyu' hu]; omega
+    · by_cases hv : c ∈ diffSet x v
+      · rw [keyv hv]; omega
+      · rw [keyv' hv]; omega
+
 end FCC
