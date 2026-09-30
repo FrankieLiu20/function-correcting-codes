@@ -158,6 +158,19 @@ in the same commit that does the work.
       projection onto any `J` of size `n − d + 1` is injective on `C` and, with
       `|C| = q^{n−d+1}`, bijective; then `#theorem 11#` iterates `#lemma 2#` by
       induction on `d(u,v)`.
+      **Singleton bound done (2026-09-30)**: `card_le_pow_minDist` in
+      `FCC/Balls.lean` (`|C| ≤ q^{n − d_min + 1}`, proved from the projection
+      argument; it assumes a non-empty alphabet, as the paper's `F_q` is a field).
+      **Remaining proof of `#corollary 8#`**: let `C₂` attain the optimum with
+      redundancy `r = optimalRedundancyData f d df` and let `C'` be its codeword set
+      (an image of `Word F k`, hence `|C'| = q^k` by injectivity, and
+      `d_min(C') ≥ d` by data protection; `q ≥ 2` because two distinct function
+      values are attained).  If `r ≤ d − 2`, Singleton gives
+      `q^k = |C'| ≤ q^{k + r − d + 1}` with `k + r − d + 1 < k`, contradicting
+      `q ≥ 2`.  If `r = d − 1`, then `k + r = k + d − 1 = n` and `C'` is MDS
+      (cardinality plus `d_min = d`, the latter from Singleton and `d_min ≥ d`), so
+      `#theorem 11#` makes `G(C')` connected and `#theorem 8#` rules the FCC out —
+      contradiction again.  Hence `d ≤ optimalRedundancyData f d df`.
 - [ ] 3.7. `#theorem 10#` (perfect codes: `G(C)` connected) and `#corollary 7#`
       (`r_f ≥ n − k + 1`): needs the packing/covering argument of §V-B — the balls
       of radius `t` around codewords partition the space (`IsPerfect`), which is

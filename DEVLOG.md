@@ -735,3 +735,27 @@ too large); it now counts the components that meet `C`.
 `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green (30 headline
 results).  Next: `#corollary 8#`, then `#theorem 10#`/`#corollary 7#` (perfect
 codes).
+
+## 2026-09-30 — the Singleton bound, proved from scratch (preparation for `#corollary 8#`)
+
+`#corollary 8#` needs the Singleton bound `M ≤ q^{n−d+1}`, which the paper quotes
+from [17].  Instead of assuming it, it is now proved in `FCC/Balls.lean` as
+`card_le_pow_minDist`: two codewords that agree on `n − d_min + 1` coordinates are at
+distance `≤ d_min − 1`, hence equal, so the projection onto a coordinate set of that
+size is injective on `C` and `|C| ≤ q^{n − d_min + 1}`.  The lemma assumes a
+non-empty alphabet (for the empty alphabet and `n = 0` the bound genuinely fails;
+the paper's `F_q` is a field).  It is the first *external* result of the paper that
+we prove rather than quote — registered as a headline result (31 audited).
+
+To let `FCC/Balls.lean` use it, `minDist_le` (previously in `FCC/Paper.lean`, §II's
+internal API) moved to `FCC/Basic.lean`, next to `minDist`: `Balls` is imported
+before the paper items, so anything it needs must live below it.
+
+**Next (recorded in `TODO.md` §3.6).**  `#corollary 8#`'s proof: take the FCC `C₂`
+attaining `r = optimalRedundancyData f d df` and its codeword set `C'` (image of the
+finite message space, so `|C'| = q^k` by injectivity and `d_min(C') ≥ d` by data
+protection; `q ≥ 2` since two distinct function values are attained — and `d = 0`
+makes the claim trivial).  If `r ≤ d − 2`, Singleton gives `q^k = |C'| ≤
+q^{k + r − d + 1}` with exponent `< k`, contradicting `q ≥ 2`.  If `r = d − 1` then
+`C'` has length `k + d − 1 = n` and is MDS (`|C'| = q^{n − d + 1}` and
+`d_min(C') = d`), so `#theorem 11#` + `#theorem 8#` contradict the FCC's existence.

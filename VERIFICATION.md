@@ -120,7 +120,7 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 30 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `scripts/axioms_check.ps1` | green — 31 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
 | `sorry` in the library | 30 (was 49: seventeen paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
@@ -146,6 +146,9 @@ Proved:
   (`isConnected_minDistGraph_of_mds`), with connectivity stated as codeword
   reachability and `componentCount` counting the components that meet `C`
   (`ISSUES.md` §16);
+* the **Singleton bound** `card_le_pow_minDist` (`|C| ≤ q^{n − d_min + 1}`), which
+  the paper quotes from [17] and which is proved here from the projection argument
+  (`FCC/Balls.lean`), in preparation for `#corollary 8#`;
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,
