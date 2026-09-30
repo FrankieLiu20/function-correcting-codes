@@ -3494,7 +3494,42 @@ theorem hamming_bound_fcc_sphere {k r : ℕ} (f : Word F k → α) (t : ℕ)
     (C : Word F k → Word F (k + r)) (hC : IsFCC f C t) :
     (Finset.univ.image f).card * (ball (0 : Word F (k + r)) t).card ≤
       Fintype.card F ^ (k + r) := by
-  sorry
+  classical
+  -- one message per attained value of `f`
+  have hex : ∀ a : {a // a ∈ Finset.univ.image f}, ∃ u : Word F k, f u = a.1 := by
+    intro a
+    obtain ⟨u, -, hu⟩ := Finset.mem_image.mp a.2
+    exact ⟨u, hu⟩
+  let u : {a // a ∈ Finset.univ.image f} → Word F k := fun a => Classical.choose (hex a)
+  have hu : ∀ a, f (u a) = a.1 := fun a => Classical.choose_spec (hex a)
+  -- their codewords form a code of pairwise distance `≥ 2t+1`
+  set S : Finset (Word F (k + r)) :=
+    Finset.univ.image (fun a : {a // a ∈ Finset.univ.image f} => C (u a)) with hS
+  have hinj : Function.Injective (fun a : {a // a ∈ Finset.univ.image f} => C (u a)) := by
+    intro a b hab
+    by_contra hne
+    have h1 : f (u a) ≠ f (u b) := by
+      rw [hu a, hu b]
+      exact fun h => hne (Subtype.ext h)
+    have h2 := hC.2 (u a) (u b) h1
+    have hab' : C (u a) = C (u b) := hab
+    rw [hab', hammingDist_self] at h2
+    omega
+  have hScard : S.card = (Finset.univ.image f).card := by
+    rw [hS, Finset.card_image_of_injective _ hinj, Finset.card_univ, Fintype.card_coe]
+  have hpairs : ∀ x ∈ S, ∀ y ∈ S, x ≠ y → 2 * t + 1 ≤ hammingDist x y := by
+    intro x hx y hy hxy
+    rw [hS] at hx hy
+    obtain ⟨a, -, rfl⟩ := Finset.mem_image.mp hx
+    obtain ⟨b, -, rfl⟩ := Finset.mem_image.mp hy
+    by_cases hab : a = b
+    · exact absurd (by rw [hab]) hxy
+    · have h1 : f (u a) ≠ f (u b) := by
+        rw [hu a, hu b]
+        exact fun h => hab (Subtype.ext h)
+      exact hC.2 _ _ h1
+  have := card_mul_card_ball_le S t hpairs
+  rwa [hScard] at this
 
 /-- `#theorem 15#` (§VIII-B) — "consider a function `f : F_q^k → Im(f)` with
 `Im(f) = {f₁,…,f_E}`.  Let `ℓ = min_{i∈[E]} |f⁻¹(fᵢ)|`, then there exists an

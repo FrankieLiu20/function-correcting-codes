@@ -71,5 +71,6 @@ namespace FCC
 #print axioms locallyBounded_redundancy_le
 #print axioms hammingWeight_redundancy_le
 #print axioms hammingWeight_redundancy_le_optimal
+#print axioms hamming_bound_fcc_sphere
 
 end FCC

@@ -65,3 +65,5 @@ locallyBounded_redundancy_le
 # §VI-C (Hamming weight functions):
 hammingWeight_redundancy_le
 hammingWeight_redundancy_le_optimal
+# §VIII-B (the Hamming bound for (f,t)-FCCs):
+hamming_bound_fcc_sphere
