@@ -52,3 +52,5 @@ mds_optimalRedundancyData_ge
 isConnected_minDistGraph_of_perfect
 # §V-B (optimality of perfect codes):
 perfect_optimalRedundancyData_ge
+# §VI-A (locally binary functions):
+locallyBinary_redundancy_le

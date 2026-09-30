@@ -2585,14 +2585,220 @@ is external ([14], the colouring of a locally bounded function), so it enters
 the docstrings: the `[n,k,d_d]` codes are used only through their minimum
 distance, and the paper's `n` is our `k + r`. -/
 
+/-! #### Internal scaffolding for `#lemma 3#`
+
+The construction writes `p_u = 1…1` (or `0…0`) according to whether `f(u)` is
+`max B_f(u, d_f−1)`.  Since our value type `α` is arbitrary (no order), the
+"maximum" is replaced by a *fixed global choice function* on nonempty finite sets
+(`pickElem`), which plays exactly the same role: it is a function of the *set*
+`B_f(u,ρ)` only, so two words whose function balls coincide get the same marked
+value — which is all the construction uses (`ISSUES.md` §18). -/
+
+omit [Fintype F] [DecidableEq F] [Zero F] [DecidableEq α] in
+/-- `(internal, §VI-A — the paper's `max B_f(u,ρ)`, order-free)` — a fixed choice
+of an element of a nonempty finite set. -/
+noncomputable def pickElem (s : Finset α) (hs : s.Nonempty) : α := Classical.choose hs
+
+omit [Fintype F] [DecidableEq F] [Zero F] [DecidableEq α] in
+/-- `(internal, §VI-A)` — the chosen element lies in the set. -/
+theorem pickElem_mem (s : Finset α) (hs : s.Nonempty) : pickElem s hs ∈ s :=
+  Classical.choose_spec hs
+
+omit [Fintype F] [DecidableEq F] [Zero F] [DecidableEq α] in
+/-- `(internal, §VI-A)` — the choice depends on the set only, not on the proof that
+it is nonempty (proof irrelevance). -/
+theorem pickElem_congr {s t : Finset α} (h : s = t) (hs : s.Nonempty) (ht : t.Nonempty) :
+    pickElem s hs = pickElem t ht := by
+  subst h
+  exact congrArg (pickElem s) (Subsingleton.elim _ _)
+
+omit [Zero F] in
+/-- `(internal, §VI-A — the paper's `max B_f(u,ρ)`)` — the distinguished value of
+the function ball `B_f(u,ρ)`. -/
+noncomputable def ballMax (f : Word F k → α) (ρ : ℕ) (u : Word F k) : α :=
+  pickElem (functionBall f u ρ) ⟨f u, Finset.mem_image.mpr ⟨u, mem_ball_self u ρ, rfl⟩⟩
+
+omit [Zero F] in
+/-- `(internal, §VI-A)` — the distinguished value lies in the function ball. -/
+theorem ballMax_mem (f : Word F k → α) (ρ : ℕ) (u : Word F k) :
+    ballMax f ρ u ∈ functionBall f u ρ :=
+  pickElem_mem _ _
+
+omit [Zero F] in
+/-- `(internal, §VI-A — the paper's `[f(u) = max B_f(u,ρ)]`)` — the marking that
+decides whether `u` gets the `1…1` block. -/
+noncomputable def ballMark (f : Word F k → α) (ρ : ℕ) (u : Word F k) : Bool :=
+  decide (f u = ballMax f ρ u)
+
+omit [Zero F] in
+/-- `(internal, §VI-A — the key step of `#lemma 3#`)` — if `d(u,v) ≤ ρ` and
+`f(u) ≠ f(v)` then `u` and `v` get different marks.
+
+Proof: `f u` and `f v` both lie in `B_f(u,ρ)`, which has at most `2` elements, so
+`B_f(u,ρ) = {f u, f v}`; the same argument gives `B_f(v,ρ) = {f u, f v}`.  The two
+balls are therefore the *same set*, so the globally chosen value is the same for
+both, and it is one of the two distinct values `f u`, `f v` — exactly one of them
+is marked. -/
+theorem ballMark_ne (f : Word F k → α) {ρ : ℕ} (hf : IsLocallyBinary f ρ) {u v : Word F k}
+    (hclose : hammingDist u v ≤ ρ) (hne : f u ≠ f v) :
+    ballMark f ρ u ≠ ballMark f ρ v := by
+  classical
+  have hu : f u ∈ functionBall f u ρ :=
+    Finset.mem_image.mpr ⟨u, mem_ball_self u ρ, rfl⟩
+  have hv : f v ∈ functionBall f u ρ :=
+    Finset.mem_image.mpr ⟨v, by
+      simp only [ball, Finset.mem_filter, Finset.mem_univ, true_and]
+      rwa [hammingDist_comm], rfl⟩
+  have hsub : ({f u, f v} : Finset α) ⊆ functionBall f u ρ := by
+    intro x hx
+    rcases Finset.mem_insert.mp hx with rfl | hx
+    · exact hu
+    · rw [Finset.mem_singleton] at hx
+      exact hx ▸ hv
+  have hcard2 : ({f u, f v} : Finset α).card = 2 := by
+    rw [Finset.card_insert_of_notMem (by simpa using hne), Finset.card_singleton]
+  have hEq : functionBall f u ρ = {f u, f v} := by
+    refine Finset.eq_of_superset_of_card_ge hsub ?_
+    rw [hcard2]
+    exact hf u
+  have hv' : f v ∈ functionBall f v ρ :=
+    Finset.mem_image.mpr ⟨v, mem_ball_self v ρ, rfl⟩
+  have hu' : f u ∈ functionBall f v ρ :=
+    Finset.mem_image.mpr ⟨u, by
+      simp only [ball, Finset.mem_filter, Finset.mem_univ, true_and]
+      exact hclose, rfl⟩
+  have hsub' : ({f u, f v} : Finset α) ⊆ functionBall f v ρ := by
+    intro x hx
+    rcases Finset.mem_insert.mp hx with rfl | hx
+    · exact hu'
+    · rw [Finset.mem_singleton] at hx
+      exact hx ▸ hv'
+  have hEq' : functionBall f v ρ = {f u, f v} := by
+    refine Finset.eq_of_superset_of_card_ge hsub' ?_
+    rw [hcard2]
+    exact hf v
+  -- the two markings use the same distinguished value
+  let S : Finset α := {f u, f v}
+  have hS : S.Nonempty := ⟨f u, by simp [S]⟩
+  have huMax : ballMax f ρ u = pickElem S hS := by
+    rw [ballMax]
+    exact pickElem_congr hEq _ _
+  have hvMax : ballMax f ρ v = pickElem S hS := by
+    rw [ballMax]
+    exact pickElem_congr hEq' _ _
+  have hmem : pickElem S hS ∈ ({f u, f v} : Finset α) := pickElem_mem S hS
+  rcases Finset.mem_insert.mp hmem with hval | hval
+  · have huTrue : ballMark f ρ u = true := by simp [ballMark, huMax, hval]
+    have hvFalse : ballMark f ρ v = false := by
+      simp only [ballMark, hvMax, hval]
+      exact decide_eq_false (fun h => hne h.symm)
+    rw [huTrue, hvFalse]
+    decide
+  · have hval' : pickElem S hS = f v := by rw [Finset.mem_singleton] at hval; exact hval
+    have huFalse : ballMark f ρ u = false := by
+      simp only [ballMark, huMax, hval']
+      exact decide_eq_false hne
+    have hvTrue : ballMark f ρ v = true := by simp [ballMark, hvMax, hval']
+    rw [huFalse, hvTrue]
+    decide
+
+omit [Fintype F] [DecidableEq F] in
+/-- `(internal, §VI-A — the alphabet of `#lemma 3#` is a field in the paper)` — some
+nonzero letter, used for the `1…1` block of the construction. -/
+theorem exists_ne_zero_of_nontrivial [Nontrivial F] : ∃ a : F, a ≠ 0 := by
+  obtain ⟨x, y, hxy⟩ := exists_pair_ne F
+  by_cases h : x = 0
+  · exact ⟨y, fun hy => hxy (by rw [h, hy])⟩
+  · exact ⟨x, h⟩
+
+/-- `(internal, §VI-A — the parity block `p_u` of `#lemma 3#`)` — the constant block
+`a…a` when `u` is marked and `0…0` otherwise. -/
+noncomputable def locallyBinaryParity (f : Word F k → α) (ρ : ℕ) (a : F) (m : ℕ)
+    (u : Word F k) : Word F m :=
+  if ballMark f ρ u then (fun _ => a) else fun _ => 0
+
+/-- `(internal, §VI-A)` — two parity blocks are at distance `0` if their marks agree
+and at distance `m` (the whole block) otherwise. -/
+theorem hammingDist_locallyBinaryParity (f : Word F k → α) (ρ : ℕ) (a : F) (ha : a ≠ 0)
+    (m : ℕ) (u v : Word F k) :
+    hammingDist (locallyBinaryParity f ρ a m u) (locallyBinaryParity f ρ a m v)
+      = if ballMark f ρ u = ballMark f ρ v then 0 else m := by
+  by_cases h : ballMark f ρ u = ballMark f ρ v
+  · rw [ite_eq_left h]
+    have : locallyBinaryParity f ρ a m u = locallyBinaryParity f ρ a m v := by
+      simp only [locallyBinaryParity, h]
+    rw [this, hammingDist_self]
+  · rw [ite_eq_right h]
+    rw [hammingDist_eq_card_diffSet]
+    have hfull : diffSet (locallyBinaryParity f ρ a m u) (locallyBinaryParity f ρ a m v)
+        = Finset.univ := by
+      ext j
+      simp only [diffSet, Finset.mem_filter, Finset.mem_univ, true_and]
+      have hcond : ((ballMark f ρ u = true) ↔ ¬ (ballMark f ρ v = true)) := by
+        constructor
+        · intro h1 h2
+          exact h (h1.trans h2.symm)
+        · intro h2
+          by_contra h1
+          refine h ?_
+          rw [Bool.eq_false_iff.mpr h1, Bool.eq_false_iff.mpr h2]
+      by_cases hu : ballMark f ρ u = true
+      · have hv : ¬ (ballMark f ρ v = true) := hcond.mp hu
+        rw [locallyBinaryParity, locallyBinaryParity, ite_eq_left hu, ite_eq_right hv]
+        exact iff_true_intro ha
+      · have hv : ballMark f ρ v = true := by
+          by_contra hv
+          exact hu (hcond.mpr hv)
+        rw [locallyBinaryParity, locallyBinaryParity, ite_eq_right hu, ite_eq_left hv]
+        exact iff_true_intro fun (hcon : (0 : F) = a) => ha hcon.symm
+    rw [hfull, Finset.card_univ, Fintype.card_fin]
+
 /-- `#lemma 3#` (§VI-A) — "for any `(d_f−1)`-locally binary function `f`, and a
 systematic `[n, k, d_d]` linear error-correcting code `C`, we have (from our
-construction in Subsection III-A) `r_f(k : d_d, d_f) ≤ n − k + d_f − d_d`". -/
-theorem locallyBinary_redundancy_le {k r dd df : ℕ} (f : Word F k → α)
+construction in Subsection III-A) `r_f(k : d_d, d_f) ≤ n − k + d_f − d_d`".
+
+The encoding is the two-step construction of §III-A: the codeword `c_u = C u`
+followed by the block `p_u` of length `d_f − d_d` that is `1…1` when `f(u)` is the
+marked value of its function ball and `0…0` otherwise.  Two hypotheses make the
+paper's step explicit: `hCsys` is the paper's word *systematic* (it is what gives
+`d(C u, C v) ≥ d(u,v)` in Case 1 of the proof), and `[Nontrivial F]` is the fact
+that the paper's alphabet is a field with `q ≥ 2`, needed for the two different
+blocks (`ISSUES.md` §18).  The paper's `max B_f(u, d_f−1)` is realised by a global
+choice function on finite sets, since our value type carries no order. -/
+theorem locallyBinary_redundancy_le [Nontrivial F] {k r dd df : ℕ} (f : Word F k → α)
     (hf : IsLocallyBinary f (df - 1)) (C : Word F k → Word F (k + r))
+    (hCsys : IsSystematic C)
     (hC : ∀ v w : Word F k, v ≠ w → dd ≤ hammingDist (C v) (C w)) :
     optimalRedundancyData f dd df ≤ r + (df - dd) := by
-  sorry
+  classical
+  obtain ⟨a, ha⟩ := exists_ne_zero_of_nontrivial (F := F)
+  let p : Word F k → Word F (df - dd) := locallyBinaryParity f (df - 1) a (df - dd)
+  have hp : ∀ u v : Word F k, ballMark f (df - 1) u ≠ ballMark f (df - 1) v →
+      hammingDist (p u) (p v) = df - dd := by
+    intro u v huv
+    show hammingDist (locallyBinaryParity f (df - 1) a (df - dd) u)
+      (locallyBinaryParity f (df - 1) a (df - dd) v) = df - dd
+    rw [hammingDist_locallyBinaryParity f (df - 1) a ha (df - dd) u v, ite_eq_right huv]
+  refine optimalRedundancyData_le_of (C := twoStepCode C p)
+    ⟨twoStepCode_systematic hCsys p, ?_, ?_⟩
+  · intro u v huv
+    rw [hammingDist_twoStepCode]
+    have := hC u v huv
+    omega
+  · intro u v hfne
+    have huv : u ≠ v := fun h => hfne (by rw [h])
+    rw [hammingDist_twoStepCode]
+    have hsplit := hammingDist_eq_msg_add_red hCsys u v
+    have h1 := hC u v huv
+    by_cases hfar : df ≤ hammingDist u v
+    · have h2 : hammingDist u v ≤ hammingDist (C u) (C v) := by
+        rw [hsplit]
+        exact Nat.le_add_right _ _
+      omega
+    · have hclose : hammingDist u v ≤ df - 1 := by omega
+      have hmark := ballMark_ne f hf hclose hfne
+      have hpv := hp u v hmark
+      omega
 
 /-- `#corollary 9#` (§VI-A) — "if there exists a perfect linear
 `(n, q^k, d_d = 2t_d+1)`-code, ... then for any `(d_f−1)`-locally binary
