@@ -19,10 +19,12 @@ in the same commit that does the work.
 - [x] 1a (part 2). `decide` regression tests (`FCC/Examples.lean`): the paper's
       Examples 6, 7 and 10 — the CDRM and DRM transcriptions, `N(D) = 3` for
       Example 6, the `[6,3,3]` and `[7,4,3]` minimum distances — plus ball sizes.
-- [ ] 1a (part 3). The closed form `|B(u,t)| = Σ_{i≤t} C(n,i)(q-1)^i`
-      (`card_sphere`, `ball_card`); the proof goes through the equivalence
+- [x] 1a (part 3, done 2026-09-30). The closed form `|B(u,t)| = Σ_{i≤t} C(n,i)(q-1)^i`
+      (`card_sphere`/`card_ball`, with `card_sphere_fiber` for one prescribed
+      disagreement set); the proof goes through the equivalence
       "word at distance `i` from `u` ↔ (set of `i` changed coordinates, values
-      on it)".  Needed by `#theorem 15#`–`#theorem 19#` and `#corollary 13#`/`#corollary 14#`.
+      on it)".  Written when §V-B needed it; `#theorem 15#`–`#theorem 19#` and
+      `#corollary 13#`/`#corollary 14#` will reuse it.
 - [x] 1b. `IsSystematic`, `minDist`; Definition 1 (`IsFCC`,
       `optimalRedundancy`) and Definition 6 (`IsFCCData`).
       Every paper item written from here on goes into `FCC/Paper.lean`, in paper
@@ -173,10 +175,30 @@ in the same commit that does the work.
       (cardinality plus `d_min = d`, the latter from Singleton and `d_min ≥ d`), so
       `#theorem 11#` makes `G(C')` connected and `#theorem 8#` rules the FCC out —
       contradiction again.  Hence `d ≤ optimalRedundancyData f d df`.
-- [ ] 3.7 (next). `#theorem 10#` (perfect codes: `G(C)` connected) and `#corollary 7#`
-      (`r_f ≥ n − k + 1`): needs the packing/covering argument of §V-B — the balls
-      of radius `t` around codewords partition the space (`IsPerfect`), which is
-      already how `IsPerfect` is stated.
+- [x] 3.7 (part 1, done 2026-09-30). `#theorem 10#` (`isConnected_minDistGraph_of_perfect`)
+      — the balls of radius `t` around the codewords of a perfect code tile the
+      space, and the paper's walk (move to the codeword `u'` covering an
+      intermediate `x` at distance `t+1` from `u`, which strictly decreases the
+      distance to `v`) gives codeword reachability.  The counting it rests on is
+      now proved in `FCC/Balls.lean`: the closed forms `card_sphere`/`card_ball`
+      (`|S(u,i)| = C(n,i)(q−1)^i`, phase 1a part 3, planned since 2026-09-14),
+      the packing bound `card_mul_card_ball_le` / `pairwiseDisjoint_ball` (the
+      Hamming bound quoted in §V-B), and the §V-B consequences
+      `exists_mem_ball_of_isPerfect` (covering), `minDist_eq_of_isPerfect` (a
+      perfect code has `d_min = 2t+1`, cf. `ISSUES.md` §16/§17) and
+      `hammingDist_lt_of_close` (the paper's step 5), plus
+      `exists_hammingDist_eq` (`FCC/Balls.lean`) and
+      `exists_hammingDist_eq_minDist` (`FCC/Basic.lean`) for the intermediate word.
+- [ ] 3.7 (part 2, next). `#corollary 7#` (`perfect_optimalRedundancyData_ge`,
+      `r_f ≥ n − k + 1` for `n` with `q^{n−k} = Σ_{i≤t}C(n,i)(q−1)^i`,
+      `t = ⌊(d_d−1)/2⌋`).  The statement now also carries `|Im f| ≥ 2`
+      (`ISSUES.md` §17 — it is false for `k = 0` otherwise).  Ingredients still
+      needed: the Hamming bound `C.card · (ball 0 t).card ≤ q^n` (from
+      `card_mul_card_ball_le`), its strict monotonicity in the length
+      (`Σ_{i≤t}C(m,i)(q−1)^i · q^{n−m} > Σ_{i≤t}C(n,i)(q−1)^i` for `m < n`), and
+      then the two cases `m = n` (the code is perfect, so `#theorem 10#` +
+      `#theorem 8#` rule the FCC out) and `m < n` (the Hamming bound contradicts
+      the monotonicity).
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

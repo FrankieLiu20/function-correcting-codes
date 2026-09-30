@@ -311,3 +311,35 @@ for every proper code.  Hence:
   included one isolated component per word outside `C`; that made `#theorem 9#`'s
   hypothesis `componentCount = Q` strictly stronger than the paper's (its `Q` was
   `q^n − |C|` too large).
+
+## 17. `#corollary 7#` needs `|Im f| ≥ 2` (its statement is false for `k = 0`)
+
+**Found while preparing phase 3.7 (2026-09-30); the proof is the next step.**  The
+paper states: "Let `f : F_q^k → Im(f)` be a function.  Then for an
+`(f : d_d, d_f)`-FCC with `d_f > d_d` we have `r_f(k : d_d, d_f) ≥ n−k+1`, where
+`n` satisfies `q^{n−k} = Σ_{i≤⌊(d_d−1)/2⌋} C(n,i)(q−1)^i`", and derives it "from
+`#theorem 8#` and `#theorem 10#`" — but `#theorem 8#` needs `|Im f| ≥ 2`, and
+without that hypothesis the claim is false:
+
+* take `k = 0` (so `F_q^0` has a single message and `|Im f| = 1`).  Then `r_f = 0`
+  (the empty encoding protects the only message vacuously), while `#corollary 7#`
+  would claim `n − 0 + 1 ≥ 2`, i.e. `r_f ≥ 2`.  Concretely `q = 2`, `d_d = 3`,
+  `d_f = 4`: `n = 1` satisfies `2^{1−0} = 2 = Σ_{i≤1} C(1,i)1^i`, and the claim
+  `2 ≤ r_f(0 : 3, 4) = 0` is false;
+* more generally the case `d_d = 2s+1`, `d_f = 2s+2` needs `|Im f| ≥ 2` for the
+  proof of `#corollary 7#` to close: the `m = n` case of the argument is exactly
+  "the code is perfect, hence `G(C)` is connected by `#theorem 10#`, hence no
+  `(f : d_d, d_f)`-FCC for `|Im f| ≥ 2` by `#theorem 8#`" — for a *constant* `f`
+  that step is unavailable (and `#theorem 8#` itself, hence the paper's derivation,
+  already excludes it).
+
+The statement will therefore take `h2 : |Im f| ≥ 2` (the same hypothesis as
+`#theorem 8#` and, after §15(b), `#corollary 8#`), exactly as the printed proof
+does.  (`|Im f| ≥ 2` also gives `q ≥ 2` and `k ≥ 1`, which the argument needs.)
+
+The same review confirmed that `IsPerfect C t` — minimum distance `≥ 2t+1` plus
+`q^n = |C| · |B(0,t)|` — is enough for everything `#theorem 10#` uses: it implies
+the balls of radius `t` around the codewords tile the space (`card_ball`,
+`pairwiseDisjoint_ball`) and that the minimum distance is *exactly* `2t+1`
+(`minDist_eq_of_isPerfect`, needed for the adjacency `d(u,u') = 2t+1`, which the
+paper reads off `d_min(C) = 2t+1`).

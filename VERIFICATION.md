@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 32 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 29 (was 49: eighteen paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 33 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 28 (was 49: nineteen paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -155,6 +155,17 @@ Proved:
   encoding, so its codeword set `C'` has `q^k` words and `d_min(C') ≥ d`; for
   `r = d − 1` Singleton forces `C'` to be MDS and `#theorem 11#`/`#theorem 8#`
   rule it out, while for `r ≤ d − 2` the Singleton bound and `q ≥ 2` do;
+* §V-B (perfect codes): `#theorem 10#` (`isConnected_minDistGraph_of_perfect`) —
+  `G(C)` is connected for every perfect `t`-error-correcting code.  The counting
+  behind it is now proved rather than quoted: the closed forms
+  `card_sphere`/`card_ball` (`|S(u,i)| = C(n,i)(q−1)^i`, phase 1a part 3), the
+  Hamming-bound packing inequality `card_mul_card_ball_le`/`pairwiseDisjoint_ball`,
+  and three §V-B consequences — `exists_mem_ball_of_isPerfect` (the balls of
+  radius `t` tile the space, so every word is within `t` of a codeword),
+  `minDist_eq_of_isPerfect` (a perfect code has `d_min = 2t+1`, which is what makes
+  the paper's `d(u,u') = 2t+1` step legal) and `hammingDist_lt_of_close` (the
+  paper's step 5 counting); `exists_hammingDist_eq` (Balls) and
+  `exists_hammingDist_eq_minDist` (Basic) supply the intermediate words;
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,

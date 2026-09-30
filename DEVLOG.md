@@ -795,3 +795,53 @@ package root holds only `FCC.lean`.  With §V-B's MDS half (`#lemma 2#`,
 `#theorem 11#`, `#corollary 8#`) complete, the remaining piece of §V-B is its
 perfect-code half, 3.7 (`#theorem 10#`, `#corollary 7#`), which needs the
 packing argument that `IsPerfect` already encodes.
+
+## 2026-09-30 (third session) — `#theorem 10#` proved; the ball/sphere counts done
+
+`isConnected_minDistGraph_of_perfect`: the minimum-distance graph of a perfect
+`t`-error-correcting code is connected (as codeword reachability).  The paper's
+proof moves from `u` towards `v` while strictly decreasing `d(·,v)`: pick `T` of
+`t+1` coordinates where `u` and `v` differ, let `x` follow `v` on `T` and `u`
+outside it (`d(x,u) = t+1`), take the codeword `u'` at distance `≤ t` from `x`
+(covering), note `d(u,u') = 2t+1` — the minimum distance of a perfect code — so
+`u u'` is an edge, and conclude `d(u',v) ≤ d(u,v) − 1` by the paper's
+`m_in`/`m_out` count.  Everything it needs is now proved, not quoted:
+
+* **Phase 1a part 3, at last**: the closed forms `card_sphere`
+  (`|S(u,i)| = C(n,i)(q−1)^i`, via the bijection "word ↦ (disagreement set,
+  values on it)", `card_sphere_fiber`) and `card_ball`
+  (`Σ_{i≤t} C(n,i)(q−1)^i`), plus `card_ball_succ`/`card_ball_lt_succ`.  These
+  were the oldest open item of the plan (2026-09-14); §VIII's bounds will reuse
+  them;
+* the **Hamming-bound packing inequality** `card_mul_card_ball_le`
+  (`|C| · |B(0,t)| ≤ q^n` when the pairwise distances are `≥ 2t+1`), from
+  `pairwiseDisjoint_ball` (triangle inequality) and the ball count;
+* the **covering lemma** `exists_mem_ball_of_isPerfect`: the balls of radius `t`
+  around a perfect code have total size `q^n`, so they tile the space —
+  "the Hamming balls … cover the entire space without overlap", as the paper
+  says;
+* `minDist_eq_of_isPerfect`: a perfect code with at least two words has
+  `d_min = 2t+1` (the paper reads this off silently when it writes "since `u` and
+  `u'` both are different codewords of `C`, we have `d(u,u') = 2t+1`).  Proof: a
+  word at distance `t+1` from a codeword is covered by a *different* codeword at
+  distance `≤ 2t+1 < d_min` if `d_min ≥ 2t+2`;
+* `hammingDist_lt_of_close`, the paper's step 5, as the set inclusion
+  `D(u',v) ⊆ (D(u',x) ∩ T) ∪ (D(u,v) \ T) ∪ (D(u',x) \ T)` plus cardinalities
+  (the paper's `m_in`, `m_out`);
+* `exists_hammingDist_eq` (a word at a prescribed distance exists for `q ≥ 2`)
+  and `exists_hammingDist_eq_minDist` (the minimum distance is attained).
+
+**Statement review.**  Re-reading §V-B against the PDF found one more statement
+defect, recorded in `ISSUES.md` §17: `#corollary 7#` needs `|Im f| ≥ 2`, the
+hypothesis `#theorem 8#` carries.  Without it the claim is false — for `k = 0`
+(one message) the redundancy is `0` while the corollary asks for `≥ n−k+1 ≥ 2`;
+the printed derivation is itself "from Theorems 8 and 10", which needs it.  The
+statement now carries it (as `#corollary 8#` and `#theorem 8#` already did).
+`#theorem 10#` itself is faithful: "connected" is codeword reachability
+(`ISSUES.md` §16), and `IsPerfect`'s two conditions are exactly what the proof
+uses.
+
+**Verification.**  `lake build` green (only the 28 `sorry` stubs warn);
+`consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 33 audited
+results.  Next: `#corollary 7#`, which needs the Hamming bound plus its strict
+monotonicity in the length (both from `card_ball`).
