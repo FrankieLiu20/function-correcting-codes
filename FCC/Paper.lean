@@ -3015,19 +3015,67 @@ theorem Nconst_four_two (t : ℕ) : Nconst (F := F₂) 4 (2 * t) = 3 * t := by
         hp i.succ j.succ (fun hcon => hij (Fin.succ_inj.mp hcon))
     omega
 
+omit [Zero F] in
 /-- `#theorem 12#` (§VI-B) — "for any `(2t_f, λ)`-bounded function `f` satisfying
 the contiguous block condition given in `#lemma 4#`, and a systematic
 `[n, k, 2t_d+1]` linear error-correcting code `C`, we have
-`r_f(k, t_d, t_f) ≤ n − k + N(λ, 2(t_f − t_d))`".  The colouring whose existence
-`#lemma 4#` provides is the hypothesis `hcol`. -/
-theorem locallyBounded_redundancy_le {k r td tf lam : ℕ} (f : Word F k → α)
-    (hf : IsLocallyBounded f (2 * tf) lam) (C : Word F k → Word F (k + r))
+`r_f(k, t_d, t_f) ≤ n − k + N(λ, 2(t_f − t_d))`".
+
+The colouring whose existence the external `#lemma 4#` provides — from
+`(2t_f, λ)`-boundedness plus the contiguous block condition — is the hypothesis
+`hcol` (which is why `_hf` itself is not used below: boundedness enters through
+`#lemma 4#`, `ISSUES.md` §20).  Three further hypotheses make the paper's proof
+explicit: `hCsys` is the paper's word *systematic* (Case 1 needs
+`d(u,v) ≤ d(C u, C v)`), `htd : t_d ≤ t_f` is the standing `d_d ≤ d_f` of
+`#definition 6#`, and `[Nontrivial F]` is the field-ness of the paper's alphabet
+(the second-step code of length `N(λ, 2(t_f−t_d))` is obtained from the
+attainment of `N`, which needs two distinct letters) — `ISSUES.md` §20.
+
+Proof: the construction of §III-A with second step `p_u := c'_{Col_f(u)}`, the
+codeword of an optimal `λ`-word code `c'` of minimum distance `2(t_f − t_d)`.  For
+`f(u) ≠ f(v)` either `d(u,v) ≥ 2t_f+1`, and the systematic first step alone gives
+`d(C u, C v) ≥ d(u,v)`, or `d(u,v) ≤ 2t_f`, and then the colours differ
+(`hcol`), so the second blocks are at distance `≥ 2(t_f−t_d)` and the total is
+`≥ (2t_d+1) + 2(t_f−t_d) = 2t_f+1`.  The paper's "particularly, for `q = 2` and
+`λ = 4`" is `r_f ≤ n − k + 3(t_f−t_d)`, which is this bound combined with
+`#lemma 5#` (`N(4,2t) = 3t`) when `F = F₂`. -/
+theorem locallyBounded_redundancy_le [Nontrivial F] {k r td tf lam : ℕ} (f : Word F k → α)
+    (_hf : IsLocallyBounded f (2 * tf) lam) (C : Word F k → Word F (k + r))
+    (hCsys : IsSystematic C)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w))
     (col : Word F k → Fin lam)
     (hcol : ∀ u v : Word F k, hammingDist u v ≤ 2 * tf → f u ≠ f v → col u ≠ col v)
-    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+    (htd : td ≤ tf) :
     optimalRedundancyData f (2 * td + 1) (2 * tf + 1) ≤
       r + Nconst (F := F) lam (2 * (tf - td)) := by
-  sorry
+  classical
+  -- an optimal `λ`-word code of length `N(λ, 2(t_f − t_d))`
+  have hne : ({r' : ℕ | IsDCode (F := F) (fun _ _ : Fin lam => 2 * (tf - td)) r'}).Nonempty :=
+    exists_isDCode_const (m := lam) (D₀ := 2 * (tf - td)) (exists_pair_ne F)
+  obtain ⟨w, hw⟩ := Nat.sInf_mem hne
+  -- the second step: send `u` to the codeword indexed by its colour
+  let p : Word F k → Word F (Nconst (F := F) lam (2 * (tf - td))) := fun u => w (col u)
+  have hp : ∀ u v : Word F k, col u ≠ col v → 2 * (tf - td) ≤ hammingDist (p u) (p v) :=
+    fun u v hcn => hw _ _ hcn
+  refine optimalRedundancyData_le_of
+    (C := twoStepCode C p)
+    (twoStep_isFCCData f td tf C hCsys hC p ?_)
+  intro u v hfuv
+  have huv : u ≠ v := fun h => hfuv (by rw [h])
+  by_cases hfar : 2 * tf + 1 ≤ hammingDist u v
+  · -- Case 1: the systematic first step already separates the two messages
+    have h1 : hammingDist u v ≤ hammingDist (C u) (C v) := by
+      have := hammingDist_eq_msg_add_red hCsys u v
+      rw [this]
+      exact Nat.le_add_right _ _
+    omega
+  · -- Case 2: the messages are close, so the colours differ and so do the blocks
+    have hclose : hammingDist u v ≤ 2 * tf := by omega
+    have hcn : col u ≠ col v := hcol u v hclose hfuv
+    have hw2 : 2 * (tf - td) ≤ hammingDist (p u) (p v) := hp u v hcn
+    have hcu : 2 * td + 1 ≤ hammingDist (C u) (C v) := hC u v huv
+    have hkey : (2 * td + 1) + 2 * (tf - td) = 2 * tf + 1 := by omega
+    omega
 
 /-- `#lemma 6#` (§VI-C) — "for the Hamming weight function `f : F_q^k → Im(f)`,
 and a systematic `[n, k, 2t_d+1]` linear error-correcting code `C`, we have

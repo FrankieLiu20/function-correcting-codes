@@ -60,3 +60,5 @@ locallyBinary_mds_redundancy_le
 locallyBinary_mds_optimal
 # §VI-B (the binary bound of [14]):
 Nconst_four_two
+# §VI-B (locally bounded functions):
+locallyBounded_redundancy_le
