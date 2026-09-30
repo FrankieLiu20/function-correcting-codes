@@ -285,3 +285,17 @@ in the same commit that does the work.
       also covers `t = 0` correctly — see `DEVLOG.md`) and the count
       `q·Σ_{i≤t−1}C(n−1,i)(q−1)^i` by summing `card_sphere_fiber` over the
       `i`-subsets of `{c}ᶜ`, then inclusion–exclusion with `card_ball`.
+- [ ] 3.13 (in progress, 2026-10-01). `#theorem 17#`'s counting layer: three pieces
+      are in `FCC/Balls.lean` (`exists_diffSet_eq_singleton`,
+      `mem_ball_inter_iff_of_dist_one`, `card_fiber_erase`).  The next piece is
+      `card_filter_erase_le`:
+      `|{x | |D(x,u) \ {c}| ≤ s}| = q · Σ_{i≤s} C(n−1,i)(q−1)^i`, whose proof was
+      developed but not finished — the split by the value of the invariant and the
+      split of each fibre over `({c}ᶜ).powersetCard i` both work; the last step
+      (`rw [hpartition, Finset.card_biUnion hdisj1]` and the analogous step inside)
+      still leaves a goal in the scratch session, most likely because
+      `Finset.card_biUnion` wants the pairwise disjointness in the `Set`-coercion
+      form (`(↑s).PairwiseDisjoint t`, which `Set.PairwiseDisjoint (fun i => i ∈ s) t`
+      is only defeq to).  After that: the `t ≥ 1` case of the intersection
+      (`+1 ≤ t` ↔ `≤ t−1`), the `t = 0` case (both sides are `0`), and finally
+      `#theorem 17#` by inclusion–exclusion with `card_ball`.
