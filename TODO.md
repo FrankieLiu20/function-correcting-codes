@@ -216,6 +216,19 @@ in the same commit that does the work.
       lower bounds `#corollary 7#`/`#corollary 8#` (with their hypothesis
       `|Im f| ≥ 2`, `ISSUES.md` §17).  `ISSUES.md` §18 records the bundle and the
       `set_option maxHeartbeats 1000000` these four declarations need.
+- [x] 3.9 (part 1, done 2026-09-30). `#lemma 5#` (`Nconst_four_two`): the paper's
+      `N(4,2t) = 3t` is a *binary* statement and the earlier transcription over an
+      arbitrary alphabet was false (`ISSUES.md` §19 — for `q = 4`, `t = 1` a
+      length-`2` code with four codewords at distance `2` exists).  It is now
+      `Nconst (F := F₂) 4 (2 * t) = 3 * t` and proved from scratch: the four words
+      `000, 011, 101, 110` repeated `t` times give the upper bound (`base4`), and
+      the Plotkin double counting `three_binary_le` gives the lower bound (three
+      binary words at pairwise distance `≥ 2t` need length `≥ 3t`, as at each
+      coordinate three binary letters disagree in `a(3−a) ≤ 2` of the three pairs).
+- [ ] 3.9 (part 2, next). `#theorem 12#` (locally bounded functions; the colouring
+      of `#lemma 4#` enters as the hypothesis `hcol`) and `#lemma 6#` (the Hamming
+      weight function; the paper gives two bounds, the second using
+      `N(q^k, 2t_d+1)`).
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

@@ -107,7 +107,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#corollary 12#` | VI-A | optimality of the construction for `d_f = d_d+1` given an MDS code (needs `\|Im f\| ≥ 2`) | `locallyBinary_mds_optimal` | proved |
 | `#definition 15#` | VI-B | `(ρ,λ)`-bounded function: `|B_f(u,ρ)| ≤ λ` for all `u` | `IsLocallyBounded` | stated |
 | `#lemma 4#` | VI-B | contiguous-block condition ⇒ a colouring `Col_f : F₂^k → [λ]` separating `f`-values at distance `≤ ρ` | — | external ([14]): hypothesis of `#theorem 12#` |
-| `#lemma 5#` | VI-B | `N(4,2t) = 3t` | `Nconst_four_two` | todo |
+| `#lemma 5#` | VI-B | `N(4,2t) = 3t` — the paper's statement is *binary*, so it is over `F₂` (the general-alphabet transcription is false, `ISSUES.md` §19); proved here from the `{000,011,101,110}` construction + Plotkin | `Nconst_four_two` | proved |
 | `#theorem 12#` | VI-B | for `(2t_f,λ)`-bounded `f` (with the `#lemma 4#` colouring): `r_f ≤ n−k+N(λ,2(t_f−t_d))`; for `q=2, λ=4`: `≤ n−k+3(t_f−t_d)` | `locallyBounded_redundancy_le` | todo |
 | `#lemma 6#` | VI-C | Hamming-weight function: `r_f ≤ n−k+N(2t_f+1,2(t_f−t_d))`, and `≤ N(q^k,2t_d+1)+N(2t_f+1,2(t_f−t_d))−k` | `hammingWeight_redundancy_le` | todo |
 
@@ -360,7 +360,7 @@ the labels 3.1/3.2 refer to that one row).
 | 3.6 | `#lemma 2#`, `#theorem 11#`, `#corollary 8#` | MDS connectivity | **done** (2026-09-30) — Singleton bound as `card_le_pow_minDist` |
 | 3.7 | `#theorem 10#`, `#corollary 7#` | perfect codes (packing/covering argument) | **done** (2026-09-30) — `#theorem 10#` with `card_sphere`/`card_ball`, the packing bound and the covering lemma; `#corollary 7#` with the truncated-binomial monotonicity |
 | 3.8 | `#lemma 3#`, `#corollary 9#`–`#corollary 12#` | locally binary construction | **done** (2026-09-30): `#lemma 3#` with the order-free marking `ballMark`/`pickElem`, and the four corollaries with the paper's perfect/MDS code bundled with its systematic form (`ISSUES.md` §18) |
-| 3.9 | `#lemma 5#`, `#theorem 12#`, `#lemma 6#` | locally bounded + Hamming weight | todo |
+| 3.9 | `#lemma 5#`, `#theorem 12#`, `#lemma 6#` | locally bounded + Hamming weight | `#lemma 5#` **done** (2026-09-30, binary statement fixed per `ISSUES.md` §19, proved via `base4`/`three_binary_le`); `#theorem 12#`/`#lemma 6#` next |
 | 3.10 | `#lemma 7#`–`#lemma 10#`, `#theorem 13#` | the linear/algebraic side | todo |
 | 3.11 | `#lemma 13#`, `#lemma 11#`, `#theorem 14#` | Plotkin bounds (double counting) | todo |
 | 3.12 | `#theorem 15#`, `#corollary 13#`, `#theorem 16#`, `#corollary 14#` | Hamming bounds (sphere packing) | todo |

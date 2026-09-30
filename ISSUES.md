@@ -423,3 +423,22 @@ the balls of radius `t` around the codewords tile the space (`card_ball`,
 `pairwiseDisjoint_ball`) and that the minimum distance is *exactly* `2t+1`
 (`minDist_eq_of_isPerfect`, needed for the adjacency `d(u,u') = 2t+1`, which the
 paper reads off `d_min(C) = 2t+1`).
+
+## 19. `#lemma 5#` is a *binary* statement (`N(4,2t) = 3t`)
+
+**Found while proving `#lemma 5#` (2026-09-30).**  The paper writes: "let
+`N(λ, 2t)` be the minimum length of a **binary** error-correcting code with `λ`
+codewords and minimum distance `2t`.  Then `N(4, 2t) = 3t`", and quotes it from
+[14].  The transcription had stated it over an arbitrary alphabet `F`
+(`Nconst (F := F) 4 (2 * t) = 3 * t`), which is **false** as soon as `q ≥ 4`: for
+`t = 1`, `q = 4` the four words `(x, −x)` (`x ∈ F₄`) of length `2` are pairwise at
+distance `2`, so `N(4, 2) ≤ 2 < 3 = 3t`.
+
+The statement is therefore specialised to `F₂` — `Nconst (F := F₂) 4 (2 * t) = 3 * t`
+— and *proved* here instead of quoted ([14, Lemma 5]): the four odd words of `F₂³`
+(`000, 011, 101, 110`, internal `base4`) are pairwise at distance `≥ 2`, and
+repeating them `t` times (`repWord`) gives the upper bound; the lower bound is the
+Plotkin double counting `three_binary_le` — three binary words at pairwise distance
+`≥ 2t` have length `≥ 3t`, since at each coordinate three binary letters disagree in
+`a(3−a) ≤ 2` of the three pairs, so the three distances sum to at most `2n` while
+they sum to at least `3 · 2t`.

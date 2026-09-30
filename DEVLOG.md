@@ -969,3 +969,29 @@ transcription produced.
 `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 39 audited
 results.  §VI-A is complete; §VI-B/C (`#lemma 5#`, `#theorem 12#`, `#lemma 6#`) is
 next.
+
+## 2026-09-30 (seventh session) — §VI-B: `#lemma 5#` (`N(4,2t) = 3t`) proved
+
+The paper quotes from [14]: "let `N(λ,2t)` be the minimum length of a **binary**
+error-correcting code with `λ` codewords and minimum distance `2t`; then
+`N(4,2t) = 3t`".  Statement review first found that the transcription had dropped
+the word *binary*: with an arbitrary alphabet the formula is false (for `q = 4`,
+`t = 1` the four length-`2` words `(x,−x)` are pairwise at distance `2`, so
+`N(4,2) ≤ 2 < 3`).  The statement is now `Nconst (F := F₂) 4 (2 * t) = 3 * t`
+(`ISSUES.md` §19) and proved from scratch rather than quoted:
+
+* **upper bound**: the four odd words of `F₂³` — `000, 011, 101, 110` (internal
+  `base4`) — are pairwise at distance `≥ 2`; repeating them `t` times with
+  `repWord` gives four words of length `3t` at pairwise distance `≥ 2t`
+  (`hammingDist_repWord` multiplies the distance by `t`).
+* **lower bound**: `three_binary_le` — three binary words at pairwise distance
+  `≥ 2t` need length `≥ 3t`.  Double counting: at each coordinate three binary
+  letters disagree in `a(3−a) ≤ 2` of the three pairs (a case analysis on the three
+  bits), so the sum of the three distances is at most `2n`, while each is at least
+  `2t`.  (This is the `M = 4` case of the Plotkin bound of §VIII, in the two-bit
+  version; the appendix's general bound comes in phase 3.11.)
+
+**Verification.**  `lake build` green (only the 21 remaining `sorry` stubs warn);
+`consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 40 audited
+results.  Next: `#theorem 12#` (locally bounded functions, with the external
+`#lemma 4#` colouring as the hypothesis `hcol`) and `#lemma 6#` (Hamming weight).
