@@ -753,4 +753,115 @@ theorem hammingDist_lt_of_close {F : Type*} [Fintype F] [DecidableEq F] {n t : �
     omega
   omega
 
+/-! ### §V-B — the truncated binomial sums of `#corollary 7#`
+
+`#corollary 7#` compares the Hamming-bound denominator `A_t(m) = Σ_{i≤t} C(m,i)(q−1)^i`
+at two lengths `m < n`: the sequence `A_t(m)/q^m` is strictly decreasing in `m`
+(the probability that a binomial variable is `≤ t`), which is what rules out a code
+shorter than the perfect one.  The proofs below use the Pascal recurrence
+`A_t(m+1) = A_t(m) + (q−1)·A_{t−1}(m)` (`Nat.choose_succ_succ`, shifting the index
+of the sum with `Finset.sum_range_succ'`) and hence `A_t(m+1) < q·A_t(m)` whenever
+`t ≤ m` and `q ≥ 2` (the extra term `C(m,t)(q−1)^t` is positive). -/
+
+/-- `(internal, §V-B — used by `#corollary 7#`)` — `q * b = (q−1) * b + b` for
+`q ≥ 1`, the arithmetic behind the truncated binomial sums. -/
+theorem mul_eq_pred_mul_add {a b : ℕ} (ha : 1 ≤ a) : a * b = (a - 1) * b + b := by
+  conv_lhs => rw [show a = (a - 1) + 1 from (Nat.sub_add_cancel ha).symm]
+  rw [add_mul, one_mul]
+
+/-- `(internal, §V-B — used by `#corollary 7#`)` — the Pascal recurrence for the
+truncated sums: `A_t(m+1) = A_t(m) + (q−1)·A_{t−1}(m)`, i.e. all binomial
+coefficients of one row are rebuilt from the previous row. -/
+theorem sum_range_choose_mul_pow_succ {q m t : ℕ} :
+    (∑ i ∈ Finset.range (t + 1), (m + 1).choose i * (q - 1) ^ i)
+      = (∑ i ∈ Finset.range (t + 1), m.choose i * (q - 1) ^ i)
+        + (q - 1) * (∑ i ∈ Finset.range t, m.choose i * (q - 1) ^ i) := by
+  have h1 : (∑ i ∈ Finset.range (t + 1), (m + 1).choose i * (q - 1) ^ i)
+      = (∑ i ∈ Finset.range t, (m + 1).choose (i + 1) * (q - 1) ^ (i + 1)) + 1 := by
+    rw [Finset.sum_range_succ']
+    simp
+  have h2 : (∑ i ∈ Finset.range (t + 1), m.choose i * (q - 1) ^ i)
+      = (∑ i ∈ Finset.range t, m.choose (i + 1) * (q - 1) ^ (i + 1)) + 1 := by
+    rw [Finset.sum_range_succ']
+    simp
+  have h3 : (∑ i ∈ Finset.range t, (m + 1).choose (i + 1) * (q - 1) ^ (i + 1))
+      = (∑ i ∈ Finset.range t, m.choose i * (q - 1) ^ (i + 1))
+        + (∑ i ∈ Finset.range t, m.choose (i + 1) * (q - 1) ^ (i + 1)) := by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [Nat.choose_succ_succ]
+    ring
+  have h4 : (∑ i ∈ Finset.range t, m.choose i * (q - 1) ^ (i + 1))
+      = (q - 1) * (∑ i ∈ Finset.range t, m.choose i * (q - 1) ^ i) := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun i _ => ?_
+    rw [pow_succ]
+    ring
+  rw [h1, h2, h3, h4]
+  ring
+
+/-- `(internal, §V-B — used by `#corollary 7#`)` — `A_t(m+1) ≤ q·A_t(m)`: the
+Hamming-ball density does not increase when the length grows by one. -/
+theorem sum_range_choose_mul_pow_le_succ {q m t : ℕ} (hq : 1 ≤ q) :
+    (∑ i ∈ Finset.range (t + 1), (m + 1).choose i * (q - 1) ^ i)
+      ≤ q * (∑ i ∈ Finset.range (t + 1), m.choose i * (q - 1) ^ i) := by
+  rw [sum_range_choose_mul_pow_succ]
+  have hsub : (∑ i ∈ Finset.range t, m.choose i * (q - 1) ^ i)
+      ≤ ∑ i ∈ Finset.range (t + 1), m.choose i * (q - 1) ^ i := by
+    rw [Finset.sum_range_succ]
+    exact Nat.le_add_right _ _
+  have h1 := Nat.mul_le_mul_left (q - 1) hsub
+  rw [mul_eq_pred_mul_add hq]
+  omega
+
+/-- `(internal, §V-B — used by `#corollary 7#`)` — the strict form of the previous
+lemma, valid as soon as the radius fits (`t ≤ m`) and the alphabet has at least two
+letters: the `t`-th binomial term `C(m,t)(q−1)^t` is then a positive gap. -/
+theorem sum_range_choose_mul_pow_lt_succ {q m t : ℕ} (htm : t ≤ m) (hq : 1 < q) :
+    (∑ i ∈ Finset.range (t + 1), (m + 1).choose i * (q - 1) ^ i)
+      < q * (∑ i ∈ Finset.range (t + 1), m.choose i * (q - 1) ^ i) := by
+  rw [sum_range_choose_mul_pow_succ]
+  have hsplit : (∑ i ∈ Finset.range (t + 1), m.choose i * (q - 1) ^ i)
+      = (∑ i ∈ Finset.range t, m.choose i * (q - 1) ^ i) + m.choose t * (q - 1) ^ t :=
+    Finset.sum_range_succ _ _
+  have hT : 0 < m.choose t * (q - 1) ^ t :=
+    Nat.mul_pos (Nat.choose_pos htm) (pow_pos (by omega) t)
+  have hlt : m.choose t * (q - 1) ^ t < q * (m.choose t * (q - 1) ^ t) := by
+    calc m.choose t * (q - 1) ^ t = 1 * (m.choose t * (q - 1) ^ t) := (one_mul _).symm
+      _ < q * (m.choose t * (q - 1) ^ t) := Nat.mul_lt_mul_of_pos_right hq hT
+  rw [hsplit]
+  have h2 : q * ((∑ i ∈ Finset.range t, m.choose i * (q - 1) ^ i)
+      + m.choose t * (q - 1) ^ t)
+      = q * (∑ i ∈ Finset.range t, m.choose i * (q - 1) ^ i)
+        + q * (m.choose t * (q - 1) ^ t) := by
+    rw [Nat.mul_add]
+  rw [h2]
+  rw [mul_eq_pred_mul_add (by omega : 1 ≤ q)]
+  omega
+
+/-- `(internal, §V-B — used by `#corollary 7#`)` — iterating the strict step:
+`A_t(m+d) < A_t(m)·q^d` for `d ≥ 1`, `t ≤ m` and `q ≥ 2`. -/
+theorem sum_range_choose_mul_pow_lt_add {q m d t : ℕ} (hd : 1 ≤ d) (htm : t ≤ m)
+    (hq : 1 < q) :
+    (∑ i ∈ Finset.range (t + 1), (m + d).choose i * (q - 1) ^ i)
+      < (∑ i ∈ Finset.range (t + 1), m.choose i * (q - 1) ^ i) * q ^ d := by
+  induction d with
+  | zero => omega
+  | succ d ih =>
+    by_cases hd0 : d = 0
+    · subst hd0
+      simpa [mul_comm] using sum_range_choose_mul_pow_lt_succ htm hq
+    · have hd1 : 1 ≤ d := by omega
+      have hle := sum_range_choose_mul_pow_le_succ (q := q) (m := m + d) (t := t) (by omega)
+      have := ih hd1
+      calc (∑ i ∈ Finset.range (t + 1), (m + (d + 1)).choose i * (q - 1) ^ i)
+          = (∑ i ∈ Finset.range (t + 1), ((m + d) + 1).choose i * (q - 1) ^ i) := by
+            rw [show m + (d + 1) = (m + d) + 1 by omega]
+        _ ≤ q * (∑ i ∈ Finset.range (t + 1), (m + d).choose i * (q - 1) ^ i) := hle
+        _ < q * ((∑ i ∈ Finset.range (t + 1), m.choose i * (q - 1) ^ i) * q ^ d) :=
+            Nat.mul_lt_mul_of_pos_left this (by omega)
+        _ = (∑ i ∈ Finset.range (t + 1), m.choose i * (q - 1) ^ i) * q ^ (d + 1) := by
+            rw [pow_succ]
+            ring
+
 end FCC

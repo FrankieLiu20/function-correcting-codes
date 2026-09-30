@@ -50,3 +50,5 @@ not_isFCCData_of_connected
 mds_optimalRedundancyData_ge
 # §V-B (connectivity of the minimum-distance graph):
 isConnected_minDistGraph_of_perfect
+# §V-B (optimality of perfect codes):
+perfect_optimalRedundancyData_ge

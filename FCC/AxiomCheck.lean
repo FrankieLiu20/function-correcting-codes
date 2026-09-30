@@ -61,5 +61,6 @@ namespace FCC
 #print axioms isConnected_minDistGraph_of_mds
 #print axioms isConnected_minDistGraph_of_perfect
 #print axioms mds_optimalRedundancyData_ge
+#print axioms perfect_optimalRedundancyData_ge
 
 end FCC

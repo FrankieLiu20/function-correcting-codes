@@ -2164,25 +2164,180 @@ theorem isConnected_minDistGraph_of_mds {n d : ℕ} (C : Finset (Word F n))
   intro u hu v hv
   exact key (hammingDist u v) u hu v hv le_rfl
 
+/-! ### Proof sketch of `#corollary 7#`
+
+The paper derives the bound "from Theorems 8 and 10"; the formal proof splits on
+the length `m = k + r` of an FCC attaining the optimum.  Its codeword set `C'` is
+injective (the encoding is systematic) with `q^k` words at pairwise distance
+`≥ d_d ≥ 2t+1`, where `t = ⌊(d_d−1)/2⌋`, so the packing bound
+`card_mul_card_ball_le` and the ball count `card_ball` give `q^k · A_t(m) ≤ q^m`,
+i.e. `A_t(m) ≤ q^{m−k}` for the printed Hamming-bound denominator
+`A_t(m) = Σ_{i≤t}C(m,i)(q−1)^i`.
+
+* `m = n`: the printed equation makes the bound an equality, so `C'` is perfect;
+  `minDist_eq_of_isPerfect` then gives `d_min(C') = 2t+1 = d_d` (because
+  `d_d ≥ 2t+1`), `#theorem 10#` makes `G(C')` connected and `#theorem 8#` forbids
+  the FCC.
+* `m < n` and `t ≤ m`: the truncated binomial sums are strictly monotone,
+  `A_t(n) < A_t(m)·q^{n−m}` (`sum_range_choose_mul_pow_lt_add`), so the printed
+  equation `A_t(n) = q^{n−k}` becomes `q^{n−k} < q^r · q^{n−k−r} = q^{n−k}`.
+* `m < n` and `t > m`: `B(0,t)` is the whole space, so the packing bound reads
+  `q^k · q^m ≤ q^m`, i.e. `q^k ≤ 1` and `k = 0` — against `|Im(f)| ≥ 2`. -/
+
 /-- `#corollary 7#` (§V-B) — "let `f : F_q^k → Im(f)` be a function.  Then for an
 `(f : d_d, d_f)`-FCC with `d_f > d_d` we have `r_f(k : d_d, d_f) ≥ n − k + 1`,
 where `n` is the integer satisfying
 `q^{n−k} = Σ_{i≤⌊(d_d−1)/2⌋} C(n,i)(q−1)^i`".
 
-The sum runs up to `⌊(d_d−1)/2⌋`, i.e. the ball radius `(d_d−1)/2` in `ℕ`
-(`(dd - 1) / 2`): the radius `d_d/2` used in the first transcription added one
-spurious term for even `d_d` — `ISSUES.md` §15(a).
+Three hypotheses the printed statement leaves implicit are made explicit
+(`ISSUES.md` §15(a) and §17):
 
-`h2` is `|Im(f)| ≥ 2`, the hypothesis `#theorem 8#` carries and the printed proof
-uses ("from Theorems 8 and 10"): without it the claim is false for `k = 0` (the
-single message can be encoded with redundancy `0`) — `ISSUES.md` §17. -/
-theorem perfect_optimalRedundancyData_ge {k n dd df : ℕ} (f : Word F k → α)
+* the sum runs up to `⌊(d_d−1)/2⌋`, the radius `(dd - 1) / 2` in `ℕ`, not `d_d/2`
+  — the latter added a spurious term for even `d_d`;
+* `h2` is `|Im(f)| ≥ 2`, the hypothesis `#theorem 8#` carries and the printed proof
+  ("from Theorems 8 and 10") uses; for `k = 0` the claim is false without it;
+* `hdd` is `1 ≤ d_d` and `hkn` is `k ≤ n`.  Both hold in the paper's picture (`n` is
+  the length of a perfect code holding `q^k` codewords, so `k ≤ n`; a
+  data-protection distance `0` is degenerate), but neither follows from the printed
+  equation: for `d_d = 0` the claim is false (for `d_f ≤ k` the systematic encoding
+  `u ↦ u` of redundancy `0` is an `(f : 0, d_f)`-FCC), and the equation also holds
+  with `k > n`.
+
+Proof: see the sketch above. -/
+theorem perfect_optimalRedundancyData_ge {F : Type*} [Zero F] [Fintype F] [DecidableEq F]
+    {k n dd df : ℕ} (f : Word F k → α)
     (hperf : Fintype.card F ^ (n - k) =
       ∑ i ∈ Finset.range ((dd - 1) / 2 + 1), n.choose i * (Fintype.card F - 1) ^ i)
     (h2 : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b)
-    (hlt : dd < df) :
+    (hlt : dd < df) (hdd : 1 ≤ dd) (hkn : k ≤ n) :
     n - k + 1 ≤ optimalRedundancyData f dd df := by
-  sorry
+  classical
+  -- two distinct function values give two distinct messages
+  have h2keep := h2
+  obtain ⟨a, b, hab, ⟨u₀, hu₀⟩, ⟨v₀, hv₀⟩⟩ := h2
+  have hneq : u₀ ≠ v₀ := fun h => hab (by rw [← hu₀, h, hv₀])
+  have hk : 1 ≤ k := by
+    by_contra hk
+    have hk0 : k = 0 := by omega
+    subst hk0
+    exact hneq (Subsingleton.elim u₀ v₀)
+  have hq2 : 2 ≤ Fintype.card F := by
+    by_contra hq
+    have hle1 : Fintype.card F ≤ 1 := by omega
+    have hword : Fintype.card (Word F k) ≤ 1 := by
+      rw [card_word]
+      calc Fintype.card F ^ k ≤ 1 ^ k := Nat.pow_le_pow_left hle1 k
+        _ = 1 := one_pow k
+    have hpair : ({u₀, v₀} : Finset (Word F k)).card ≤ Fintype.card (Word F k) :=
+      Finset.card_le_univ _
+    rw [Finset.card_insert_of_notMem (by simpa using hneq), Finset.card_singleton] at hpair
+    omega
+  have ht_le : 2 * ((dd - 1) / 2) + 1 ≤ dd := by
+    have := Nat.mul_div_le (dd - 1) 2
+    omega
+  by_contra hcon
+  have hsmall : optimalRedundancyData f dd df < n - k + 1 := by omega
+  obtain ⟨r₁, C₁, hC₁⟩ := exists_isFCCData f dd df
+  have hne : ∃ r' : ℕ, r' ∈ {r' : ℕ | ∃ C : Word F k → Word F (k + r'),
+      IsFCCData f C dd df} := ⟨r₁, C₁, hC₁⟩
+  rw [optimalRedundancyData, dite_eq_left hne] at hsmall
+  obtain ⟨C₂, hC₂⟩ := Nat.find_spec hne
+  set C' : Finset (Word F (k + Nat.find hne)) := Finset.univ.image C₂ with hC'
+  have hinj : Function.Injective C₂ := by
+    intro x y hxy
+    funext i
+    rw [← hC₂.1 x i, ← hC₂.1 y i, hxy]
+  have hcard' : C'.card = Fintype.card F ^ k := by
+    rw [hC', Finset.card_image_of_injective _ hinj, Finset.card_univ, card_word]
+  have hcard2 : 2 ≤ C'.card := by
+    rw [hcard']
+    calc 2 ≤ Fintype.card F ^ 1 := by simpa using hq2
+      _ ≤ Fintype.card F ^ k := Nat.pow_le_pow_right (by omega) hk
+  have hpairs : ∀ x ∈ C', ∀ y ∈ C', x ≠ y → dd ≤ hammingDist x y := by
+    intro x hx y hy hxy
+    obtain ⟨u, -, rfl⟩ := Finset.mem_image.mp hx
+    obtain ⟨v, -, rfl⟩ := Finset.mem_image.mp hy
+    exact hC₂.2.1 u v fun h => hxy (by rw [h])
+  have hipack : ∀ x ∈ C', ∀ y ∈ C', x ≠ y → 2 * ((dd - 1) / 2) + 1 ≤ hammingDist x y :=
+    fun x hx y hy hxy => le_trans ht_le (hpairs x hx y hy hxy)
+  have hbound := card_mul_card_ball_le C' ((dd - 1) / 2) hipack
+  rw [hcard', card_ball] at hbound
+  have hr_le : Nat.find hne ≤ n - k := Nat.lt_succ_iff.mp hsmall
+  have hle : k + Nat.find hne ≤ n := by
+    have h1 := Nat.add_le_add_left hr_le k
+    rwa [Nat.add_sub_of_le hkn] at h1
+  by_cases hmn : k + Nat.find hne = n
+  · -- the optimum has length exactly `n`: its code is perfect
+    have hperfect : IsPerfect C' ((dd - 1) / 2) := by
+      refine ⟨hipack, ?_⟩
+      rw [hcard', card_ball, hmn, ← hperf, ← pow_add, Nat.add_sub_of_le hkn]
+    have hmin : minDist C' = 2 * ((dd - 1) / 2) + 1 :=
+      minDist_eq_of_isPerfect hperfect hcard2
+    have hdd_le : dd ≤ minDist C' := by
+      obtain ⟨x, hx, y, hy, hxy, hd⟩ := exists_hammingDist_eq_minDist hcard2
+      rw [← hd]
+      exact hpairs x hx y hy hxy
+    have hmin_dd : minDist C' = dd := by omega
+    have hrange : Set.range C₂ = (↑C' : Set (Word F (k + Nat.find hne))) := by
+      rw [hC']
+      ext x
+      exact ⟨fun ⟨u, hu⟩ => hu ▸ Finset.mem_image.mpr ⟨u, Finset.mem_univ _, rfl⟩,
+        fun hx => by
+          obtain ⟨u, -, rfl⟩ := Finset.mem_image.mp hx
+          exact ⟨u, rfl⟩⟩
+    exact (not_isFCCData_of_connected C' hmin_dd
+      (isConnected_minDistGraph_of_perfect C' hperfect) f h2keep hlt) ⟨C₂, hC₂, hrange⟩
+  · -- the optimum is shorter than `n`: the Hamming bound contradicts the count
+    have hmlt : k + Nat.find hne < n := by omega
+    have hAkn : (∑ i ∈ Finset.range ((dd - 1) / 2 + 1),
+        n.choose i * (Fintype.card F - 1) ^ i) = Fintype.card F ^ (n - k) := hperf.symm
+    have hAk : (∑ i ∈ Finset.range ((dd - 1) / 2 + 1),
+        (k + Nat.find hne).choose i * (Fintype.card F - 1) ^ i)
+        ≤ Fintype.card F ^ Nat.find hne := by
+      rw [pow_add] at hbound
+      exact Nat.le_of_mul_le_mul_left hbound (pow_pos (by omega) k)
+    by_cases htm : (dd - 1) / 2 ≤ k + Nat.find hne
+    · have hstrict := sum_range_choose_mul_pow_lt_add (q := Fintype.card F)
+        (m := k + Nat.find hne) (d := n - (k + Nat.find hne)) (t := (dd - 1) / 2)
+        (by omega) htm (by omega)
+      rw [Nat.add_sub_of_le (by omega : k + Nat.find hne ≤ n)] at hstrict
+      have hchain : Fintype.card F ^ (n - k) < Fintype.card F ^ (n - k) := by
+        have h1 : Fintype.card F ^ (n - k) < (∑ i ∈ Finset.range ((dd - 1) / 2 + 1),
+            (k + Nat.find hne).choose i * (Fintype.card F - 1) ^ i)
+            * Fintype.card F ^ (n - (k + Nat.find hne)) := by
+          rw [← hAkn]
+          exact hstrict
+        have h2 : (∑ i ∈ Finset.range ((dd - 1) / 2 + 1),
+            (k + Nat.find hne).choose i * (Fintype.card F - 1) ^ i)
+            * Fintype.card F ^ (n - (k + Nat.find hne))
+            ≤ Fintype.card F ^ Nat.find hne * Fintype.card F ^ (n - (k + Nat.find hne)) :=
+          Nat.mul_le_mul_right _ hAk
+        have h3 : Fintype.card F ^ Nat.find hne * Fintype.card F ^ (n - (k + Nat.find hne))
+            = Fintype.card F ^ (n - k) := by
+          have hexp : Nat.find hne + (n - (k + Nat.find hne)) = n - k := by omega
+          rw [← pow_add, hexp]
+        omega
+      exact absurd hchain (lt_irrefl _)
+    · -- otherwise the ball is the whole space and `q^k ≤ 1`, i.e. `k = 0`
+      have hkt : k + Nat.find hne ≤ (dd - 1) / 2 := by omega
+      have hfull : (ball (0 : Word F (k + Nat.find hne)) ((dd - 1) / 2)).card
+          = Fintype.card F ^ (k + Nat.find hne) := by
+        rw [ball_eq_univ_of_le hkt, Finset.card_univ, card_word]
+      rw [← card_ball, hfull] at hbound
+      have hqk : Fintype.card F ^ k ≤ 1 := by
+        have h1 : Fintype.card F ^ (k + Nat.find hne) * Fintype.card F ^ k
+            ≤ Fintype.card F ^ (k + Nat.find hne) * 1 := by
+          rw [Nat.mul_one]
+          rwa [mul_comm]
+        exact Nat.le_of_mul_le_mul_left h1 (pow_pos (by omega) (k + Nat.find hne))
+      have hk0 : k = 0 := by
+        by_contra hkne
+        have hk1 : 1 ≤ k := by omega
+        have h2' : 2 ≤ Fintype.card F ^ k := by
+          calc 2 ≤ Fintype.card F ^ 1 := by simpa using hq2
+            _ ≤ Fintype.card F ^ k := Nat.pow_le_pow_right (by omega) hk1
+        omega
+      omega
 
 /-- `#corollary 8#` (§V-B) — "let `f : F_q^k → Im(f)` be a function.  Assume
 there exists an MDS `(n, q^k, d)_q` code, i.e. `n = k + d − 1`.  Then for an
