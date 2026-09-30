@@ -133,7 +133,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#lemma 13#` | VIII | over `F_q`: `N(D) ≥ 2q/(M²(q−1)−a(q−a))·Σ_{i<j}[D]ᵢⱼ`, `a = M mod q` | `plotkin_bound` | stated |
 | `#theorem 14#` | VIII-A | `r_f(k:d_d,d_f) ≥ ((L−1)d_d+(q^k−L)d_f)/(q^{k−1}(q−1)) − k`, `L = max_α |f⁻¹(α)|`, for `d_f > d_d` | `plotkin_bound_fcc` | stated |
 | `#theorem 15#` | VIII-B | Hamming-type bound for `(f,t)`-FCCs: `E ≤ q^n/|∪_{j≤ℓ} B(v_j,t)|` (see the direction note in `Notation.md` §5) | `hamming_bound_fcc` | todo |
-| `#corollary 13#` | VIII-B | `E ≤ q^n/Σ_{i≤t} C(n,i)(q−1)^i` | `hamming_bound_fcc_sphere` | todo |
+| `#corollary 13#` | VIII-B | `E ≤ q^n/Σ_{i≤t} C(n,i)(q−1)^i` (proved via the ball-packing inequality `card_mul_card_ball_le` on one codeword per attained value) | `hamming_bound_fcc_sphere` | proved |
 | `#theorem 16#` | VIII-C | Hamming-type bound for `(f:d_d,d_f)`-FCCs, with `d(vᵢ,vⱼ) ≥ d_d` in the union | `hamming_bound_fcc_data` | todo |
 | `#corollary 14#` | VIII-C | `E ≤ q^n/(ℓ·Σ_{i≤t_d} C(n,i)(q−1)^i)` | `hamming_bound_fcc_data_sphere` | todo |
 | `#theorem 17#` | App. | `|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i≤t−1}C(n−1,i)(q−1)^i` for `d(u,v)=1` | `card_ball_union_dist_one` | stated |
@@ -363,7 +363,7 @@ the labels 3.1/3.2 refer to that one row).
 | 3.9 | `#lemma 5#`, `#theorem 12#`, `#lemma 6#` | locally bounded + Hamming weight | **done** (2026-09-30): `#lemma 5#` (§19, binary statement), `#theorem 12#` (§20) and `#lemma 6#` both bounds (§21) |
 | 3.10 | `#lemma 7#`–`#lemma 10#`, `#theorem 13#` | the linear/algebraic side | todo |
 | 3.11 | `#lemma 13#`, `#lemma 11#`, `#theorem 14#` | Plotkin bounds (double counting) | todo |
-| 3.12 | `#theorem 15#`, `#corollary 13#`, `#theorem 16#`, `#corollary 14#` | Hamming bounds (sphere packing) | todo |
+| 3.12 | `#theorem 15#`, `#corollary 13#`, `#theorem 16#`, `#corollary 14#` | Hamming bounds (sphere packing) | `#corollary 13#` **done** (2026-09-30); the other three next |
 | 3.13 | `#theorem 17#`, `#lemma 14#`, `#theorem 18#`, `#theorem 19#` | appendix: counting unions of balls | todo |
 | 3.14 | non-vacuity of the FCC set (`∃ r, ∃ C, IsFCCData f C dd df`) | lets the paper's side conditions be dropped from `#theorem 2#` and is used by every lower bound of §IV | **done** (2026-09-20) — `exists_isFCCData` (repeat the message `max d_d d_f` times) |
 

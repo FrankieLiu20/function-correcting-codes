@@ -263,3 +263,15 @@ in the same commit that does the work.
 - [x] Keep `lake build` warning-free apart from the `sorry` stubs: deprecated
       `dif_pos`/`if_pos`/`if_neg`/`Set.mem_setOf_eq` replaced, and the unused
       section variables of the `sInf` API silenced with `omit … in`.
+- [x] 3.12 (part 1, done 2026-09-30). `#corollary 13#` (`hamming_bound_fcc_sphere`) —
+      the Hamming bound `|Im f| · |B(0,t)| ≤ q^n` for an `(f,t)`-FCC.  Proof: choose
+      one message per attained value (`Classical.choose` on the preimages, indexed by
+      the subtype `{a // a ∈ Im f}`); their codewords are pairwise at distance `≥ 2t+1`
+      by `IsFCC`, so the packing inequality `card_mul_card_ball_le` gives
+      `|Im f| · |B(0,t)| ≤ q^n` (the code is systematic, so equal messages have equal
+      codewords).
+- [ ] 3.12 (part 2, next). `#theorem 15#` and `#theorem 16#` (the same bounds with
+      the *union of balls* `minUnionCard`/`minUnionCardDist` instead of a single ball)
+      and `#corollary 14#`; they need the appendix's counting of unions of balls
+      (`#theorem 17#`–`#theorem 19#`, `#lemma 14#`), which is also the next thing to
+      do for `#lemma 13#`/`#theorem 14#` (Plotkin bounds, phase 3.11).

@@ -1081,3 +1081,20 @@ axiom audits green with 43 audited headline results.  §VI is now complete
 (`#lemma 3#`, `#corollary 9#`–`#corollary 12#`, `#lemma 5#`, `#theorem 12#`,
 `#lemma 6#`); §VII (linear FCCs) and §VIII / appendix (Plotkin and Hamming bounds)
 are next.
+
+## 2026-09-30 (eleventh session) — §VIII-B starts: `#corollary 13#` proved
+
+`hamming_bound_fcc_sphere`: an `(f,t)`-FCC of length `n = k + r` forces
+`|Im f| · |B(0,t)| ≤ q^n` — the Hamming bound in the form the paper's later
+examples use.  The proof only had to assemble existing pieces: choose one message
+per attained value of `f` (a `Classical.choose` over the preimages, indexed by the
+subtype `{a // a ∈ Im f}` so that no default message is needed), observe that the
+corresponding codewords are pairwise at distance `≥ 2t+1` (`IsFCC` plus the fact
+that different values give different messages), and apply the packing inequality
+`card_mul_card_ball_le` from `FCC/Balls.lean`; systemativity makes the map
+`a ↦ C u_a` injective, so the code has exactly `|Im f|` words.
+
+**Verification.**  `lake build` green (18 `sorry` stubs remain); consistency and
+axiom audits green with 44 audited headline results.  Next: the union-of-balls
+bounds (`#theorem 15#`/`#theorem 16#`, needing the appendix's `#theorem 17#`–`19#`
+and `#corollary 14#`) and the Plotkin family (`#lemma 13#`, `#theorem 14#`).

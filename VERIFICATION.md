@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 43 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 19 (was 49: twenty-nine paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 44 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 18 (was 49: thirty paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -208,6 +208,11 @@ Proved:
   `hammingWeight_redundancy_le_optimal`
   (`r_f ≤ (N(q^k, 2t_d+1) − k) + N(2t_f+1, 2(t_f−t_d))`, the first bound applied
   to the bundled systematic encoder of the optimal length; `ISSUES.md` §21).
+* §VIII-B (Hamming bound): `#corollary 13#` (`hamming_bound_fcc_sphere`) — an
+  `(f,t)`-FCC forces `\|Im f\| · \|B(0,t)\| ≤ q^n`.  Pick one message per attained
+  value (`Classical.choose` on the preimages); their codewords are pairwise at
+  distance `≥ 2t+1` by `IsFCC`, so the ball-packing inequality
+  `card_mul_card_ball_le` applies.
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,
