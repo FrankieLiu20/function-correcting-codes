@@ -93,6 +93,19 @@ noncomputable def minDist {F : Type*} [DecidableEq F] {n : ℕ} (C : Finset (Wor
     exact if h : ∃ d : ℕ, d ∈ {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d}
       then Nat.find h else 0
 
+/-- `(internal, §II — used by the counting lemmas of `FCC/Balls.lean` and §V)` — the
+minimum distance of a code is at most the distance of any pair of distinct
+codewords.  (It lives here rather than in the paper file so that the Singleton bound
+in `FCC/Balls.lean` — which is imported *before* the paper items — can use it.) -/
+theorem minDist_le {F : Type*} [DecidableEq F] {n : ℕ} {C : Finset (Word F n)}
+    {x y : Word F n} (hx : x ∈ C) (hy : y ∈ C) (hxy : x ≠ y) :
+    minDist C ≤ hammingDist x y := by
+  classical
+  have hne : ∃ d : ℕ, d ∈ {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d} :=
+    ⟨hammingDist x y, ⟨x, hx, y, hy, hxy, rfl⟩⟩
+  rw [minDist, dite_eq_left hne]
+  exact Nat.find_min' hne ⟨x, hx, y, hy, hxy, rfl⟩
+
 end MinDist
 
 section PerfectAndMDS

@@ -23,6 +23,7 @@ results that are actually proved (`#theorem 2#` first).
 
 namespace FCC
 
+#print axioms card_le_pow_minDist
 #print axioms wt_zero
 #print axioms wt_le_wt_add_hammingDist
 #print axioms mem_ball_self

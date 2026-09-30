@@ -964,18 +964,6 @@ theorem optimalRedundancyData_eq_of {k r : ℕ} {f : Word F k → α} {dd df : �
   refine le_antisymm (Nat.find_min' hne h1) (le_of_not_gt fun hlt => ?_)
   exact h2 _ hlt (Nat.find_spec hne)
 
-omit [Fintype F] in
-/-- `(internal, §II)` — the minimum distance of a code is at most the distance of
-any pair of distinct codewords. -/
-theorem minDist_le {n : ℕ} {C : Finset (Word F n)} {x y : Word F n} (hx : x ∈ C)
-    (hy : y ∈ C) (hxy : x ≠ y) : minDist C ≤ hammingDist x y :=
-  by
-    classical
-    have hne : ∃ d : ℕ, d ∈ {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d} :=
-      ⟨hammingDist x y, ⟨x, hx, y, hy, hxy, rfl⟩⟩
-    rw [minDist, dite_eq_left hne]
-    exact Nat.find_min' hne ⟨x, hx, y, hy, hxy, rfl⟩
-
 omit [DecidableEq α] in
 /-- `(internal, §IV)` — `r_f(k : d_d, d_f)` is at most the redundancy of any
 `(f : d_d, d_f)`-FCC. -/

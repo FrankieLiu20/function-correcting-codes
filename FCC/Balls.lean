@@ -348,4 +348,82 @@ theorem exists_ne_eq_of_card_lt {k : ℕ} {γ : Type*} [DecidableEq γ] {g : Fin
     exact hsub i
   omega
 
+/-! ## The Singleton bound
+
+The paper quotes the Singleton bound from [17] (`M ≤ q^{n−d+1}`) and uses it in §V-B;
+it is proved here from scratch, because the only ingredient is the projection
+argument: two codewords that agree on `n − d_min + 1` coordinates are at distance at
+most `d_min − 1`, hence equal. -/
+
+/-- `(internal, §V-B — used by `#corollary 8#`)` — the Singleton bound: a code of
+length `n` over a non-empty alphabet has at most `q^{n − d_min(C) + 1}` words. -/
+theorem card_le_pow_minDist {F : Type*} [Nonempty F] [Fintype F] [DecidableEq F] {n : ℕ}
+    {C : Finset (Word F n)} :
+    C.card ≤ Fintype.card F ^ (n - minDist C + 1) := by
+  classical
+  by_cases hsmall : C.card ≤ 1
+  · -- at most one codeword: no pair of distinct codewords, so `d_min = 0`
+    have hempty : ¬∃ d' : ℕ,
+        d' ∈ {d' : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d'} := by
+      rintro ⟨d', x, hx, y, hy, hxy, -⟩
+      have h2 : 2 ≤ C.card := by
+        have hsub : ({x, y} : Finset (Word F n)) ⊆ C := by
+          intro z hz
+          rw [Finset.mem_insert, Finset.mem_singleton] at hz
+          rcases hz with rfl | rfl
+          exacts [hx, hy]
+        have := Finset.card_le_card hsub
+        rwa [Finset.card_insert_of_notMem (by simpa using hxy), Finset.card_singleton] at this
+      omega
+    have hmin0 : minDist C = 0 := by rw [minDist, dite_eq_right hempty]
+    rw [hmin0]
+    calc C.card ≤ Fintype.card (Word F n) := Finset.card_le_univ C
+      _ = Fintype.card F ^ n := card_word n
+      _ ≤ Fintype.card F ^ (n - 0 + 1) := by
+          refine Nat.pow_le_pow_right (Nat.one_le_iff_ne_zero.mpr Fintype.card_ne_zero) (by omega)
+  · -- at least two codewords: project onto `n - d_min + 1` coordinates
+    obtain ⟨u, hu, v, hv, huv⟩ : ∃ u ∈ C, ∃ v ∈ C, u ≠ v := by
+      obtain ⟨x, hx, y, hy, hxy⟩ := Finset.one_lt_card.mp (by omega : 1 < C.card)
+      exact ⟨x, hx, y, hy, hxy⟩
+    have hdn : minDist C ≤ n := by
+      refine le_trans (minDist_le hu hv huv) ?_
+      have := hammingDist_le_card_fintype (x := u) (y := v)
+      rwa [Fintype.card_fin] at this
+    have hd1 : 1 ≤ minDist C := by
+      have hne : ∃ d' : ℕ,
+          d' ∈ {d' : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d'} :=
+        ⟨hammingDist u v, ⟨u, hu, v, hv, huv, rfl⟩⟩
+      rw [minDist, dite_eq_left hne]
+      obtain ⟨x, hx, y, hy, hxy, hval⟩ := Nat.find_spec hne
+      have := hammingDist_pos.mpr hxy
+      omega
+    obtain ⟨J, -, hJcard⟩ :=
+      Finset.exists_subset_card_eq (s := (Finset.univ : Finset (Fin n)))
+        (n := n - minDist C + 1)
+        (by rw [Finset.card_univ, Fintype.card_fin]; omega)
+    have hinj : ∀ x ∈ C, ∀ y ∈ C, (∀ i : {i // i ∈ J}, x i.1 = y i.1) → x = y := by
+      intro x hx y hy hagree
+      by_contra hxy
+      have h1 : minDist C ≤ hammingDist x y := minDist_le hx hy hxy
+      have hsub : diffSet x y ⊆ Jᶜ := by
+        intro i hi
+        rw [diffSet, Finset.mem_filter] at hi
+        rw [Finset.mem_compl]
+        intro hiJ
+        exact hi.2 (hagree ⟨i, hiJ⟩)
+      have h2' : (diffSet x y).card ≤ Jᶜ.card := Finset.card_le_card hsub
+      rw [hammingDist_eq_card_diffSet] at h1
+      rw [Finset.card_compl, Fintype.card_fin, hJcard] at h2'
+      omega
+    have hcard_le : C.card ≤ Fintype.card F ^ J.card := by
+      have := Fintype.card_le_of_injective
+        (fun x : ↥C => fun i : {i // i ∈ J} => (x : Word F n) i.1)
+        (by
+          intro x y hxy
+          refine Subtype.ext (hinj x.val x.2 y.val y.2 ?_)
+          intro i
+          exact congrFun hxy i)
+      rwa [Fintype.card_coe, Fintype.card_fun, Fintype.card_coe] at this
+    rwa [hJcard] at hcard_le
+
 end FCC

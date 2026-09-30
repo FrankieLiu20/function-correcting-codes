@@ -6,6 +6,7 @@
 # headline theorem therefore requires an explicit change here.
 #
 # Phase 0 (paper-independent base layer):
+card_le_pow_minDist
 mem_ball_self
 wt_le_wt_add_hammingDist
 wt_zero
