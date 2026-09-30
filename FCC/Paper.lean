@@ -3077,13 +3077,50 @@ theorem locallyBounded_redundancy_le [Nontrivial F] {k r td tf lam : ℕ} (f : W
     have hkey : (2 * td + 1) + 2 * (tf - td) = 2 * tf + 1 := by omega
     omega
 
+/-- `(internal, §VI-C — the residue argument of `#lemma 6#`)` — two weights whose
+difference is smaller than the modulus have different residues: if `a % m = b % m`
+then `m` divides `a − b` (`Nat.ModEq.dvd'`), so a nonzero difference is at least
+`m`. -/
+theorem mod_ne_of_sub_lt {m a b : ℕ} (hb : b ≤ a) (hne : a ≠ b)
+    (hlt : a - b < m) : a % m ≠ b % m := by
+  intro h
+  have hdvd : m ∣ a - b := Nat.ModEq.dvd' (show b ≡ a [MOD m] from h.symm)
+  have hpos : 0 < a - b := Nat.sub_pos_of_lt (lt_of_le_of_ne hb fun hcon => hne hcon.symm)
+  have := Nat.le_of_dvd hpos hdvd
+  omega
+
 /-- `#lemma 6#` (§VI-C) — "for the Hamming weight function `f : F_q^k → Im(f)`,
 and a systematic `[n, k, 2t_d+1]` linear error-correcting code `C`, we have
-`r_f(k, t_d, t_f) ≤ n − k + N(2t_f+1, 2(t_f − t_d))`". -/
-theorem hammingWeight_redundancy_le {k r td tf : ℕ} (C : Word F k → Word F (k + r))
-    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w)) :
+`r_f(k, t_d, t_f) ≤ n − k + N(2t_f+1, 2(t_f − t_d))`".
+
+The paper states this together with a second bound (below), and both proofs use
+the same two steps: `p_u := c'_{f(u) mod (2t_f+1)}` for an optimal `2t_f+1`-word
+code `c'` of minimum distance `2(t_f−t_d)`.  Two hypotheses the transcription had
+left implicit are made explicit here (`ISSUES.md` §21): `hCsys` (the paper's word
+*systematic*: in the case `|f(u) − f(v)| > 2t_f` one needs
+`d(u,v) ≤ d(C u, C v)`) and `htd : t_d ≤ t_f` (the standing `d_d ≤ d_f` of
+`#definition 6#`, used for `(2t_d+1) + 2(t_f−t_d) = 2t_f+1`); `[Nontrivial F]` is
+the paper's field-ness, needed again for the attainment of `N`. -/
+theorem hammingWeight_redundancy_le [Nontrivial F] {k r td tf : ℕ} (C : Word F k → Word F (k + r))
+    (hCsys : IsSystematic C)
+    (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w))
+    (htd : td ≤ tf) :
     optimalRedundancyData (fun u : Word F k => wt u) (2 * td + 1) (2 * tf + 1) ≤
       r + Nconst (F := F) (2 * tf + 1) (2 * (tf - td)) := by
+  sorry
+
+/-- `#lemma 6#` (§VI-C), second bound — "or `r_f(k, t_d, t_f) ≤ N(q^k, 2t_d+1) +
+N(2t_f+1, 2(t_f − t_d)) − k`": instead of a *given* systematic code, one takes an
+optimal `q^k`-word code of minimum distance `2t_d+1` (of length
+`N(q^k, 2t_d+1)`, hence redundancy `N(q^k, 2t_d+1) − k`) as the first step.
+
+As in `#corollary 9#`–`#corollary 12#` (`ISSUES.md` §18) the optimal code has to
+come with its systematic form; the proof (next session) will bundle it, and the
+unbundled statement is recorded here in the paper's shape (`ISSUES.md` §21). -/
+theorem hammingWeight_redundancy_le_optimal [Nontrivial F] {k td tf : ℕ} (htd : td ≤ tf) :
+    optimalRedundancyData (fun u : Word F k => wt u) (2 * td + 1) (2 * tf + 1) ≤
+      (Nconst (F := F) (Fintype.card F ^ k) (2 * td + 1) - k) +
+        Nconst (F := F) (2 * tf + 1) (2 * (tf - td)) := by
   sorry
 
 end SectionVIStatements
