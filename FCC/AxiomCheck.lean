@@ -63,5 +63,9 @@ namespace FCC
 #print axioms mds_optimalRedundancyData_ge
 #print axioms perfect_optimalRedundancyData_ge
 #print axioms locallyBinary_redundancy_le
+#print axioms locallyBinary_perfect_redundancy_le
+#print axioms locallyBinary_perfect_optimal
+#print axioms locallyBinary_mds_redundancy_le
+#print axioms locallyBinary_mds_optimal
 
 end FCC

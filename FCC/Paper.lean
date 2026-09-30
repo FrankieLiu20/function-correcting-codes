@@ -2800,43 +2800,130 @@ theorem locallyBinary_redundancy_le [Nontrivial F] {k r dd df : ℕ} (f : Word F
       have hpv := hp u v hmark
       omega
 
+-- The four corollaries below quantify over a bundled perfect/MDS code with its
+-- systematic encoder and mention the paper's Hamming-bound denominators; their
+-- signatures and proofs need more than the default elaboration budget.
+set_option maxHeartbeats 1000000
 /-- `#corollary 9#` (§VI-A) — "if there exists a perfect linear
 `(n, q^k, d_d = 2t_d+1)`-code, ... then for any `(d_f−1)`-locally binary
-function `f`, `r_f(k : d_d, d_f) ≤ n − k + d_f − d_d`". -/
-theorem locallyBinary_perfect_redundancy_le {k n dd df t : ℕ} (f : Word F k → α)
-    (hf : IsLocallyBinary f (df - 1)) (C : Finset (Word F n)) (hperf : IsPerfect C t)
-    (hdd : dd = 2 * t + 1) (hk : C.card = Fintype.card F ^ k) :
-    optimalRedundancyData f dd df ≤ n - k + (df - dd) := by
-  sorry
+function `f`, `r_f(k : d_d, d_f) ≤ n − k + d_f − d_d`".
+
+The perfect code is used by `#lemma 3#` through its **systematic** form: `E` is a
+systematic encoder with minimum distance `≥ d_d` whose range is the perfect code
+`C` of length `k + r`.  For a *linear* code such an `E` always exists (its generator
+matrix can be put in standard form, §VII), but this repository has no linear-code
+theory yet, so the systematic parametrisation is carried explicitly —
+`ISSUES.md` §18.  The bound `n − k + d_f − d_d` is `r + (d_f − d_d)` with
+`n = k + r`. -/
+theorem locallyBinary_perfect_redundancy_le [Nontrivial F] {k r dd df t : ℕ}
+    (f : Word F k → α) (hf : IsLocallyBinary f (df - 1))
+    (hcode : ∃ (C : Finset (Word F (k + r))) (E : Word F k → Word F (k + r)),
+      IsPerfect C t ∧ C.card = Fintype.card F ^ k ∧ IsSystematic E ∧
+        Set.range E = (↑C : Set (Word F (k + r))) ∧
+        (∀ v w : Word F k, v ≠ w → dd ≤ hammingDist (E v) (E w)))
+    (_hdd : dd = 2 * t + 1) :
+    optimalRedundancyData f dd df ≤ r + (df - dd) := by
+  obtain ⟨_, E, _, _, hEsys, _, hE⟩ := hcode
+  exact locallyBinary_redundancy_le f hf E hEsys hE
 
 /-- `#corollary 10#` (§VI-A) — "let `f` be a `(d_f−1)`-locally binary function.
 Then the construction described in the proof of `#lemma 3#` gives an optimal
 `(f : d_d, d_f)`-FCC for `d_f = d_d + 1` if there exists a perfect
-`(n, q^k, d_d)` code". -/
-theorem locallyBinary_perfect_optimal {k n dd t : ℕ} (f : Word F k → α)
-    (hf : IsLocallyBinary f dd) (C : Finset (Word F n)) (hperf : IsPerfect C t)
-    (hdd : dd = 2 * t + 1) (hk : C.card = Fintype.card F ^ k) :
-    optimalRedundancyData f dd (dd + 1) = n - k + 1 := by
-  sorry
+`(n, q^k, d_d)` code".
+
+The upper bound is `#corollary 9#`; the matching lower bound is `#corollary 7#`,
+whose standing hypotheses are explicit here (`|Im f| ≥ 2` and `1 ≤ d_d`) — the
+claim is false for a constant `f` (`#corollary 7#`, `ISSUES.md` §17). -/
+theorem locallyBinary_perfect_optimal [Nontrivial F] {k r dd t : ℕ} (f : Word F k → α)
+    (hf : IsLocallyBinary f ((dd + 1) - 1))
+    (hcode : ∃ (C : Finset (Word F (k + r))) (E : Word F k → Word F (k + r)),
+      IsPerfect C t ∧ C.card = Fintype.card F ^ k ∧ IsSystematic E ∧
+        Set.range E = (↑C : Set (Word F (k + r))) ∧
+        (∀ v w : Word F k, v ≠ w → dd ≤ hammingDist (E v) (E w)))
+    (hdd : dd = 2 * t + 1)
+    (h2 : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b)
+    (hdd1 : 1 ≤ dd) :
+    optimalRedundancyData f dd (dd + 1) = r + 1 := by
+  obtain ⟨C, E, hperf, hk, hEsys, _, hE⟩ := hcode
+  refine le_antisymm ?_ ?_
+  · -- the upper bound of `#corollary 9#`
+    have hu := locallyBinary_redundancy_le f hf E hEsys hE
+    rw [Nat.add_sub_cancel_left] at hu
+    exact hu
+  · -- the lower bound of `#corollary 7#`, applied to the perfect code
+    have hqe : (dd - 1) / 2 = t := by
+      rw [hdd]
+      omega
+    have hperf2 := hperf.2
+    rw [card_ball, hk] at hperf2
+    have hEq : Fintype.card F ^ ((k + r) - k)
+        = ∑ i ∈ Finset.range ((dd - 1) / 2 + 1),
+            (k + r).choose i * (Fintype.card F - 1) ^ i := by
+      rw [Nat.add_sub_cancel_left, hqe]
+      have h1 : Fintype.card F ^ k * Fintype.card F ^ r
+          = Fintype.card F ^ k * ∑ i ∈ Finset.range (t + 1),
+              (k + r).choose i * (Fintype.card F - 1) ^ i := by
+        rw [← pow_add]
+        exact hperf2
+      exact mul_left_cancel₀
+        (pow_pos (Fintype.card_pos_iff.mpr ⟨(0 : F)⟩) k).ne' h1
+    have hlt : dd < dd + 1 := Nat.lt_succ_self dd
+    have hkn : k ≤ k + r := Nat.le_add_right k r
+    have hlow := perfect_optimalRedundancyData_ge (n := k + r) f hEq h2 hlt hdd1 hkn
+    rw [Nat.add_sub_cancel_left] at hlow
+    exact hlow
 
 /-- `#corollary 11#` (§VI-A) — "if there exists an MDS `(n, q^k, d_d = n−k+1)` code,
 then for any `(d_f−1)`-locally binary function `f`,
-`r_f(k : d_d, d_f) ≤ n − k + d_f − d_d = d_f − 1`". -/
-theorem locallyBinary_mds_redundancy_le {k n dd df : ℕ} (f : Word F k → α)
-    (hf : IsLocallyBinary f (df - 1)) (C : Finset (Word F n)) (hC : IsMDS C dd)
-    (hk : C.card = Fintype.card F ^ k) (hn : n = k + dd - 1) :
+`r_f(k : d_d, d_f) ≤ n − k + d_f − d_d = d_f − 1`".
+
+As in `#corollary 9#`, the MDS code enters through a systematic parametrisation `E`
+(`ISSUES.md` §18).  Its defining relation `d_d = n − k + 1` is the parameter
+relation of `IsMDS` combined with `|C| = q^k`; the paper's standing assumption
+`d_d ≤ d_f` is `hdf` below. -/
+theorem locallyBinary_mds_redundancy_le [Nontrivial F] {k r dd df : ℕ} (f : Word F k → α)
+    (hf : IsLocallyBinary f (df - 1))
+    (hcode : ∃ (C : Finset (Word F (k + r))) (E : Word F k → Word F (k + r)),
+      IsMDS C dd ∧ C.card = Fintype.card F ^ k ∧ IsSystematic E ∧
+        Set.range E = (↑C : Set (Word F (k + r))) ∧ dd = r + 1 ∧
+        (∀ v w : Word F k, v ≠ w → dd ≤ hammingDist (E v) (E w)))
+    (hdf : dd ≤ df) :
     optimalRedundancyData f dd df ≤ df - 1 := by
-  sorry
+  obtain ⟨_, E, _, _, hEsys, _, _, hE⟩ := hcode
+  have hu : optimalRedundancyData f dd df ≤ r + (df - dd) :=
+    locallyBinary_redundancy_le f hf E hEsys hE
+  have h1 : r + (df - dd) = df - 1 := by omega
+  rwa [h1] at hu
 
 /-- `#corollary 12#` (§VI-A) — "let `f` be a `(d_f−1)`-locally binary function.
 Then the construction described in the proof of `#lemma 3#` gives an optimal
 `(f : d_d, d_f)`-FCC for `d_f = d_d + 1`, if there exists an `(n, q^k, d_d)` MDS
-code". -/
-theorem locallyBinary_mds_optimal {k n dd : ℕ} (f : Word F k → α)
-    (hf : IsLocallyBinary f dd) (C : Finset (Word F n)) (hC : IsMDS C dd)
-    (hk : C.card = Fintype.card F ^ k) (hn : n = k + dd - 1) :
+code".
+
+The upper bound is `#corollary 11#` (whose `d_f − 1` is `d_d` here) and the
+matching lower bound is `#corollary 8#`, with its standing hypothesis
+`|Im f| ≥ 2` (the claim is false for constant `f`, `ISSUES.md` §17). -/
+theorem locallyBinary_mds_optimal [Nontrivial F] {k r dd : ℕ} (f : Word F k → α)
+    (hf : IsLocallyBinary f ((dd + 1) - 1))
+    (hcode : ∃ (C : Finset (Word F (k + r))) (E : Word F k → Word F (k + r)),
+      IsMDS C dd ∧ C.card = Fintype.card F ^ k ∧ IsSystematic E ∧
+        Set.range E = (↑C : Set (Word F (k + r))) ∧ dd = r + 1 ∧
+        (∀ v w : Word F k, v ≠ w → dd ≤ hammingDist (E v) (E w)))
+    (h2 : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b) :
     optimalRedundancyData f dd (dd + 1) = dd := by
-  sorry
+  obtain ⟨C, E, hC, hk, hEsys, _, _, hE⟩ := hcode
+  refine le_antisymm ?_ ?_
+  · have hu : optimalRedundancyData f dd (dd + 1) ≤ (dd + 1) - 1 :=
+      locallyBinary_mds_redundancy_le (df := dd + 1) f hf
+        ⟨C, E, hC, hk, hEsys, ‹Set.range E = (↑C : Set (Word F (k + r)))›, ‹dd = r + 1›, hE⟩
+        (Nat.le_succ dd)
+    rw [Nat.add_sub_cancel] at hu
+    exact hu
+  · exact mds_optimalRedundancyData_ge (k := k) (n := k + r) f ⟨C, hC, hk⟩ h2
+      (Nat.lt_succ_self dd)
+
+-- restore the default budget for the declarations that follow
+set_option maxHeartbeats 200000
 
 /-- `#lemma 5#` (§VI-B, quoted from [14]) — "let `N(λ, 2t)` be the minimum length
 of a binary error-correcting code with `λ` codewords and minimum distance `2t`.

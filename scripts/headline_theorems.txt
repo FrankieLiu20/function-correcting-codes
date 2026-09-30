@@ -54,3 +54,7 @@ isConnected_minDistGraph_of_perfect
 perfect_optimalRedundancyData_ge
 # §VI-A (locally binary functions):
 locallyBinary_redundancy_le
+locallyBinary_perfect_redundancy_le
+locallyBinary_perfect_optimal
+locallyBinary_mds_redundancy_le
+locallyBinary_mds_optimal
