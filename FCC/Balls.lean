@@ -1018,4 +1018,107 @@ theorem card_fiber_erase {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {n : �
     Finset.card_insert_of_notMem hS, pow_succ]
   exact hgoal
 
+/-- `(internal, Appendix — the invariant count behind `#theorem 17#`)` — the number
+of words that disagree with `u` in at most `s` coordinates *other than* `c`:
+
+`|{x | |D(x,u) \ {c}| ≤ s}| = q · Σ_{i≤s} C(n−1,i)(q−1)^i`.
+
+Split by the value `i` of the invariant `|D(x,u) \ {c}|` (`Finset.range (s+1)`) and,
+inside, by the disagreement set `S = D(x,u) \ {c}`, which ranges over the `i`-subsets
+of `{c}ᶜ`: each contributes `card_fiber_erase`, i.e. `q·(q−1)^i`, and there are
+`C(n−1,i)` of them (`Finset.card_powersetCard`, with `({c}ᶜ).card = n−1`). -/
+theorem card_filter_erase_le {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {n : ℕ}
+    (u : Word F n) (c : Fin n) (s : ℕ) :
+    (Finset.univ.filter (fun x : Word F n => ((diffSet x u).erase c).card ≤ s)).card
+      = Fintype.card F *
+        (∑ i ∈ Finset.range (s + 1), (n - 1).choose i * (Fintype.card F - 1) ^ i) := by
+  classical
+  have hpartition : (Finset.univ.filter (fun x : Word F n => ((diffSet x u).erase c).card ≤ s))
+      = (Finset.range (s + 1)).biUnion
+          (fun i => Finset.univ.filter fun x : Word F n => ((diffSet x u).erase c).card = i) := by
+    ext x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_biUnion,
+      Finset.mem_range]
+    constructor
+    · intro hx
+      exact ⟨_, Nat.lt_succ_of_le hx, rfl⟩
+    · rintro ⟨i, hi, hix⟩
+      rw [hix]
+      exact Nat.le_of_lt_succ hi
+  have hdisj1 : Set.PairwiseDisjoint (fun i => i ∈ Finset.range (s + 1))
+      (fun i => Finset.univ.filter fun x : Word F n => ((diffSet x u).erase c).card = i) := by
+    intro i _ j _ hij
+    change Disjoint (Finset.univ.filter fun x : Word F n => ((diffSet x u).erase c).card = i)
+      (Finset.univ.filter fun x : Word F n => ((diffSet x u).erase c).card = j)
+    rw [Finset.disjoint_left]
+    intro x hx hy
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx hy
+    exact hij (hx.symm.trans hy)
+  have hstep : ∀ i, (Finset.univ.filter
+        (fun x : Word F n => ((diffSet x u).erase c).card = i)).card
+      = (n - 1).choose i * (Fintype.card F * (Fintype.card F - 1) ^ i) := by
+    intro i
+    have hsplit : (Finset.univ.filter (fun x : Word F n => ((diffSet x u).erase c).card = i))
+        = (({c}ᶜ : Finset (Fin n)).powersetCard i).biUnion
+            (fun S => Finset.univ.filter fun x : Word F n => (diffSet x u).erase c = S) := by
+      ext x
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_biUnion,
+        Finset.mem_powersetCard]
+      constructor
+      · intro hx
+        refine ⟨(diffSet x u).erase c, ⟨?_, hx⟩, rfl⟩
+        intro j hj
+        rw [Finset.mem_compl]
+        intro hjc
+        rw [Finset.mem_erase] at hj
+        exact hj.1 (Finset.mem_singleton.mp hjc)
+      · rintro ⟨S, ⟨-, hcard⟩, hxS⟩
+        rw [hxS]
+        exact hcard
+    have hdisj2 : Set.PairwiseDisjoint (fun S => S ∈ ({c}ᶜ : Finset (Fin n)).powersetCard i)
+        (fun S => Finset.univ.filter fun x : Word F n => (diffSet x u).erase c = S) := by
+      intro S _ T _ hne
+      change Disjoint (Finset.univ.filter fun x : Word F n => (diffSet x u).erase c = S)
+        (Finset.univ.filter fun x : Word F n => (diffSet x u).erase c = T)
+      rw [Finset.disjoint_left]
+      intro x hx hy
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx hy
+      exact hne (hx.symm.trans hy)
+    have hcard2 : (Finset.univ.filter (fun x : Word F n => ((diffSet x u).erase c).card = i)).card
+        = ∑ S ∈ ({c}ᶜ : Finset (Fin n)).powersetCard i,
+            (Finset.univ.filter fun x : Word F n => (diffSet x u).erase c = S).card := by
+      rw [hsplit]
+      exact Finset.card_biUnion (s := ({c}ᶜ : Finset (Fin n)).powersetCard i)
+        (t := fun S => Finset.univ.filter fun x : Word F n => (diffSet x u).erase c = S)
+        hdisj2
+    rw [hcard2]
+    have hterm : ∀ S ∈ ({c}ᶜ : Finset (Fin n)).powersetCard i,
+        (Finset.univ.filter fun x : Word F n => (diffSet x u).erase c = S).card
+          = Fintype.card F * (Fintype.card F - 1) ^ i := by
+      intro S hS
+      rw [card_fiber_erase u (by
+        intro hc
+        have h1 := (Finset.mem_powersetCard.mp hS).1 hc
+        rw [Finset.mem_compl] at h1
+        exact h1 (Finset.mem_singleton_self c)), (Finset.mem_powersetCard.mp hS).2]
+    rw [Finset.sum_congr rfl hterm, Finset.sum_const, Finset.card_powersetCard,
+      Finset.card_compl, Fintype.card_fin, Finset.card_singleton, smul_eq_mul]
+  calc (Finset.univ.filter (fun x : Word F n => ((diffSet x u).erase c).card ≤ s)).card
+      = ((Finset.range (s + 1)).biUnion
+          (fun i => Finset.univ.filter fun x : Word F n => ((diffSet x u).erase c).card = i)).card := by
+        rw [hpartition]
+    _ = ∑ i ∈ Finset.range (s + 1),
+          (Finset.univ.filter fun x : Word F n => ((diffSet x u).erase c).card = i).card :=
+        Finset.card_biUnion (s := Finset.range (s + 1))
+          (t := fun i => Finset.univ.filter fun x : Word F n => ((diffSet x u).erase c).card = i)
+          hdisj1
+    _ = Fintype.card F *
+          (∑ i ∈ Finset.range (s + 1), (n - 1).choose i * (Fintype.card F - 1) ^ i) := by
+        rw [Finset.sum_congr rfl fun i _ => hstep i]
+        have hfactor : ∀ i ∈ Finset.range (s + 1),
+            (n - 1).choose i * (Fintype.card F * (Fintype.card F - 1) ^ i)
+              = Fintype.card F * ((n - 1).choose i * (Fintype.card F - 1) ^ i) :=
+          fun i _ => by ring
+        rw [Finset.sum_congr rfl hfactor, ← Finset.mul_sum]
+
 end FCC
