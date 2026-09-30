@@ -337,6 +337,30 @@ The statement will therefore take `h2 : |Im f| ≥ 2` (the same hypothesis as
 `#theorem 8#` and, after §15(b), `#corollary 8#`), exactly as the printed proof
 does.  (`|Im f| ≥ 2` also gives `q ≥ 2` and `k ≥ 1`, which the argument needs.)
 
+Proving the corollary found two further hypotheses that the printed one-liner
+("where `n` is the integer satisfying `q^{n−k} = Σ_{i≤⌊(d_d−1)/2⌋}…`") does not
+supply; both hold in the paper's picture, where `n` is the length of a perfect code
+with `q^k` codewords:
+
+* `hdd : 1 ≤ d_d`.  For `d_d = 0` the transcription is **false**: take `q = 2`,
+  `k = 1`, `d_f = 1`, `f = id` (so `|Im f| = 2` and `d_f > d_d`).  The printed
+  equation reads `2^{n−1} = Σ_{i≤0} C(n,i) = 1`, i.e. `n = k = 1`, so the corollary
+  would claim `r_f ≥ n − k + 1 = 1`; but the systematic encoding `u ↦ u` of
+  redundancy `0` satisfies every clause of `#definition 6#` for `(f : 0, 1)` (data
+  protection at distance `0` is vacuous, and `f u ≠ f v` forces `u ≠ v`, so
+  `d = 1 ≥ d_f`), hence `r_f = 0`;
+* `hkn : k ≤ n`.  The printed equation *does* have solutions with `k > n`: with
+  `t = 0` (i.e. `d_d ≤ 1`) the sum is `1` for every `n`, so any `n < k` satisfies
+  it; the claim then reduces to `1 ≤ r_f`, which needs a separate argument (that no
+  systematic encoding of redundancy `0` can be function-correcting) that is not part
+  of the paper's derivation.  Since the paper's `n` comes from a perfect code of
+  length `n` holding `M = q^k` codewords, `q^k ≤ q^n` and `k ≤ n` there.
+
+The proof itself (`perfect_optimalRedundancyData_ge`) is the paper's: the packing
+bound on the optimum gives `A_t(k+r) ≤ q^r`; `k + r = n` makes the code perfect
+(then `#theorem 10#` + `#theorem 8#`), `k + r < n` contradicts the strict
+monotonicity `A_t(n) < A_t(k+r)·q^{n−k−r}`, and `t > k + r` forces `k = 0`.
+
 The same review confirmed that `IsPerfect C t` — minimum distance `≥ 2t+1` plus
 `q^n = |C| · |B(0,t)|` — is enough for everything `#theorem 10#` uses: it implies
 the balls of radius `t` around the codewords tile the space (`card_ball`,

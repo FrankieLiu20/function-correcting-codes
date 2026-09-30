@@ -189,16 +189,17 @@ in the same commit that does the work.
       `hammingDist_lt_of_close` (the paper's step 5), plus
       `exists_hammingDist_eq` (`FCC/Balls.lean`) and
       `exists_hammingDist_eq_minDist` (`FCC/Basic.lean`) for the intermediate word.
-- [ ] 3.7 (part 2, next). `#corollary 7#` (`perfect_optimalRedundancyData_ge`,
+- [x] 3.7 (part 2, done 2026-09-30). `#corollary 7#` (`perfect_optimalRedundancyData_ge`,
       `r_f ≥ n − k + 1` for `n` with `q^{n−k} = Σ_{i≤t}C(n,i)(q−1)^i`,
-      `t = ⌊(d_d−1)/2⌋`).  The statement now also carries `|Im f| ≥ 2`
-      (`ISSUES.md` §17 — it is false for `k = 0` otherwise).  Ingredients still
-      needed: the Hamming bound `C.card · (ball 0 t).card ≤ q^n` (from
-      `card_mul_card_ball_le`), its strict monotonicity in the length
-      (`Σ_{i≤t}C(m,i)(q−1)^i · q^{n−m} > Σ_{i≤t}C(n,i)(q−1)^i` for `m < n`), and
-      then the two cases `m = n` (the code is perfect, so `#theorem 10#` +
-      `#theorem 8#` rule the FCC out) and `m < n` (the Hamming bound contradicts
-      the monotonicity).
+      `t = ⌊(d_d−1)/2⌋`).  The statement carries three hypotheses the printed
+      one-liner does not supply — `|Im f| ≥ 2`, `1 ≤ d_d`, `k ≤ n`
+      (`ISSUES.md` §17, each with a counterexample or a justification) — and the
+      proof is the paper's: the packing bound `card_mul_card_ball_le` on the optimum
+      gives `A_t(k+r) ≤ q^r`; `k + r = n` makes the code perfect (`#theorem 10#` +
+      `#theorem 8#` rule the FCC out), `k + r < n` contradicts the strict
+      monotonicity `A_t(n) < A_t(k+r)·q^{n−k−r}` (the new lemmas
+      `sum_range_choose_mul_pow_le_succ`/`lt_succ`/`lt_add` in `FCC/Balls.lean`),
+      and `t > k + r` forces `k = 0`.
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.

@@ -845,3 +845,50 @@ uses.
 `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 33 audited
 results.  Next: `#corollary 7#`, which needs the Hamming bound plus its strict
 monotonicity in the length (both from `card_ball`).
+
+## 2026-09-30 (fourth session) — `#corollary 7#` proved; §V complete
+
+`perfect_optimalRedundancyData_ge`: if `q^{n−k} = Σ_{i≤t} C(n,i)(q−1)^i` with
+`t = ⌊(d_d−1)/2⌋`, `|Im f| ≥ 2`, `1 ≤ d_d` and `k ≤ n`, then
+`r_f(k : d_d, d_f) ≥ n − k + 1` for `d_f > d_d`.  The paper derives it "from
+Theorems 8 and 10"; the formal proof splits on the length `m = k + r` of an FCC
+attaining the optimum:
+
+* the packing bound `card_mul_card_ball_le` on `C'` (injective, `q^k` words,
+  pairwise distances `≥ d_d ≥ 2t+1`) gives `q^k·A_t(m) ≤ q^m`, i.e.
+  `A_t(m) ≤ q^{m−k}` where `A_t(m) = Σ_{i≤t}C(m,i)(q−1)^i`;
+* `m = n`: the printed equation turns the bound into equality, so `C'` *is* perfect,
+  `#theorem 10#` makes `G(C')` connected and `#theorem 8#` forbids it (the
+  hypothesis `d_min(C') = d_d` comes from `minDist_eq_of_isPerfect` plus `d_d ≥ 2t+1`);
+* `m < n`: the strict monotonicity `A_t(n) < A_t(m)·q^{n−m}` (proved below) turns
+  `A_t(n) = q^{n−k}` into `q^{n−k} < q^{n−k}`;
+* `t > m`: the ball is the whole space, so the bound reads `q^k ≤ 1`, i.e. `k = 0`.
+
+**New arithmetic (`FCC/Balls.lean`), the last piece of phase 1a's counting theme.**
+The sequence `A_t(m)/q^m` is strictly decreasing in `m` (for `t ≤ m`, `q ≥ 2`),
+which is the paper's implicit "the Hamming bound gets tighter as the code gets
+longer".  Formalised through the Pascal recurrence
+`sum_range_choose_mul_pow_succ` (`A_t(m+1) = A_t(m) + (q−1)A_{t−1}(m)`, from
+`Nat.choose_succ_succ` and `Finset.sum_range_succ'`, i.e. a shift of the summation
+index), then `sum_range_choose_mul_pow_le_succ`, the strict
+`sum_range_choose_mul_pow_lt_succ` (the `t`-th term `C(m,t)(q−1)^t` is a positive
+gap) and the iterated form `sum_range_choose_mul_pow_lt_add`.
+
+**Statement review — two more hypotheses (`ISSUES.md` §17).**  The printed corollary
+only asks for the equation; proving it showed that the transcription also needs
+`1 ≤ d_d` and `k ≤ n`:
+
+* `d_d = 0` is *false*: with `q = 2`, `k = 1`, `d_f = 1` and `f = id` the equation
+  gives `n = 1`, so the claim is `r_f ≥ 1`, while the systematic encoding `u ↦ u`
+  (redundancy `0`) is an `(f : 0, 1)`-FCC — data protection at distance `0` is
+  vacuous and `f u ≠ f v` forces `u ≠ v`;
+* `k > n` is consistent with the equation (`t = 0` makes the sum `1` for every `n`),
+  and the claim then reduces to `1 ≤ r_f`, a statement about redundancy-`0` encodings
+  that the paper's derivation does not cover.  In the paper's picture `n` is a
+  perfect-code length holding `q^k` codewords, so `k ≤ n`.
+
+**Verification.**  `lake build` green (only the 27 `sorry` stubs warn);
+`consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with 34 audited
+results.  §V (both `#theorem 8#`–`#theorem 11#` and `#corollary 7#`/`#corollary 8#`)
+is complete; §VI (locally binary/bounded functions, `#lemma 3#`, `#theorem 12#`,
+`#lemma 6#`) is next.

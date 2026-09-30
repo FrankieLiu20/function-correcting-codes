@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 33 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 28 (was 49: nineteen paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 34 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 27 (was 49: twenty paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -166,6 +166,15 @@ Proved:
   the paper's `d(u,u') = 2t+1` step legal) and `hammingDist_lt_of_close` (the
   paper's step 5 counting); `exists_hammingDist_eq` (Balls) and
   `exists_hammingDist_eq_minDist` (Basic) supply the intermediate words;
+* §V-B (optimality of perfect codes): `#corollary 7#`
+  (`perfect_optimalRedundancyData_ge`) — if `q^{n−k} = Σ_{i≤t}C(n,i)(q−1)^i` with
+  `t = ⌊(d_d−1)/2⌋`, `|Im f| ≥ 2`, `1 ≤ d_d` and `k ≤ n`, then
+  `r_f(k : d_d, d_f) ≥ n−k+1` for `d_f > d_d`.  The packing bound on an optimal FCC
+  gives `A_t(k+r) ≤ q^r`; length exactly `n` makes the code perfect (so
+  `#theorem 10#` + `#theorem 8#` apply) while a shorter code contradicts the strict
+  monotonicity `A_t(n) < A_t(k+r)·q^{n−k−r}` of the truncated binomial sums
+  (`sum_range_choose_mul_pow_lt_add`, built from the Pascal recurrence
+  `sum_range_choose_mul_pow_succ`); the remaining case `t > k+r` forces `k = 0`.
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,

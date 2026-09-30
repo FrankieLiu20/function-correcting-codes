@@ -43,10 +43,10 @@ labelling conventions follow Shenghao Yang's
 
 | Module | Contents | Status |
 | --- | --- | --- |
-| `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | All 65 numbered items are present: Definitions 1–18 stated, 12 of the 17 examples formalized, every theorem/lemma/corollary stated.  **Proved**: `#corollary 1#`, `#theorem 1#`, `#corollary 2#` (§II); `#theorem 2#`, `#theorem 3#`, `#theorem 4#`, `#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#theorem 7#` (§IV); `#theorem 8#`, `#theorem 9#` (§V-A); `#theorem 10#`, `#lemma 2#`, `#theorem 11#`, `#corollary 8#` (§V-B); plus the non-vacuity bricks.  The rest carry `sorry` (28 in total) |
+| `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | All 65 numbered items are present: Definitions 1–18 stated, 12 of the 17 examples formalized, every theorem/lemma/corollary stated.  **Proved**: `#corollary 1#`, `#theorem 1#`, `#corollary 2#` (§II); `#theorem 2#`, `#theorem 3#`, `#theorem 4#`, `#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#theorem 7#` (§IV); `#theorem 8#`, `#theorem 9#` (§V-A); `#theorem 10#`, `#corollary 7#`, `#lemma 2#`, `#theorem 11#`, `#corollary 8#` (§V-B, i.e. all of §V); plus the non-vacuity bricks.  The rest carry `sorry` (27 in total) |
 | `FCC/Definitions.lean` | §I-E notation: `Word F n` (= `F_q^n`), `wt`, `ball` | Phase 0 — complete |
 | `FCC/Basic.lean` | internal: `wt_le_wt_add_hammingDist`, `wt_zero`, `mem_ball_self` | Phase 0 — complete |
-| `FCC/Balls.lean` | internal: `card_word`, `diffSet`, `sphere`, `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`, `ball_eq_univ_of_le`, `card_ball_univ`, the closed forms `card_sphere`/`card_ball` (`\|B(u,t)\| = Σ_{i≤t} C(n,i)(q-1)^i`), the Singleton bound `card_le_pow_minDist`, and the §V-B counting for perfect codes (`card_mul_card_ball_le`, `exists_mem_ball_of_isPerfect`, `minDist_eq_of_isPerfect`, `hammingDist_lt_of_close`) | Phase 1a complete | 
+| `FCC/Balls.lean` | internal: `card_word`, `diffSet`, `sphere`, `ball_eq_biUnion_sphere`, `disjoint_sphere`, `ball_mono`, `ball_eq_univ_of_le`, `card_ball_univ`, the closed forms `card_sphere`/`card_ball` (`\|B(u,t)\| = Σ_{i≤t} C(n,i)(q-1)^i`), the Singleton bound `card_le_pow_minDist`, the §V-B counting for perfect codes (`card_mul_card_ball_le`, `exists_mem_ball_of_isPerfect`, `minDist_eq_of_isPerfect`, `hammingDist_lt_of_close`) and the truncated binomial sums of `#corollary 7#` (`sum_range_choose_mul_pow_succ`/`le_succ`/`lt_succ`/`lt_add`) | Phase 1a complete | 
 | `FCC/Internal.lean` | internal scaffolding for the example checks | Phase 1a |
 | `FCC/AxiomCheck.lean` | `#print axioms` audit of the headline results | complete |
 
@@ -55,10 +55,11 @@ and phase 3 (proofs) is under way: 3.0 (the `sInf`/attainment API for `N`, `r_f`
 `d_min`, `d(fᵢ,fⱼ)`), 3.1–3.6 (§II: `#corollary 1#`, `#theorem 1#`,
 `#corollary 2#`; §IV: `#theorem 2#`, `#theorem 3#`, `#theorem 4#`,
 `#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#theorem 7#`; §V-A:
-`#theorem 8#`, `#theorem 9#`; §V-B: `#theorem 10#`, `#lemma 2#`, `#theorem 11#`,
-`#corollary 8#`) and 3.14 (an FCC always exists) are finished; everything else
-carries a `sorry` stub.  The rest of 3.7 is `#corollary 7#` (the perfect-code
-lower bound on `r_f`), which is next.
+`#theorem 8#`, `#theorem 9#`; §V-B: `#theorem 10#`, `#corollary 7#`, `#lemma 2#`,
+`#theorem 11#`, `#corollary 8#`) and 3.14 (an FCC always exists) are finished —
+§II, §IV and §V are complete; everything else carries a `sorry` stub.  Section §VI
+(locally binary/bounded functions, `#lemma 3#`, `#theorem 12#`, `#lemma 6#`) is
+next.
 `PLAN.md` §4 lists the phases — with a status column — and `PLAN.md` §1.1 is the
 table of *all* 65 numbered items of the paper (18 definitions, 19 theorems, 14
 lemmas and 14 corollaries) with their status; that table is the project's
