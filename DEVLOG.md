@@ -1123,3 +1123,30 @@ or `a + 1` and `a + 1` (when `x c` differs from both), so in every case
 other coordinates contribute `Σ_{i≤t−1}C(n−1,i)(q−1)^i`.  Note the characterisation
 must be stated as `a + 1 ≤ t` (not `a ≤ t − 1`): for `t = 0` the two differ, which
 is exactly why the printed sum is empty there.
+## 2026-10-01 — incident: a broken commit slipped through; `card_fiber_erase` re-landed
+
+**What went wrong.**  The fibre count `card_fiber_erase` (written for `#theorem 17#`)
+worked in a scratch file, but while landing it I broke one sub-proof (the
+disjointness of the two fibres) while removing a style-lint suggestion.  Worse, I
+had chained `lake build` and `git commit && git push` in a *single* shell command
+with `;`, so the commit and the push ran **even though the build had failed**: the
+tip of `main` briefly contained a file that no longer compiled.  This is the same
+class of trap as `AGENTS.md` rule 17 (a green build is not evidence the edit is
+present) — the lesson here is the mirror image:
+
+> **Run `lake build` as its own command and read its result before committing.**
+> Never chain the build and the commit/push in one shell line.
+
+**Repair.**  The bad commit (`ccf963a`) was reverted (`09b3390`) and pushed the
+same session, so `main` compiled again immediately.  The lemma was then re-derived
+with a lint-free disjointness argument — `insert c S ≠ S` follows from
+`c ∉ S` via `Finset.insert_eq_self`, and the fibre equality is closed by a `calc`
+along the two defining equations — and re-landed after a *standalone* build and a
+standalone `consistency_check.ps1 -Strict` (commit `797d2ea`).
+
+**Result.**  `card_fiber_erase` is in `FCC/Balls.lean`: for `c ∉ S`,
+`|{x | D(x,u) \ {c} = S}| = q·(q−1)^{|S|}`.  Together with
+`exists_diffSet_eq_singleton` and `mem_ball_inter_iff_of_dist_one` this completes
+the counting layer of `#theorem 17#`; what remains is summing over the `i`-subsets
+of `{c}ᶜ` (`C(n−1,i)` of them) and the inclusion–exclusion with `card_ball`.
+
