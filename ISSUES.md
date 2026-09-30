@@ -470,7 +470,7 @@ is what the *external* `#lemma 4#` turns into the colouring hypothesis `hcol`
 
 ## 21. `#lemma 6#`: two bounds, and the same implicit hypotheses as `#theorem 12#`
 
-**Statement fixed 2026-09-30 (proofs in progress).**  The paper's Lemma 6 gives
+**Statement fixed and both bounds proved 2026-09-30.**  The paper's Lemma 6 gives
 **two** bounds for the Hamming weight function `f(u) = wt(u)` and a systematic
 `[n,k,2t_d+1]` code `C`:
 
@@ -488,11 +488,12 @@ The second bound replaces the given code by an *optimal* `q^k`-word code of
 minimum distance `2t_d+1`; as in §18, that code has to come with its systematic
 form, so its proof will bundle it (the statement above is the paper's shape).
 
-The proof machinery is already in place: the construction
-`p_u := c'_{f(u) mod (2t_f+1)}` (an optimal `2t_f+1`-word code `c'` of minimum
-distance `2(t_f−t_d)`, obtained from the attainment of `N`), the weight inequality
-`d(u,v) ≥ wt(u) − wt(v)` (`wt_le_wt_add_hammingDist`) in the case
-`|f(u) − f(v)| > 2t_f`, and the residue fact that two weights differing by less
-than the modulus have different residues (internal `mod_ne_of_sub_lt`, from
-`Nat.ModEq.dvd'`) in the case `0 < |f(u) − f(v)| ≤ 2t_f`.  What remains is the
-`Fin`-index bookkeeping of the second-step encoder.
+The proof is the paper's: the second step is `p_u := c'_{f(u) mod (2t_f+1)}` (an
+optimal `2t_f+1`-word code `c'` of minimum distance `2(t_f−t_d)`, obtained from the
+attainment of `N`), and for `f(u) ≠ f(v)` either the residues differ — then the two
+second blocks are at distance `≥ 2(t_f−t_d)` and the total is `≥ 2t_f+1` — or they
+agree, in which case the weights differ by at least the modulus `2t_f+1` (the
+internal residue lemma `mod_ne_of_sub_lt`, from `Nat.ModEq.dvd'`), so
+`d(u,v) ≥ wt(u) − wt(v) ≥ 2t_f+1` (`wt_le_wt_add_hammingDist`) and systematicity
+folds the first step in.  The second bound is the first one applied to a systematic
+encoder of the optimal length `N(q^k, 2t_d+1)` (bundled in `hcode`, as in §18).

@@ -1055,3 +1055,29 @@ remains is a `Fin`-index/`let` bookkeeping step (`m := 2*t_f+1` versus
 **Verification.**  `lake build` green (the 21 `sorry` stubs warn — 20 plus the new
 second bound); `consistency_check.ps1 -Strict` green; `axioms_check.ps1` green with
 41 audited results.
+
+## 2026-09-30 (tenth session) — §VI-C: both bounds of `#lemma 6#` proved; §VI complete
+
+The block that stopped the previous session was pure bookkeeping: the second-step
+encoder `p_u := c'_{f(u) mod (2t_f+1)}` mixed a `let m := 2*t_f+1` index with the
+literal `Fin (2*t_f+1)`, which `simpa` would not unify.  Routing *every* index
+through one local definition
+`let idx : Word F k → Fin (2*t_f+1) := fun u => ⟨(wt u) % (2*t_f+1), …⟩` (and the
+encoder through `let p := fun u => w (idx u)`) removed the mismatch, and both
+bounds now go through:
+
+* `hammingWeight_redundancy_le`: the two-step construction with second step `p`,
+  where `c'` has length exactly `N(2t_f+1, 2(t_f−t_d))` (attainment of `N`).  For
+  `f(u) ≠ f(v)`: if the residues differ, the blocks are distinct codewords of `c'`
+  (distance `≥ 2(t_f−t_d)`) and `d(C u, C v) ≥ 2t_d+1` gives `2t_f+1` in total; if
+  the residues agree, the weights differ by at least the modulus `2t_f+1` (the
+  internal `mod_ne_of_sub_lt`), so `d(u,v) ≥ |wt u − wt v| ≥ 2t_f+1`
+  (`wt_le_wt_add_hammingDist`) and systematicity transfers that to `d(C u, C v)`.
+* `hammingWeight_redundancy_le_optimal`: the first bound applied to a systematic
+  encoder of the optimal length `N(q^k, 2t_d+1)` (bundled in `hcode`, as in §18).
+
+**Verification.**  `lake build` green (19 `sorry` stubs remain); consistency and
+axiom audits green with 43 audited headline results.  §VI is now complete
+(`#lemma 3#`, `#corollary 9#`–`#corollary 12#`, `#lemma 5#`, `#theorem 12#`,
+`#lemma 6#`); §VII (linear FCCs) and §VIII / appendix (Plotkin and Hamming bounds)
+are next.

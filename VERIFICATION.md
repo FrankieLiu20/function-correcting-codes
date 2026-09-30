@@ -120,8 +120,8 @@ Verified:
 | --- | --- |
 | `lake build` | green (1818 jobs), warning-free apart from the `sorry` stubs |
 | `scripts/consistency_check.ps1 -Strict` | green — 78 paper markers, all inventory rows, 73 rows stated, docstring convention, no orphan modules |
-| `scripts/axioms_check.ps1` | green — 41 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
-| `sorry` in the library | 21 (was 49: twenty-seven paper statements discharged, plus the two internal halves of `#theorem 2#`) |
+| `scripts/axioms_check.ps1` | green — 43 audited results; every one of them depends only on `propext`, `Classical.choice`, `Quot.sound` |
+| `sorry` in the library | 19 (was 49: twenty-nine paper statements discharged, plus the two internal halves of `#theorem 2#`) |
 | GitHub Actions | green on the push that carries this section |
 
 Proved:
@@ -200,6 +200,14 @@ Proved:
   `N(λ, 2(t_f−t_d))`, from the attainment of `N`) gives
   `r_f ≤ r + N(λ, 2(t_f−t_d))`.  The three hypotheses the printed statement left
   implicit (systematicity, `t_d ≤ t_f`, `q ≥ 2`) are `ISSUES.md` §20.
+* §VI-C (Hamming weight): `#lemma 6#` in both of the paper's bounds —
+  `hammingWeight_redundancy_le` (`r_f ≤ r + N(2t_f+1, 2(t_f−t_d))`, second step
+  `p_u := c'_{f(u) mod (2t_f+1)}` with `c'` of length exactly
+  `N(2t_f+1, 2(t_f−t_d))` from the attainment of `N`, the residue lemma
+  `mod_ne_of_sub_lt`, and `wt_le_wt_add_hammingDist`) and
+  `hammingWeight_redundancy_le_optimal`
+  (`r_f ≤ (N(q^k, 2t_d+1) − k) + N(2t_f+1, 2(t_f−t_d))`, the first bound applied
+  to the bundled systematic encoder of the optimal length; `ISSUES.md` §21).
 * `optimalRedundancyData_eq_N_drmData` — the paper's central identity
   `r_f(k,t_d,t_f) = N(D_f(t_d,t_f : u₁, …, u_{q^k}))` — with the internal bricks
   `hammingDist_eq_msg_add_red`, `isDCode_drmData_of_isFCCData`,

@@ -234,18 +234,18 @@ in the same commit that does the work.
       implicit are in `ISSUES.md` §20 (systematicity, `t_d ≤ t_f`, `q ≥ 2`).
       `_hf` (local boundedness) is kept for fidelity — it is `#lemma 4#` (external)
       that turns it into `hcol`.
-- [ ] 3.9 (part 3, next). `#lemma 6#` (the Hamming weight function).  The
+- [x] 3.9 (part 3, done 2026-09-30). `#lemma 6#` (the Hamming weight function).  The
       *statements* are done (`ISSUES.md` §21): the first bound now carries the
       systematic form and `t_d ≤ t_f` (`hammingWeight_redundancy_le`), and the
       paper's **second** bound
       `r_f ≤ N(q^k,2t_d+1)+N(2t_f+1,2(t_f−t_d))−k` has been added
-      (`hammingWeight_redundancy_le_optimal`).  Both proofs are still `sorry`.
-      Machinery ready: the construction `p_u := c'_{f(u) mod (2t_f+1)}` (attainment
-      of `N`), `wt_le_wt_add_hammingDist` for the case `|f u − f v| > 2t_f`, and the
-      internal residue lemma `mod_ne_of_sub_lt` for `0 < |f u − f v| ≤ 2t_f`.
-      Remaining: the `Fin`-index bookkeeping of the second-step encoder (a
-      defeq issue between the `let m := 2*t_f+1` index and `Fin (2*t_f+1)`), then the
-      second bound by applying the first to the bundled optimal systematic code.
+      (`hammingWeight_redundancy_le_optimal`).  Both are now **proved**: the second
+      step `p_u := c'_{f(u) mod (2t_f+1)}` (with `c'` of length exactly
+      `N(2t_f+1, 2(t_f−t_d))`, from the attainment of `N`), the case split on the
+      residues (`mod_ne_of_sub_lt` plus `wt_le_wt_add_hammingDist` when they agree),
+      and the second bound as the first one applied to the bundled systematic
+      encoder of the optimal length.  (The `Fin`-index bookkeeping issue was solved
+      by routing every index through a single `let idx : Word F k → Fin (2*t_f+1)`.)
 - [ ] Upgrade the examples that currently check "a witness exists / none exists"
       (`#example 1#`, `2`, `4`, `5`, `6`, `7`, `9`) to equalities about `N` and
       `minDist` with `N_eq_of`/`minDist_eq_of`, now that phase 3.0 is done.
