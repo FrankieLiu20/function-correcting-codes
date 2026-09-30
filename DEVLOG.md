@@ -1115,7 +1115,11 @@ line by line:
 
 No statement change was needed this time (a first).  The proofs are the next step;
 the `d(u,v) = 1` case of `#theorem 17#` reduces to
-`|B(u,t) ∩ B(v,t)| = q·Σ_{i≤t−1}C(n−1,i)(q−1)^i`, because
-`d(x,u) + d(x,v) = 2·(disagreements outside the single differing coordinate) + 1`,
-so `x` lies in both balls iff it disagrees with `u` in at most `t−1` other
-coordinates (and the differing coordinate is free: `q` choices).
+`|B(u,t) ∩ B(v,t)| = q·Σ_{i≤t−1}C(n−1,i)(q−1)^i`: writing `c` for the single
+differing coordinate and `a` for the number of coordinates `≠ c` where `x`
+disagrees with `u`, the two distances are `a + 1` and `a` (when `x c ∈ {u c, v c}`)
+or `a + 1` and `a + 1` (when `x c` differs from both), so in every case
+`x ∈ B(u,t) ∩ B(v,t) ⟺ a + 1 ≤ t`; hence `x c` is free (`q` choices) and the
+other coordinates contribute `Σ_{i≤t−1}C(n−1,i)(q−1)^i`.  Note the characterisation
+must be stated as `a + 1 ≤ t` (not `a ≤ t − 1`): for `t = 0` the two differ, which
+is exactly why the printed sum is empty there.

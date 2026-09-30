@@ -278,6 +278,10 @@ in the same commit that does the work.
 - [x] Statement review of the appendix counts (2026-10-01): `#theorem 17#`,
       `#lemma 14#`, `#theorem 18#`, `#theorem 19#` were re-read against the PDF and
       match verbatim (`DEVLOG.md`); no change needed.  Their proofs are the next
-      step, starting with `#theorem 17#` (reduce the intersection to
-      `q·Σ_{i≤t−1}C(n−1,i)(q−1)^i` by splitting on the single differing coordinate,
-      then inclusion–exclusion with `card_ball`).
+      step, starting with `#theorem 17#`: `exists_diffSet_eq_singleton` (the unique
+      differing coordinate of two words at distance one) is already in
+      `FCC/Balls.lean`; next come the characterisation
+      `x ∈ B(u,t) ∩ B(v,t) ⟺ |D(x,u) \ {c}| + 1 ≤ t` (stated with `+1 ≤ t`, which
+      also covers `t = 0` correctly — see `DEVLOG.md`) and the count
+      `q·Σ_{i≤t−1}C(n−1,i)(q−1)^i` by summing `card_sphere_fiber` over the
+      `i`-subsets of `{c}ᶜ`, then inclusion–exclusion with `card_ball`.

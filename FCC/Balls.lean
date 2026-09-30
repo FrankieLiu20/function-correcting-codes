@@ -864,4 +864,22 @@ theorem sum_range_choose_mul_pow_lt_add {q m d t : ℕ} (hd : 1 ≤ d) (htm : t 
             rw [pow_succ]
             ring
 
+/-! ## Appendix — the ball-union counts
+
+The appendix computes the size of a union (or intersection) of two or three Hamming
+balls; everything rests on carving the coordinates at which the centres differ.
+The first two ingredients are here: the unique differing coordinate of two words at
+distance one, and the characterisation of `B(u,t) ∩ B(v,t)` for such a pair (see
+the `#theorem 17#` entry of `PLAN.md` for the resulting count). -/
+
+/-- `(internal, Appendix — first step of `#theorem 17#`)` — two words at Hamming
+distance one differ in exactly one coordinate. -/
+theorem exists_diffSet_eq_singleton {F : Type*} [Fintype F] [DecidableEq F] {n : ℕ}
+    {u v : Word F n} (h : hammingDist u v = 1) : ∃ c : Fin n, diffSet u v = {c} := by
+  have hcard : (diffSet u v).card = 1 := by
+    rw [← hammingDist_eq_card_diffSet]
+    exact h
+  obtain ⟨c, hc⟩ := Finset.card_eq_one.mp hcard
+  exact ⟨c, hc⟩
+
 end FCC
