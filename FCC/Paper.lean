@@ -1857,11 +1857,99 @@ theorem not_isFCCData_of_components {k r d df Q : ℕ} (C : Finset (Word F (k + 
   omega
 
 /-- `#theorem 10#` (§V-B) — "the minimum-distance graph of a perfect `t`-error
-correcting code is connected". -/
+correcting code is connected".
+
+Proof (the paper's): fix `u, v ∈ C` and move along edges while strictly decreasing
+`d(·,v)`.  If `d(u,v) > 0` then, `u` and `v` being codewords,
+`d(u,v) ≥ d_min(C) = 2t+1` (`minDist_eq_of_isPerfect`), so we may pick `t+1`
+coordinates on which they differ; let `x` agree with `v` on those and with `u`
+elsewhere (`d(x,u) = t+1`).  Since the balls of radius `t` around a perfect code
+tile the space (`exists_mem_ball_of_isPerfect`), some `u' ∈ C` is at distance
+`≤ t` from `x`; then `u ≠ u'`, so `2t+1 ≤ d(u,u') ≤ d(u,x) + d(x,u') ≤ 2t+1`,
+i.e. `u u'` is an edge of `G(C)`, and `hammingDist_lt_of_close` gives
+`d(u',v) < d(u,v)`.  Induction on `d(u,v)` (started at `0`, where `u = v`) then
+produces the walk. -/
 theorem isConnected_minDistGraph_of_perfect {F : Type*} [Zero F] [Fintype F] [DecidableEq F]
     {n t : ℕ} (C : Finset (Word F n)) (h : IsPerfect C t) :
     ∀ u ∈ C, ∀ v ∈ C, (minDistGraph C).Reachable u v := by
-  sorry
+  classical
+  have key : ∀ m : ℕ, ∀ u ∈ C, ∀ v ∈ C, hammingDist u v ≤ m →
+      (minDistGraph C).Reachable u v := by
+    intro m
+    induction m with
+    | zero =>
+      intro u _ v _ hm
+      have hzero : hammingDist u v = 0 := by omega
+      rw [hammingDist_eq_zero] at hzero
+      rw [hzero]
+    | succ m ih =>
+      intro u hu v hv hm
+      by_cases hle : hammingDist u v ≤ m
+      · exact ih u hu v hv hle
+      · have hd : hammingDist u v = m + 1 := by omega
+        have huv : u ≠ v := by
+          intro hcon
+          rw [hcon, hammingDist_self] at hd
+          omega
+        have hcard2 : 2 ≤ C.card := by
+          have hsub2 : ({u, v} : Finset (Word F n)) ⊆ C := by
+            intro z hz
+            rcases Finset.mem_insert.mp hz with rfl | hz
+            · exact hu
+            · rw [Finset.mem_singleton] at hz
+              exact hz ▸ hv
+          have := Finset.card_le_card hsub2
+          rw [Finset.card_insert_of_notMem (by simpa using huv), Finset.card_singleton] at this
+          omega
+        have hmin : minDist C = 2 * t + 1 := minDist_eq_of_isPerfect h hcard2
+        have hge : 2 * t + 1 ≤ hammingDist u v := by
+          have h1 := minDist_le hu hv huv
+          omega
+        obtain ⟨T, hTsub, hTcard⟩ :=
+          Finset.exists_subset_card_eq (s := diffSet u v) (n := t + 1) (by
+            rw [hammingDist_eq_card_diffSet] at hge
+            omega)
+        let x : Word F n := fun i => if i ∈ T then v i else u i
+        obtain ⟨u', hu'C, hclose⟩ := exists_mem_ball_of_isPerfect h x
+        have hstep : hammingDist u' v < hammingDist u v :=
+          hammingDist_lt_of_close hTsub hTcard hclose
+        have hxu : hammingDist x u = t + 1 := by
+          rw [hammingDist_eq_card_diffSet]
+          have hset : diffSet x u = T := by
+            ext i
+            by_cases hi : i ∈ T
+            · have hxv : x i = v i := by
+                show (fun i => if i ∈ T then v i else u i) i = v i
+                exact ite_eq_left hi
+              have hvu : v i ≠ u i := by
+                have h1 : u i ≠ v i := by
+                  have := hTsub hi
+                  simpa [diffSet] using this
+                exact h1.symm
+              simp [diffSet, hi, hxv, hvu]
+            · have hxu' : x i = u i := by
+                show (fun i => if i ∈ T then v i else u i) i = u i
+                exact ite_eq_right hi
+              simp [diffSet, hi, hxu']
+          rw [hset, hTcard]
+        have hne' : u ≠ u' := by
+          intro hcon
+          have : hammingDist x u' = t + 1 := by
+            rw [← hcon]
+            exact hxu
+          omega
+        have hadj : (minDistGraph C).Adj u u' := by
+          refine ⟨hne', hu, hu'C, ?_⟩
+          have h1 : minDist C ≤ hammingDist u u' := minDist_le hu hu'C hne'
+          have h2 : hammingDist u u' ≤ hammingDist u x + hammingDist x u' :=
+            hammingDist_triangle u x u'
+          have h3 : hammingDist u x = t + 1 := hammingDist_comm u x ▸ hxu
+          omega
+        have hreach1 : (minDistGraph C).Reachable u u' := hadj.reachable
+        have hlt : hammingDist u' v ≤ m := by omega
+        exact hreach1.trans (ih u' hu'C v hv hlt)
+  intro u hu v hv
+  exact key (hammingDist u v) u hu v hv le_rfl
 
 /-- `#lemma 2#` (§V-B) — "let `C` be an MDS code with parameters `(n, M, d)_q`,
 and let `u, v ∈ C`.  Then there exists `u' ∈ C` such that `d(u,u') = d` (i.e.
@@ -2083,10 +2171,15 @@ where `n` is the integer satisfying
 
 The sum runs up to `⌊(d_d−1)/2⌋`, i.e. the ball radius `(d_d−1)/2` in `ℕ`
 (`(dd - 1) / 2`): the radius `d_d/2` used in the first transcription added one
-spurious term for even `d_d` — `ISSUES.md` §15(a). -/
+spurious term for even `d_d` — `ISSUES.md` §15(a).
+
+`h2` is `|Im(f)| ≥ 2`, the hypothesis `#theorem 8#` carries and the printed proof
+uses ("from Theorems 8 and 10"): without it the claim is false for `k = 0` (the
+single message can be encoded with redundancy `0`) — `ISSUES.md` §17. -/
 theorem perfect_optimalRedundancyData_ge {k n dd df : ℕ} (f : Word F k → α)
     (hperf : Fintype.card F ^ (n - k) =
       ∑ i ∈ Finset.range ((dd - 1) / 2 + 1), n.choose i * (Fintype.card F - 1) ^ i)
+    (h2 : ∃ a b : α, a ≠ b ∧ (∃ u : Word F k, f u = a) ∧ ∃ v : Word F k, f v = b)
     (hlt : dd < df) :
     n - k + 1 ≤ optimalRedundancyData f dd df := by
   sorry

@@ -106,6 +106,19 @@ theorem minDist_le {F : Type*} [DecidableEq F] {n : ℕ} {C : Finset (Word F n)}
   rw [minDist, dite_eq_left hne]
   exact Nat.find_min' hne ⟨x, hx, y, hy, hxy, rfl⟩
 
+/-- `(internal, §V-B — used by `#theorem 10#`)` — for a code with at least two words
+the minimum distance is *attained*: some pair of distinct codewords is at distance
+`d_min(C)`. -/
+theorem exists_hammingDist_eq_minDist {F : Type*} [DecidableEq F] {n : ℕ}
+    {C : Finset (Word F n)} (hcard : 2 ≤ C.card) :
+    ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = minDist C := by
+  classical
+  obtain ⟨x, hx, y, hy, hxy⟩ := Finset.one_lt_card.mp (by omega : 1 < C.card)
+  have hne : ∃ d : ℕ, d ∈ {d : ℕ | ∃ x ∈ C, ∃ y ∈ C, x ≠ y ∧ hammingDist x y = d} :=
+    ⟨hammingDist x y, ⟨x, hx, y, hy, hxy, rfl⟩⟩
+  rw [minDist, dite_eq_left hne]
+  exact Nat.find_spec hne
+
 end MinDist
 
 section PerfectAndMDS
