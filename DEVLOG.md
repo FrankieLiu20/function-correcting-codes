@@ -1413,3 +1413,62 @@ Also: `simp` on `j ∈ diffSet x u` inside a `rw`-heavy context can unfold the
 `card_ball_union_dist_three` was added to `scripts/headline_theorems.txt` and
 `FCC/AxiomCheck.lean`.  **The appendix is now complete**, which unblocks §VIII's
 union-ball bounds `#theorem 15#`/`#theorem 16#`/`#corollary 14#` (TODO 3.12 part 2).
+
+## 2026-10-01 — §VIII: the three Hamming bounds (`#theorem 15#`, `#theorem 16#`,
+`#corollary 14#`)
+
+All of phase 3.12 is now proved (`#corollary 13#` was already done on 2026-09-30):
+
+* `#theorem 15#` (`hamming_bound_fcc`): an `(f,t)`-FCC of length `k+r` forces
+  `|Im f| · minUnionCard ℓ (k+r) t ≤ q^{k+r}` with `ℓ = minPreimageCard f`;
+* `#theorem 16#` (`hamming_bound_fcc_data`): the same with `minUnionCardDist ℓ d_d
+  (k+r) t_f` for an `(f : d_d, d_f)`-FCC;
+* `#corollary 14#` (`hamming_bound_fcc_data_sphere`):
+  `|Im f| · ℓ · |B(0,t_d)| ≤ q^{k+r}`.
+
+**Statement check first.**  `#theorem 15#` was fine as printed (its docstring already
+records the direction fix).  But `#theorem 16#` and `#corollary 14#` were **false as
+transcribed**: both left the ball radius (`t_f`, resp. `t_d`) free of the distance
+parameters, while the paper's convention is `d_d = 2t_d+1`, `d_f = 2t_f+1` with
+`t_d ≤ t_f` (`Notation.md` §5).  Counterexample found and then made into the
+recorded one: `F = Bool`, `k = 1`, `r = 0`, `f = C = id`, `d_d = d_f = 1`,
+`t_d = 1` gives `E = 2`, `ℓ = 1`, `|B(0,1)| = 2`, so `#corollary 14#` would read
+`4 ≤ 2`.  The statements now carry `2t_f+1 ≤ d_f` (theorem 16) and
+`2t_d+1 ≤ d_d, d_f` (corollary 14); `ISSUES.md` §23.
+
+**Proof (the paper's ball packing, one argument three times).**  For an attained
+value `a`, let `U_a` be the union of the radius-`t` balls around the codewords of
+`f⁻¹(a)`.
+
+* `|U_a| ≥` the minimum over ℓ-element families: `|f⁻¹(a)| ≥ ℓ`
+  (`minPreimageCard` is the `sInf` of the preimage sizes), so take an ℓ-element
+  subset `s` of the preimage; `s.image C` has ℓ elements (systematic encodings are
+  injective) and its ball-union sits inside `U_a`, so `Nat.sInf_le` applies.  For
+  `#theorem 16#` the same `s.image C` also satisfies the pairwise `≥ d_d` condition
+  required by `minUnionCardDist` (`IsFCCData`'s second conjunct).
+* Disjointness across values: if a word `x` were in `U_a ∩ U_b` with `a ≠ b`, the
+  two codewords would be within `2t`, contradicting `IsFCC` (or `IsFCCData` plus the
+  radius-distance link) — `hammingDist_triangle` + `omega`.
+* Hence `|Im f| · M ≤ Σ_a |U_a| ≤ q^{k+r}` (disjoint subsets of the code space).
+* `#corollary 14#` additionally uses that *within* one preimage the radius-`t_d`
+  balls are disjoint (`d(C u, C v) ≥ d_d ≥ 2t_d+1` whenever `u ≠ v`), so
+  `|U_a| = |f⁻¹(a)| · |B(0,t_d)|` via `Finset.card_biUnion` + `card_ball`.
+
+**Refactor.**  `unionBalls` / `minUnionCard` / `minUnionCardDist` (internal, used
+only by these two statements) now take a `Finset (Word F n)` instead of a family
+`Fin ℓ → Word F n`.  Reasons: the paper minimises over *distinct* vectors, and the
+finset form makes the "at least ℓ words" step immediate
+(`Finset.exists_subset_card_eq` + `Nat.sInf_le`) instead of having to build an
+equivalence `Finset ≃ Fin ℓ`.  The statements in `FCC/Paper.lean` are unchanged.
+
+**Lean notes.**  `rw [hU, unionBalls]` fails on the beta-redex `(fun a => …) a`;
+`simp only [hU, unionBalls, …]` is the robust form (again).  `Nat.sInf_le` returns
+the *unfolded* `sInf`; annotate the `have` with `minPreimageCard f` so `rw [← hℓ]`
+can match.  `omit [Zero F] in` is needed before the docstring (not before
+`theorem`) for the declarations that do not use `0`.
+
+**Verification.**  Standalone `lake build` green (no lint warnings), then
+(separately) `consistency_check.ps1 -Strict` green (11 `sorry`) and
+`axioms_check.ps1` green (51 audited results); commits `2881a4e` and `be903b7`.
+Next: §VIII-A's Plotkin pair `#lemma 13#`/`#theorem 14#`, then §VII (linear FCCs)
+and the remaining examples.

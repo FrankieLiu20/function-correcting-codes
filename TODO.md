@@ -283,12 +283,26 @@ in the same commit that does the work.
       by `IsFCC`, so the packing inequality `card_mul_card_ball_le` gives
       `|Im f| · |B(0,t)| ≤ q^n` (the code is systematic, so equal messages have equal
       codewords).
-- [ ] 3.12 (part 2, **next** — the appendix counts it needs were all proved on
-      2026-10-01, so nothing blocks it any more). `#theorem 15#` and `#theorem 16#` (the same bounds with
-      the *union of balls* `minUnionCard`/`minUnionCardDist` instead of a single ball)
-      and `#corollary 14#`; they need the appendix's counting of unions of balls
-      (`#theorem 17#`–`#theorem 19#`, `#lemma 14#`), which is also the next thing to
-      do for `#lemma 13#`/`#theorem 14#` (Plotkin bounds, phase 3.11).
+- [x] 3.12 (part 2, **done** 2026-10-01). `#theorem 15#` (`hamming_bound_fcc`),
+      `#theorem 16#` (`hamming_bound_fcc_data`) and `#corollary 14#`
+      (`hamming_bound_fcc_data_sphere`) — the union-of-balls bounds.  All three are
+      the paper's ball-packing argument: over each attained value `a` of `f`, the
+      ball-union `U_a` around the codewords of the preimage has at least
+      `minUnionCard ℓ n t` words (pick `ℓ` of the preimage's codewords — they form ℓ
+      distinct words, and for `#theorem 16#` they are pairwise at distance `≥ d_d` by
+      `IsFCCData`), the `U_a` for different values are pairwise disjoint (`IsFCC`/
+      `IsFCCData` plus the radius-distance link), and all of them sit in `q^n`.  For
+      `#corollary 14#` the radius-`t_d` balls inside one preimage are themselves
+      pairwise disjoint, so `|U_a| = |f⁻¹(a)| · |B(0,t_d)|` exactly.  `unionBalls`
+      /`minUnionCard`/`minUnionCardDist` were refactored to take a *finset* of words
+      (the paper minimises over distinct vectors).  **Statement fix**: the
+      transcriptions had left the ball radius free of the distances; they now carry
+      `2t_f+1 ≤ d_f` (resp. `2t_d+1 ≤ d_d, d_f`) — `ISSUES.md` §23 has the
+      counterexample.
+- [ ] 3.11 (next). `#lemma 13#` (`plotkin_bound`) and `#theorem 14#`: the Plotkin
+      family of §VIII-A.  They use the appendix's *union* counts as well
+      (`#theorem 17#`/`#theorem 18#`), so the same machinery applies; `#lemma 11#`
+      (quoted from [1]) stays a hypothesis like the other external rows.
 - [x] Statement review of the appendix counts (2026-10-01): `#theorem 17#`,
       `#lemma 14#`, `#theorem 18#`, `#theorem 19#` were re-read against the PDF and
       match verbatim (`DEVLOG.md`); no change needed.  Their proofs are the next

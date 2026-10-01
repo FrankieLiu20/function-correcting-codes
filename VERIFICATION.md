@@ -330,6 +330,46 @@ With `#theorem 18#` this means the whole appendix (and hence the §VIII bounds
 `#theorem 15#`/`#theorem 16#`/`#corollary 14#`) is now unblocked: the appendix
 counting layer is complete.
 
+## Phase 3.12 — the §VIII Hamming bounds (2026-10-01)
+
+All four rows of phase 3.12 are proved: `#corollary 13#`
+(`hamming_bound_fcc_sphere`, 2026-09-30), then `#theorem 15#`
+(`hamming_bound_fcc`), `#theorem 16#` (`hamming_bound_fcc_data`) and
+`#corollary 14#` (`hamming_bound_fcc_data_sphere`).
+
+Verified:
+
+| Check | Result |
+| --- | --- |
+| `lake build` | green (1818 jobs; 11 `sorry` warnings, all Plotkin/linear FCC/example rows) |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers; 73 rows stated; 11 `sorry`) |
+| `scripts/axioms_check.ps1` | green — 51 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+
+**Statement fix.**  `#theorem 16#` and `#corollary 14#` need the ball radius tied to
+the distances (`2t_f+1 ≤ d_f`, resp. `2t_d+1 ≤ d_d` and `2t_d+1 ≤ d_f`): the paper's
+convention `d_d = 2t_d+1`, `d_f = 2t_f+1`, `t_d ≤ t_f` supplies them, but as written
+without them the statements are false (counterexample in `ISSUES.md` §23: `F = Bool`,
+`k = 1`, `r = 0`, `f = C = id`, `d_d = d_f = 1`, `t_d = 1` would read `4 ≤ 2`).
+
+**Method.**  All three are the paper's ball-packing argument.  For each attained
+value `a` of `f`, let `U_a` be the ball-union over the codewords of the preimage
+`f⁻¹(a)`.  Then: (i) `|f⁻¹(a)| ≥ ℓ = minPreimageCard f`, so choosing `ℓ` of its
+messages gives ℓ distinct codewords (systematic ⟹ injective) whose ball-union is
+inside `U_a` — and for `#theorem 16#` those codewords are pairwise at distance
+`≥ d_d` by `IsFCCData`, so the minimising family of `minUnionCardDist` applies;
+(ii) the `U_a` of different values are disjoint, since two codewords of different
+function values would otherwise be within `2t` (resp. `2t_d`), contradicting
+`IsFCC`/`IsFCCData` together with the radius-distance link; (iii) they are disjoint
+subsets of the code space `F_q^{k+r}`.  For `#corollary 14#` the radius-`t_d` balls
+*inside* one preimage are a code of minimum distance `≥ d_d ≥ 2t_d+1`, hence pairwise
+disjoint, so `|U_a| = |f⁻¹(a)| · |B(0,t_d)|` exactly.
+
+The internal definitions `unionBalls` / `minUnionCard` / `minUnionCardDist` now take
+a *finset* of words rather than a family `Fin ℓ → Word F n`: the paper minimises
+over distinct vectors, and the finset form makes "a set with at least ℓ words is at
+least as large as the minimum over ℓ-element sets" immediate
+(`Finset.exists_subset_card_eq` + `Nat.sInf_le`).
+
 ## Not formalized (and why)
 
 Nothing yet; this section is filled in as results are classified.
