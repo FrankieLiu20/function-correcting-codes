@@ -414,6 +414,27 @@ in the same commit that does the work.
       Then `plotkin_total_le_sharp` (the `q · Σ_i Σ_{j≠i} hammingDist ≤ r·A` bound,
       from `total_pair_eq_sum_coord` + `card_ne_pairs_mul_le_sharp`), and the
       `ℚ`/`sInf` finish in `FCC/Paper.lean` (`plotkin_bound`).
+
+      **Attempted 2026-10-01 and rolled back** (repo left green at `7275bb5`):
+      the `ite` route above was implemented once and hit these walls, which the
+      next attempt should go around rather than rediscover:
+
+      * `Finset.sum_congr rfl (fun j hj => …)` used *as a rewrite rule* leaves a
+        metavariable for the summand (`f i j = ?m j`), and `split_ifs` then fails
+        with "no if-then-else conditions to split".  State the desired equality as
+        an explicit `have : ∑ … = ∑ …` and rewrite with that.
+      * `if_pos`/`if_neg` are deprecated in this pin (use the `ite_eq_left`/
+        `ite_eq_right` pair, cf. `AGENTS.md` rule 18), and `split_ifs with h` names
+        a hypothesis only in the branches that *have* one — `intro`-style
+        restructuring is more predictable.
+      * The cleanest way to see `∑_{j ∈ univ.erase i} f i j = ∑ j, if i = j then 0
+        else f i j` seems to be `Finset.sum_subset (Finset.erase_subset i univ)`
+        with the vanishing condition `j = i → … = 0` proved by `subst` + `simp`
+        (the "on the subset" direction then needs the per-`j` rewrite above, where
+        `j ∈ erase i` gives `j ≠ i`).
+      * The pointwise identity `if i = j then 0 else f i j = (if i < j then f i j
+        else 0) + (if j < i then f i j else 0)` is best proved by
+        `intro i j; split_ifs <;> omega` (no hypothesis naming needed).
 - [x] Statement review of the appendix counts (2026-10-01): `#theorem 17#`,
       `#lemma 14#`, `#theorem 18#`, `#theorem 19#` were re-read against the PDF and
       match verbatim (`DEVLOG.md`); no change needed.  Their proofs are the next
