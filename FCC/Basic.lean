@@ -199,4 +199,25 @@ def redPart {F : Type*} {k r : ℕ} (c : Word F (k + r)) : Word F r :=
 
 end SystematicSplit
 
+section Append
+
+/-- `(internal, §VII — used by `#lemma 10#`)` — `Fin.append` commutes with
+pointwise addition: appending two sums is the sum of the appended words. -/
+theorem append_add {F : Type*} [Add F] {m n : ℕ} (x₁ x₂ : Word F m) (y₁ y₂ : Word F n) :
+    Fin.append (x₁ + x₂) (y₁ + y₂) = Fin.append x₁ y₁ + Fin.append x₂ y₂ := by
+  funext i
+  refine Fin.addCases (fun a => ?_) (fun b => ?_) i <;>
+    simp [Fin.append_left, Fin.append_right]
+
+/-- `(internal, §VII — used by `#lemma 10#`)` — `Fin.append` commutes with scalar
+multiplication. -/
+theorem append_smul {R F : Type*} [SMul R F] {m n : ℕ} (c : R) (x : Word F m)
+    (y : Word F n) :
+    Fin.append (c • x) (c • y) = c • Fin.append x y := by
+  funext i
+  refine Fin.addCases (fun a => ?_) (fun b => ?_) i <;>
+    simp [Fin.append_left, Fin.append_right]
+
+end Append
+
 end FCC

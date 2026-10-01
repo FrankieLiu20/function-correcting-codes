@@ -85,5 +85,8 @@ namespace FCC
 -- §VII-A (coset codes of a linear FCC):
 #print axioms cosetDist_eq
 #print axioms wt_ge_of_not_mem_kernel
+-- §VII-B (the concatenated code):
+#print axioms image_linear_concat
+#print axioms isLinearFCC_concat
 
 end FCC

@@ -370,7 +370,7 @@ over distinct vectors, and the finset form makes "a set with at least ℓ words 
 least as large as the minimum over ℓ-element sets" immediate
 (`Finset.exists_subset_card_eq` + `Nat.sInf_le`).
 
-## Phase 3.10 (part 1) — §VII-A: the coset-distance bridge (2026-10-01)
+## Phase 3.10 (part 1) — §VII-A/B: the coset-distance bridge and the concatenation (2026-10-01)
 
 `#lemma 8#` (`cosetDist_eq`) and `#lemma 9#` (`wt_ge_of_not_mem_kernel`) are
 proved, the first two results of the linear side (§VII).
@@ -401,9 +401,31 @@ Verified (separately, after the full build):
 
 | Check | Result |
 | --- | --- |
-| `lake build` | green (1819 jobs; 6 `sorry` warnings, all in phases 3.10–3.11) |
-| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 6 `sorry`) |
-| `scripts/axioms_check.ps1` | green — 56 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+| `lake build` | green (1819 jobs; 4 `sorry` warnings, `#lemma 7#`/`#lemma 13#`/`#lemma 11#`×2) |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 4 `sorry`) |
+| `scripts/axioms_check.ps1` | green — 58 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+
+**§VII-B, same day.**  `#lemma 10#` (`image_linear_concat`) and `#theorem 13#`
+(`isLinearFCC_concat`):
+
+* `#lemma 10#`: the encoding `u ↦ (C(u), D(f(u)))` — the paper's
+  `u ↦ (C(u), D(f(u)))`, spelled `catWord (Cf u) (Df (f u))` — is `IsLinearMap F`.
+  `catWord = Fin.append` is additive and `F`-linear in both arguments
+  (`append_add`/`append_smul`, added to `FCC/Basic.lean`: `Fin.addCases` on the
+  coordinate plus `Fin.append_left`/`right`), and the two components are linear,
+  so `simp only [catWord, map_add, append_add]` (resp. `map_smul`, `append_smul`)
+  closes both linearity fields.
+* `#theorem 13#`: the paper's two distance guarantees.  `hammingDist_append`
+  splits the distance of a concatenated pair into the two block distances, so
+  `u ≠ v` gives `d_d` from the first block, and `f u ≠ f v` (which forces
+  `u ≠ v`) gives `d_f` from `d_d` in the first block plus `d_f − d_d` in the
+  second (`omega`, using the paper's standing `d_d ≤ d_f`).
+
+The paper's `#lemma 10#`/`#theorem 13#` also claim that `C_cat` *is a linear code
+of dimension `k`* with total redundancy `(n−k)+r'`; the Lean statements formalize
+the linearity of the encoding and the two distance guarantees, and the dimension
+bookkeeping is still open (it needs the encoders as injective linear maps — see
+`TODO.md` 3.10 and the *Statement-level caveats* below).
 
 ## Phase 3.11 (part 1) — `#theorem 14#`, the generalized Plotkin bound (2026-10-01)
 
@@ -486,6 +508,18 @@ Planned to appear here: the paper's numbered **examples**
 papers and will be used as explicit hypotheses rather than assumed as axioms.
 
 ## Statement-level caveats
+
+* **§VII-B, the dimension half of `#lemma 10#`/`#theorem 13#` is not
+  formalized yet.**  Both printed claims say that the concatenated code
+  `C_cat = {(C(u), D(f(u)))}` is a linear code *of dimension `k`* (and, for
+  `#theorem 13#`, of total redundancy `(n−k)+r'`).  The declarations
+  `image_linear_concat` (linearity of the encoding map) and `isLinearFCC_concat`
+  (the two distance guarantees) cover the rest; the dimension statement needs the
+  encoders `C`, `D` to be *injective* linear maps (as the paper's
+  "linear codes of dimensions `k` and `ℓ`" provides), i.e. a statement
+  `finrank F (LinearMap.range ...) = k` with `Cf` injective.  Tracked in
+  `TODO.md` 3.10; the labels are `stated`/`proved` for what is there, so the
+  consistency checker cannot see this gap — hence this note.
 
 `#theorem 2#` is stated with one side condition that the paper assumes rather
 than prints — `d_d ≤ d_f` (from `#definition 6#`, and used by the proof) — see

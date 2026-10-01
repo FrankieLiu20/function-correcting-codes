@@ -1649,3 +1649,35 @@ needs a statement fix — as written in Phase 2 it has **no** hypotheses and is
 false (take `C = span{(0,1)} ⊂ F_q²`, `msgPart` is `0` on `C`, so
 `finrank D_f = 1` while `finrank ker f` can be `0`); the paper's
 "in standard form" is essential and will be made explicit.
+
+**Same session, §VII-B.**  `#lemma 10#` (`image_linear_concat`) and
+`#theorem 13#` (`isLinearFCC_concat`) are in as well — `sorry` 6 → 4, headline
+56 → 58.
+
+`#lemma 10#` needs `catWord = Fin.append` to be additive and `F`-linear in each
+argument; mathlib has no `Fin.append_add` (only the coordinate projections
+`Fin.append_left`/`Fin.append_right`), so `append_add`/`append_smul` were added
+to `FCC/Basic.lean`: `funext i` plus `Fin.addCases` on the coordinate.  With them
+`simp only [catWord, map_add, append_add]` (resp. `map_smul`, `append_smul`)
+closes both `IsLinearMap` fields — the whole proof is two lines.  One
+`omit [Fintype F] [DecidableEq F] in`: linearity is pure module algebra and does
+not need finiteness.
+
+`#theorem 13#` is the paper's two distance guarantees: `hammingDist_append`
+splits `d((C u, D(f u)), (C v, D(f v)))` into `d(C u, C v) + d(D(f u), D(f v))`,
+`u ≠ v` gives `dd ≤` the first block, and for `f u ≠ f v` (which forces `u ≠ v`)
+`omega` combines `dd ≤ d(Cu,Cv)`, `df - dd ≤ d(Dfu,Dfv)` and the paper's
+`dd ≤ df`.  (First attempt failed because I had the split lemma in `have` but had
+not `rw`'d it into the goal — `omega` saw only the unsplit distance; a reminder
+that the hypothesis has to reach the goal, not just the context.)
+
+**Gap recorded.**  The printed `#lemma 10#`/`#theorem 13#` also say that `C_cat`
+is a linear code *of dimension `k`* (total redundancy `(n−k)+r'`).  The Lean
+statements formalize the linearity of the encoding and the two distance
+guarantees; the dimension half is **not** formalized yet, because it needs the
+encoders to be *injective* linear maps (`finrank (range ...) = k`).  `PLAN.md`'s
+two rows are marked "proved (linearity)"/"proved (distances)" with the caveat
+inline, `TODO.md` 3.10 lists it as still open, and the note is in
+`VERIFICATION.md` §"Statement-level caveats" — the label-level consistency
+checker cannot see a gap like this, so it is written down where a reader will
+find it.

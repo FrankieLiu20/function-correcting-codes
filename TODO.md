@@ -313,8 +313,22 @@ in the same commit that does the work.
         `x = v`, `y = 0`), and `wt v = wt (v + 0)` with `0 ∈ D_f`, so
         `d_f ≤ cosetCodeMinDist ≤ cosetDist (D_f) v ≤ wt v` (three `Nat.sInf_le`).
 
-      Still to do: `#lemma 7#` (see below — it needs a statement fix),
-      `#lemma 10#` and `#theorem 13#` (the §VII-B concatenation).
+      * `#lemma 10#` (`image_linear_concat`) — the encoding `u ↦ (C(u), D(f(u)))`
+        is `IsLinearMap F`: `catWord = Fin.append` is additive and `F`-linear in
+        both arguments (`append_add`/`append_smul`, new in `FCC/Basic.lean`), and
+        `Cf`, `Df ∘ f` are linear (`simp only [catWord, map_add, append_add]`).
+      * `#theorem 13#` (`isLinearFCC_concat`) — the two distance guarantees: the
+        Hamming distance of a concatenated pair splits (`hammingDist_append`,
+        `catWord`), so `dd ≤ d(Cu,Cv)` gives the first, and for the second
+        `f u ≠ f v` forces `u ≠ v`, `d_f − d_d ≤ d(D(fu),D(fv))` plus
+        `d_d ≤ d(Cu,Cv)` gives `d_f ≤ d(cat)` (`omega` with `hadd`).
+
+      **Still to do in 3.10**: `#lemma 7#` (see below — it needs a statement fix),
+      and the *dimension* half of `#lemma 10#`/`#theorem 13#` ("a linear code of
+      dimension `k` and total redundancy `(n−k)+r'`"), which needs the encoders
+      `C`, `D` as *injective* linear maps (the Lean statements currently take them
+      as plain functions and state linearity/distances only — the gap is recorded
+      in `VERIFICATION.md` §"Statement-level caveats").
 - [ ] 3.11 (in progress). `#lemma 13#` (`plotkin_bound`) — `#theorem 14#`
       (`plotkin_bound_fcc`) is **done** (2026-10-01, new module
       `FCC/Plotkin.lean`); `#lemma 11#` (quoted from [1]) stays a hypothesis like

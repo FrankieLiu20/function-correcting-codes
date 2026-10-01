@@ -3350,6 +3350,7 @@ of a word of length `m` with one of length `n`, i.e. the paper's pair
 def catWord {m n : ℕ} (x : Word F m) (y : Word F n) : Word F (m + n) :=
   Fin.append x y
 
+omit [Fintype F] [DecidableEq F] in
 /-- `#lemma 10#` (§VII) — "let `f : F_q^k → F_q^ℓ` be a linear function.  Further,
 let `C ⊆ F_q^n` and `D ⊆ F_q^{r'}` be linear codes of dimensions `k` and `ℓ`,
 respectively ... Then the concatenated code
@@ -3360,7 +3361,11 @@ is `#theorem 13#`. -/
 theorem image_linear_concat {k ℓ r r' : ℕ} (f : Word F k →ₗ[F] Word F ℓ)
     (Cf : Word F k →ₗ[F] Word F r) (Df : Word F ℓ →ₗ[F] Word F r') :
     IsLinearMap F (fun u : Word F k => catWord (Cf u) (Df (f u))) := by
-  sorry
+  -- `u ↦ (C(u), D(f(u)))` is `Fin.append ∘ (C, D ∘ f)`: both components are linear
+  -- and `Fin.append` is additive/bilinear (`append_add`/`append_smul`)
+  refine ⟨fun a b => ?_, fun c a => ?_⟩
+  · simp only [catWord, map_add, append_add]
+  · simp only [catWord, map_smul, append_smul]
 
 /-- `#theorem 13#` (§VII-B) — "the image `C_cat = {(C(u), D(f(u))) : u ∈ F_q^k}`
 `⊆ F_q^{n+r'}` is a linear `(f : d_d, d_f)`-FCC of dimension `k` and total
@@ -3376,7 +3381,23 @@ theorem isLinearFCC_concat {k ℓ r r' dd df : ℕ} (f : Word F k →ₗ[F] Word
         dd ≤ hammingDist (catWord (C u) (D (f u))) (catWord (C v) (D (f v)))) ∧
       ∀ u v : Word F k, f u ≠ f v →
         df ≤ hammingDist (catWord (C u) (D (f u))) (catWord (C v) (D (f v))) := by
-  sorry
+  -- the Hamming distance of `(C(u), D(f(u)))` splits over the two blocks
+  have hsplit : ∀ u v : Word F k,
+      hammingDist (catWord (C u) (D (f u))) (catWord (C v) (D (f v)))
+        = hammingDist (C u) (C v) + hammingDist (D (f u)) (D (f v)) := fun u v => by
+    simp only [catWord, hammingDist_append]
+  constructor
+  · intro u v huv
+    have h₁ : dd ≤ hammingDist (C u) (C v) := hC u v huv
+    rw [hsplit u v]
+    omega
+  · intro u v huv
+    -- `f u ≠ f v` forces `u ≠ v` (through `f`), so the first block gives `d_d`
+    have huv' : u ≠ v := fun h => huv (by rw [h])
+    have h₁ : dd ≤ hammingDist (C u) (C v) := hC u v huv'
+    have h₂ : df - dd ≤ hammingDist (D (f u)) (D (f v)) := hD (f u) (f v) huv
+    rw [hsplit u v]
+    omega
 
 end SectionVIIStatements
 
