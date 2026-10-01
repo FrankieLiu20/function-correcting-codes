@@ -136,7 +136,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#corollary 13#` | VIII-B | `E ≤ q^n/Σ_{i≤t} C(n,i)(q−1)^i` (proved via the ball-packing inequality `card_mul_card_ball_le` on one codeword per attained value) | `hamming_bound_fcc_sphere` | proved |
 | `#theorem 16#` | VIII-C | Hamming-type bound for `(f:d_d,d_f)`-FCCs, with `d(vᵢ,vⱼ) ≥ d_d` in the union | `hamming_bound_fcc_data` | todo |
 | `#corollary 14#` | VIII-C | `E ≤ q^n/(ℓ·Σ_{i≤t_d} C(n,i)(q−1)^i)` | `hamming_bound_fcc_data_sphere` | todo |
-| `#theorem 17#` | App. | `|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i≤t−1}C(n−1,i)(q−1)^i` for `d(u,v)=1` | `card_ball_union_dist_one` | stated |
+| `#theorem 17#` | App. | `|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i≤t−1}C(n−1,i)(q−1)^i` for `d(u,v)=1` (via the internal `card_ball_inter_dist_one` / `card_filter_erase_le`) | `card_ball_union_dist_one` | proved |
 | `#lemma 14#` | App. | `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)` for `d(u₁,u₂)=2` over `F₂` | `card_ball_inter_dist_two` | stated |
 | `#theorem 18#` | App. | union of three balls at pairwise distances `1,1,2` | `card_ball_union_three` | stated |
 | `#theorem 19#` | App. | `|B(u₁,t) ∪ B(u₂,t)| = 2Σ_{i≤t}C(n,i) − 8Σ_{i≤t−3}C(n−3,i) − 6C(n−3,t−2)` for `d(u₁,u₂)=3`, `t ≥ 2` | `card_ball_union_dist_three` | stated |
@@ -364,7 +364,7 @@ the labels 3.1/3.2 refer to that one row).
 | 3.10 | `#lemma 7#`–`#lemma 10#`, `#theorem 13#` | the linear/algebraic side | todo |
 | 3.11 | `#lemma 13#`, `#lemma 11#`, `#theorem 14#` | Plotkin bounds (double counting) | todo |
 | 3.12 | `#theorem 15#`, `#corollary 13#`, `#theorem 16#`, `#corollary 14#` | Hamming bounds (sphere packing) | `#corollary 13#` **done** (2026-09-30); the other three next |
-| 3.13 | `#theorem 17#`, `#lemma 14#`, `#theorem 18#`, `#theorem 19#` | appendix: counting unions of balls | todo |
+| 3.13 | `#theorem 17#`, `#lemma 14#`, `#theorem 18#`, `#theorem 19#` | appendix: counting unions of balls | `#theorem 17#` **done** (2026-10-01); `#lemma 14#`/`#theorem 18#`/`#theorem 19#` next |
 | 3.14 | non-vacuity of the FCC set (`∃ r, ∃ C, IsFCCData f C dd df`) | lets the paper's side conditions be dropped from `#theorem 2#` and is used by every lower bound of §IV | **done** (2026-09-20) — `exists_isFCCData` (repeat the message `max d_d d_f` times) |
 
 Suggested *warm-up* before 3.1, if the first proof session should be gentle:

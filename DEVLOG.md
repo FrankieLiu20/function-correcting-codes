@@ -1150,3 +1150,33 @@ standalone `consistency_check.ps1 -Strict` (commit `797d2ea`).
 the counting layer of `#theorem 17#`; what remains is summing over the `i`-subsets
 of `{c}ᶜ` (`C(n−1,i)` of them) and the inclusion–exclusion with `card_ball`.
 
+## 2026-10-01 — appendix: `#theorem 17#` proved
+
+`#theorem 17#` (`card_ball_union_dist_one`): for `d(u,v) = 1`,
+`|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i<t}C(n−1,i)(q−1)^i`.
+It is three lines once the intersection is known — inclusion–exclusion
+(`Finset.card_union_add_card_inter`), two `card_ball`s, and the new internal
+`card_ball_inter_dist_one` — and the intersection itself is where the work is:
+
+* `exists_diffSet_eq_singleton` gives the single differing coordinate `c`;
+* `mem_ball_inter_iff_of_dist_one` characterises the intersection as
+  `{x | |D(x,u) \ {c}| + 1 ≤ t}` (the `+ 1 ≤ t` form, since `≤ t − 1` is wrong at
+  `t = 0` — exactly where the printed sum is empty);
+* `card_fiber_erase` counts one fibre (`q(q−1)^{|S|}`) and `card_filter_erase_le`
+  sums them over the `i`-subsets of `{c}ᶜ`, giving `q·Σ_{i≤s}C(n−1,i)(q−1)^i`;
+* finally `t = 0` (empty filter, empty sum) versus `t ≥ 1`
+  (`+1 ≤ t ↔ ≤ t−1`, `t−1+1 = t`).
+
+**Lean lessons** (all cost real time, so recorded): `Finset.card_biUnion` needs its
+disjointness in the `Set`-coercion form, and the `Disjoint` goals produced by
+`Set.PairwiseDisjoint` are unreduced `Function.onFun Disjoint …` terms, so they must
+be `change`d to the explicit-filter form before `rw [Finset.disjoint_left]`;
+the final arithmetic needs `Finset.card_singleton` in the `rw` chain, after which
+that chain closes the goal (a trailing `ring` then fails with "no goals to be
+solved").  Verifying each piece in an isolated `example` (and using `trace_state`
+to see the real goal) was what finally unblocked the counting.
+
+**Verification.**  Standalone `lake build` green, `consistency_check.ps1 -Strict`
+green, `axioms_check.ps1` green with 45 audited results; commit `eba716d`.  17 `sorry`
+stubs remain.  Next: `#lemma 14#`, `#theorem 18#`, `#theorem 19#`.
+

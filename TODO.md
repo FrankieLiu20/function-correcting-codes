@@ -285,7 +285,22 @@ in the same commit that does the work.
       also covers `t = 0` correctly — see `DEVLOG.md`) and the count
       `q·Σ_{i≤t−1}C(n−1,i)(q−1)^i` by summing `card_sphere_fiber` over the
       `i`-subsets of `{c}ᶜ`, then inclusion–exclusion with `card_ball`.
-- [ ] 3.13 (in progress, 2026-10-01). `#theorem 17#`'s counting layer: three pieces
+- [x] 3.13 (part 1, done 2026-10-01). `#theorem 17#` (`card_ball_union_dist_one`) —
+      `|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i<t}C(n−1,i)(q−1)^i` for
+      `d(u,v) = 1`, from `Finset.card_union_add_card_inter` and two `card_ball`s,
+      the intersection coming from the internal `card_ball_inter_dist_one`
+      (`mem_ball_inter_iff_of_dist_one` + `card_filter_erase_le`, with `t = 0` the
+      empty filter against the empty sum).  Lean lessons: `Finset.card_biUnion`
+      wants the disjointness in the `Set`-coercion form and the `Disjoint` goals
+      must be `change`d to the explicit-filter form before `rw
+      [Finset.disjoint_left]`; `Finset.card_singleton` must be in the final `rw`
+      chain (which then closes the goal, so no trailing `ring`).
+- [ ] 3.13 (part 2, next). `#lemma 14#` (`F₂`, `d(u₁,u₂) = 2`:
+      `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i<t}C(n−1,i)`), then `#theorem 18#` (three balls,
+      distances `1,1,2`) and `#theorem 19#` (`F₂`, distance `3`), by the same
+      coordinate-splitting and inclusion–exclusion; these unlock
+      `#theorem 15#`/`#theorem 16#`/`#corollary 14#`.
+- [ ] 3.13 (old note, kept for the record). `#theorem 17#`'s counting layer: three pieces
       are in `FCC/Balls.lean` (`exists_diffSet_eq_singleton`,
       `mem_ball_inter_iff_of_dist_one`, `card_fiber_erase`).  The next piece is
       `card_filter_erase_le`:
