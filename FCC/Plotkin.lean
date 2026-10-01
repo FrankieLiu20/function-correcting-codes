@@ -411,4 +411,54 @@ theorem plotkin_bound_fcc_aux {k r : ℕ} (f : Word F k → α)
 
 end Main
 
+section GeneralPairCount
+
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+variable {F : Type*} [Fintype F] [DecidableEq F] {n : ℕ}
+
+omit [Fintype F] in
+/-- `(internal, §VIII-A — the general form of `sum_erase_ite_eq_card_filter`, needed
+by `#lemma 13#`)` — for a fixed coordinate, the indicator sum over the pairs of
+distinct indices is the number of *all* pairs of indices whose words differ there.
+The only difference from the version used for `#theorem 14#` is the index type: a
+`D`-code is indexed by `Fin M`, not by the messages `Word F k`. -/
+theorem sum_erase_ite_eq_card_filter_gen (p : ι → Word F n) (c : Fin n) :
+    (∑ i : ι, ∑ j ∈ (Finset.univ : Finset ι).erase i,
+        (if (p i) c ≠ (p j) c then 1 else 0))
+      = ((Finset.univ : Finset (ι × ι)).filter (fun q => (p q.1) c ≠ (p q.2) c)).card := by
+  classical
+  rw [Finset.card_eq_sum_ones, Finset.sum_filter, ← Finset.univ_product_univ,
+    Finset.sum_product]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [← Finset.sum_erase_add (Finset.univ : Finset ι)
+    (fun j => if (p i) c ≠ (p j) c then 1 else 0) (Finset.mem_univ i)]
+  simp
+
+omit [Fintype F] in
+/-- `(internal, §VIII-A — the general double count of `#lemma 13#`)` — the total
+pairwise distance of a code is the sum over the coordinates of the number of pairs
+of codewords differing in that coordinate (over an arbitrary index type). -/
+theorem total_pair_eq_sum_coord (p : ι → Word F n) :
+    (∑ i : ι, ∑ j ∈ (Finset.univ : Finset ι).erase i, hammingDist (p i) (p j))
+      = ∑ c : Fin n, ((Finset.univ : Finset (ι × ι)).filter
+          (fun q => (p q.1) c ≠ (p q.2) c)).card := by
+  classical
+  have hdist : ∀ i j : ι, hammingDist (p i) (p j)
+      = ∑ c : Fin n, (if (p i) c ≠ (p j) c then 1 else 0) := by
+    intro i j
+    rw [hammingDist, Finset.card_eq_sum_ones, Finset.sum_filter]
+  calc (∑ i : ι, ∑ j ∈ (Finset.univ : Finset ι).erase i, hammingDist (p i) (p j))
+      = ∑ i : ι, ∑ c : Fin n, ∑ j ∈ (Finset.univ : Finset ι).erase i,
+          (if (p i) c ≠ (p j) c then 1 else 0) := by
+        refine Finset.sum_congr rfl fun i _ => ?_
+        simp only [hdist i]
+        exact Finset.sum_comm
+    _ = ∑ c : Fin n, ∑ i : ι, ∑ j ∈ (Finset.univ : Finset ι).erase i,
+          (if (p i) c ≠ (p j) c then 1 else 0) := Finset.sum_comm
+    _ = ∑ c : Fin n, ((Finset.univ : Finset (ι × ι)).filter
+          (fun q => (p q.1) c ≠ (p q.2) c)).card :=
+        Finset.sum_congr rfl fun c _ => sum_erase_ite_eq_card_filter_gen p c
+
+end GeneralPairCount
+
 end FCC
