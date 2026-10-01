@@ -391,6 +391,29 @@ in the same commit that does the work.
       `r`; (c) the `ℚ`/`sInf` finish: every valid `r` satisfies the bound, and the
       set of valid lengths is nonempty (so `sInf` is a valid lower bound — the
       `A = M²(q−1) − a(q−a) = 0` cases, i.e. `M ≤ 1` or `q = 1`, are trivial).
+
+      **Landed so far** (2026-10-01): `card_mul_sum_sq_ge` (the balanced-squared
+      brick), `card_ne_pairs_mul_le_sharp` (the sharp per-coordinate count),
+      `sum_erase_ite_eq_card_filter_gen`/`total_pair_eq_sum_coord` (the double
+      count for an arbitrary index type — a `D`-code is indexed by `Fin M`), and
+      `sum_lt_eq_sum_lt_i` (the paper's `Σ_{i<j}` as a sum of rows).
+
+      **Next, concretely**: `two_mul_sum_lt_eq_sum_erase_for_linearOrder`
+      (the factor `2` of the paper's constant): for symmetric `f`, prove
+      `2 * Σ_{i<j} f i j = Σ_i Σ_{j∈erase i} f i j`.  The cheap route is *not* to
+      split each row by `j < i` (which needs `Finset.sum_comm'` plus two
+      filter-`ext`s); write both sides as iterated `ite` sums instead:
+      `Σ_{i<j} f = Σ_i Σ_j if i < j then f i j else 0`
+      (`Finset.sum_filter` + `sum_product`), and
+      `Σ_i Σ_{j∈erase i} f = Σ_i Σ_j if i = j then 0 else f i j`
+      (`Finset.erase_eq_filter` if available, else `Finset.sum_erase_add` with
+      `Σ_j f i j - f i i`), then pull the `2` inside (`Finset.mul_sum`) and close
+      pointwise per `(i,j)` with `rcases lt_trichotomy i j` (for `i ≠ j` exactly
+      one of `i < j`, `j < i` holds and both terms are `f i j`; the `j < i` half is
+      reindexed onto the `i < j` half by `Finset.sum_comm` plus `hsymm`).
+      Then `plotkin_total_le_sharp` (the `q · Σ_i Σ_{j≠i} hammingDist ≤ r·A` bound,
+      from `total_pair_eq_sum_coord` + `card_ne_pairs_mul_le_sharp`), and the
+      `ℚ`/`sInf` finish in `FCC/Paper.lean` (`plotkin_bound`).
 - [x] Statement review of the appendix counts (2026-10-01): `#theorem 17#`,
       `#lemma 14#`, `#theorem 18#`, `#theorem 19#` were re-read against the PDF and
       match verbatim (`DEVLOG.md`); no change needed.  Their proofs are the next

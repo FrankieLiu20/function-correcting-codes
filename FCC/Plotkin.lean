@@ -461,4 +461,22 @@ theorem total_pair_eq_sum_coord (p : ι → Word F n) :
 
 end GeneralPairCount
 
+section UnorderedPairs
+
+variable {ι : Type*} [Fintype ι] [DecidableEq ι] [LinearOrder ι]
+
+omit [DecidableEq ι] in
+/-- `(internal, §VIII-A — the unordered-pair form of `#lemma 13#`)` — the paper's sum
+over the pairs `i < j`, written as a sum of rows: `∑_{i<j} g i j = ∑_i ∑_{i<j} g i j`.
+The filter `fun q : ι × ι => q.1 < q.2` over the *product* finset is unfolded with
+`Finset.sum_product`. -/
+theorem sum_lt_eq_sum_lt_i (g : ι → ι → ℕ) :
+    (∑ q ∈ (Finset.univ : Finset (ι × ι)).filter (fun q => q.1 < q.2), g q.1 q.2)
+      = ∑ i, ∑ j ∈ (Finset.univ.filter fun j => i < j), g i j := by
+  rw [Finset.sum_filter, ← Finset.univ_product_univ, Finset.sum_product]
+  exact Finset.sum_congr rfl fun i _ => (Finset.sum_filter (s := Finset.univ)
+    (f := fun j => g i j) (p := fun j => i < j)).symm
+
+end UnorderedPairs
+
 end FCC
