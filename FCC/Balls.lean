@@ -2470,6 +2470,7 @@ theorem card_ne_pairs_mul_le {ι : Type*} [Fintype ι] [DecidableEq ι]
     rw [hne_eq, Nat.mul_sub_left_distrib]
     exact Nat.sub_le_sub_left h1 (Fintype.card F * T)
 
+
 /-- `(internal, §VIII-A — the *sharp* balanced-distribution estimate of `#lemma 13#`)` —
 for `M` positions carrying symbols of a `q`-ary alphabet (`M` = the sum of the
 symbol counts `n_ε`), the sum of squares of the counts is minimal when the symbols
@@ -2553,6 +2554,82 @@ theorem card_mul_sum_sq_ge {ι : Type*} [Fintype ι] (n : ι → ℕ) :
     push_cast
     exact hmain
   exact_mod_cast hgoal
+
+/-- `(internal, §VIII-A — the *sharp* per-coordinate estimate of `#lemma 13#`)` — the
+sharpening of `card_ne_pairs_mul_le` by the correction term `a(q−a)`: among `M`
+positions carrying symbols of a `q`-ary alphabet, the number of ordered pairs of
+positions with *different* symbols is at most `(M²(q−1) − a(q−a))/q`, i.e.
+`q · #{(i,j) : symbols differ} ≤ M²(q−1) − a(q−a)` with `a = M mod q`.  With
+`n_ε` the number of positions carrying `ε`, the count is `M² − Σ_ε n_ε²` (the
+supporting count of `card_ne_pairs_mul_le`) and the sharp inequality
+`q·Σ_ε n_ε² ≥ M² + a(q−a)` is `card_mul_sum_sq_ge`; the two together give
+`q·#(differences) = qM² − q·Σ_ε n_ε² ≤ qM² − M² − a(q−a) = M²(q−1) − a(q−a)`.
+
+The preamble is the one of `card_ne_pairs_mul_le` (unchanged); only the final
+arithmetic uses the sharp `card_mul_sum_sq_ge` in place of Cauchy–Schwarz. -/
+theorem card_ne_pairs_mul_le_sharp {ι : Type*} [Fintype ι] [DecidableEq ι]
+    {F : Type*} [Fintype F] [DecidableEq F] (x : ι → F) :
+    Fintype.card F * ((Finset.univ : Finset (ι × ι)).filter
+        (fun p => x p.1 ≠ x p.2)).card ≤
+      (Fintype.card ι) ^ 2 * (Fintype.card F - 1) -
+        ((Fintype.card ι) % Fintype.card F) *
+          (Fintype.card F - (Fintype.card ι) % Fintype.card F) := by
+  classical
+  set n : F → ℕ := fun ε => (Finset.univ.filter (fun i : ι => x i = ε)).card with hn
+  have hcardEq : (Finset.univ.filter (fun p : ι × ι => x p.1 = x p.2)).card
+      = ∑ ε, n ε ^ 2 := by
+    have hset : (Finset.univ.filter (fun p : ι × ι => x p.1 = x p.2))
+        = Finset.univ.biUnion (fun ε : F =>
+            (Finset.univ.filter (fun i : ι => x i = ε)) ×ˢ
+              (Finset.univ.filter (fun j : ι => x j = ε))) := by
+      ext p
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_biUnion,
+        Finset.mem_product]
+      constructor
+      · intro h
+        exact ⟨x p.1, rfl, h.symm⟩
+      · rintro ⟨ε, h1, h2⟩
+        rw [h1, h2]
+    have hdisj : Set.PairwiseDisjoint (fun ε => ε ∈ (Finset.univ : Finset F))
+        (fun ε => (Finset.univ.filter (fun i : ι => x i = ε)) ×ˢ
+          (Finset.univ.filter (fun j : ι => x j = ε))) := by
+      intro ε _ δ _ hne
+      change Disjoint _ _
+      rw [Finset.disjoint_left]
+      intro p hp hq
+      simp only [Finset.mem_product, Finset.mem_filter, Finset.mem_univ, true_and] at hp hq
+      exact hne (hp.1.symm.trans hq.1)
+    rw [hset, Finset.card_biUnion hdisj]
+    refine Finset.sum_congr rfl fun ε _ => ?_
+    rw [Finset.card_product, hn, pow_two]
+  have hpart : (Finset.univ.filter (fun p : ι × ι => x p.1 ≠ x p.2)).card
+      + (Finset.univ.filter (fun p : ι × ι => x p.1 = x p.2)).card
+      = (Fintype.card ι) ^ 2 := by
+    have h := Finset.card_filter_add_card_filter_not (s := (Finset.univ : Finset (ι × ι)))
+      (p := fun p => x p.1 = x p.2)
+    simpa [Finset.card_univ, Fintype.card_prod, pow_two, mul_comm, add_comm] using h
+  have hM : Fintype.card ι = ∑ ε, n ε := by
+    have h := Finset.card_eq_sum_card_fiberwise (s := (Finset.univ : Finset ι))
+      (t := (Finset.univ : Finset F)) (f := x) (fun i _ => Finset.mem_univ _)
+    simpa [Finset.card_univ, hn] using h
+  rcases Nat.eq_zero_or_pos (Fintype.card F) with hq0 | hqpos
+  · rw [hq0]
+    simp
+  · set T := (Fintype.card ι) ^ 2 with hT
+    have h2 : (Finset.univ.filter (fun p : ι × ι => x p.1 ≠ x p.2)).card
+        + ∑ ε, n ε ^ 2 = T := by rw [← hcardEq, hpart]
+    have hne_eq : (Finset.univ.filter (fun p : ι × ι => x p.1 ≠ x p.2)).card
+        = T - ∑ ε, n ε ^ 2 := by omega
+    have hsharp : T + (Fintype.card ι) % Fintype.card F *
+        (Fintype.card F - (Fintype.card ι) % Fintype.card F)
+        ≤ Fintype.card F * ∑ ε, n ε ^ 2 := by
+      have h := card_mul_sum_sq_ge (n := n)
+      rw [← hM, ← hT] at h
+      exact h
+    have h3 : T * (Fintype.card F - 1) = Fintype.card F * T - T := by
+      rw [Nat.mul_sub_left_distrib, mul_one, mul_comm T (Fintype.card F)]
+    rw [hne_eq, Nat.mul_sub_left_distrib, h3, Nat.sub_sub]
+    exact Nat.sub_le_sub_left hsharp (Fintype.card F * T)
 
 end FCC
 
