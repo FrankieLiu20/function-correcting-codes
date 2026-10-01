@@ -283,7 +283,8 @@ in the same commit that does the work.
       by `IsFCC`, so the packing inequality `card_mul_card_ball_le` gives
       `|Im f| · |B(0,t)| ≤ q^n` (the code is systematic, so equal messages have equal
       codewords).
-- [ ] 3.12 (part 2, next). `#theorem 15#` and `#theorem 16#` (the same bounds with
+- [ ] 3.12 (part 2, **next** — the appendix counts it needs were all proved on
+      2026-10-01, so nothing blocks it any more). `#theorem 15#` and `#theorem 16#` (the same bounds with
       the *union of balls* `minUnionCard`/`minUnionCardDist` instead of a single ball)
       and `#corollary 14#`; they need the appendix's counting of unions of balls
       (`#theorem 17#`–`#theorem 19#`, `#lemma 14#`), which is also the next thing to
@@ -377,7 +378,7 @@ in the same commit that does the work.
       `#₁` for six of them, `#₂` for `000`/`111`) and the pairwise intersection
       replaced by `card_ball_inter_dist_three`.  These unlock
       `#theorem 15#`/`#theorem 16#`/`#corollary 14#`.
-- [ ] 3.13 (part 4, next). `#theorem 19#` (`card_ball_union_dist_three`): two balls at
+- [x] 3.13 (part 4, **done** 2026-10-01). `#theorem 19#` (`card_ball_union_dist_three`): two balls at
       distance `3`, `t ≥ 2` (the hypothesis is the paper's own, so `t − 2` is
       exact).  The paper computes the *intersection* first: with three special
       coordinates its table gives `6#₁ + 2#₂`, where `#₁ = Σ_{i<t−1}C(n−3,i)` covers

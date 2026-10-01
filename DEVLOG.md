@@ -1362,3 +1362,54 @@ paper's `A ∪ B ∪ C`.
 `eedded1`.  `card_ball_union_three` was added to `scripts/headline_theorems.txt`
 and `FCC/AxiomCheck.lean`.  Next: `#theorem 19#` (two balls at distance three,
 `t ≥ 2`), the last of the four appendix counts.
+
+## 2026-10-01 — appendix: `#theorem 19#` proved; the four appendix counts are done
+
+`#theorem 19#`: for two binary words at distance three and `t ≥ 2`,
+
+```text
+|B(u₁,t) ∪ B(u₂,t)| = 2 Σ_{i≤t} C(n,i) − 8 Σ_{i≤t−2} C(n−3,i) − 6 C(n−3,t−2).
+```
+
+Same two steps as `#theorem 18#`, one dimension up.
+
+1. **intersection.**  `mem_ball_inter_iff_dist_three`: with `T = {c₁,c₂,c₃}` the
+   three differing coordinates, `S = D(x,u) \ T` and `k = |D(x,u) ∩ T|`,
+   `d(x,u) = |S| + k` and `d(x,v) = |S| + (3 − k)` (at each coordinate of `T`
+   exactly one of the two distances gains `1`), so both balls contain `x` iff
+   `|S| + max k (3 − k) ≤ t` — the paper's table, `k ∈ {0,3}` costing `3` and
+   `k ∈ {1,2}` costing `2`.  Over `F₂` the disagreement set determines the word, so
+   `card_allowed_triple` counts admissible sets by splitting on `D ∩ T`:
+   `∅` and `T` each contribute one `card_filter_inter_eq_card` fibre of cost `3`,
+   and the six remaining patterns (indexed by
+   `T.powerset.filter (· ≠ ∅ ∧ · ≠ T)`, whose card is `2^3 − 2 = 6` via two
+   `card_erase_of_mem`s) contribute six fibres of cost `2`.  Packaged as
+   `card_ball_inter_dist_three` = `2Σ_{i<t−2}C(n−3,i) + 6Σ_{i<t−1}C(n−3,i)`, the
+   paper's `2#₂ + 6#₁`.
+2. **union.**  `Finset.card_union_add_card_inter` with `card_ball` for both balls
+   (each `Σ_{i<t+1}C(n,i)` over `F₂`) and
+   `Σ_{i<t−1}C(n−3,i) = Σ_{i<t−2}C(n−3,i) + C(n−3,t−2)` (`Finset.sum_range_succ`,
+   `2 ≤ t` is the paper's hypothesis) so that `omega` recovers the printed
+   `−8Σ − 6C` from the `+6Σ` of the intersection.
+
+**Statement check.**  The printed statement already carries `t ≥ 2` in the paper,
+so every `t − 2`, `t − 3` is exact in `ℕ` and no hypothesis had to be added (unlike
+`#theorem 18#`, `ISSUES.md` §22).  The paper's proof was re-read before starting;
+its table is exactly the `max k (3−k)` dichotomy used here.
+
+**Lean notes.**  Two `rw`-matching lessons again: `card_filter_diffSet` needs its
+predicate passed explicitly (higher-order unification is not attempted by `rw`),
+and a hypothesis whose type mentions a `set`-introduced local definition `T` is not
+matched by the literal `{c₁,c₂,c₃}` — the counting lemma therefore takes the
+cardinality hypothesis `#({c₁,c₂,c₃}) = 3` (which is what the paper uses) instead of
+three pairwise-distinctness hypotheses, so no distinctness plumbing is needed.
+Also: `simp` on `j ∈ diffSet x u` inside a `rw`-heavy context can unfold the
+`Finset` all the way to `List` operations; `simpa [diffSet] using h` plus
+`Finset.mem_filter.mpr` is the robust form.
+
+**Verification.**  Standalone `lake build` green (no lint warnings), then
+(separately) `consistency_check.ps1 -Strict` green (14 `sorry`) and
+`axioms_check.ps1` green (48 audited results); commit `49abd31`.
+`card_ball_union_dist_three` was added to `scripts/headline_theorems.txt` and
+`FCC/AxiomCheck.lean`.  **The appendix is now complete**, which unblocks §VIII's
+union-ball bounds `#theorem 15#`/`#theorem 16#`/`#corollary 14#` (TODO 3.12 part 2).

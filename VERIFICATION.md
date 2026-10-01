@@ -245,17 +245,17 @@ redundancy `r_s` and has since been reworked and proved (`ISSUES.md` §13(d)).
 
 ## Phase 3.13 — the appendix ball-union counts (2026-10-01)
 
-`#theorem 17#` (`card_ball_union_dist_one`), `#lemma 14#`
-(`card_ball_inter_dist_two`) and `#theorem 18#` (`card_ball_union_three`) are
-proved; `#theorem 19#` remains stated with `sorry`.
+All four appendix counts are proved: `#theorem 17#` (`card_ball_union_dist_one`),
+`#lemma 14#` (`card_ball_inter_dist_two`), `#theorem 18#`
+(`card_ball_union_three`) and `#theorem 19#` (`card_ball_union_dist_three`).
 
 Verified:
 
 | Check | Result |
 | --- | --- |
 | `lake build` | green (1818 jobs; 16 `sorry` warnings, all in phases 3.11–3.13) |
-| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 15 `sorry`) |
-| `scripts/axioms_check.ps1` | green — 47 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 14 `sorry`) |
+| `scripts/axioms_check.ps1` | green — 48 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
 
 `#lemma 14#` is the paper's Appendix Lemma 14: over `F₂`, for `d(u₁,u₂) = 2`,
 `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)`.  Statement re-read against the PDF
@@ -308,6 +308,27 @@ other), `zmod2_eq_add_one_of_ne`, `zmod2_add_one_ne`,
   (`Nat.choose_succ_succ`) and `Σ_{i<t}C(n−2,i) = Σ_{i<t−1}C(n−2,i) + C(n−2,t−1)`.
 * `c₁ ≠ c₂` is derived from `d(u₂,u₃) = 2`: over `F₂` two words that differ from
   `u₁` in the *same* single coordinate coincide.
+
+`#theorem 19#` (two balls at distance three, `t ≥ 2` — the paper's own threshold, so
+no `t − 2` truncation can arise) is proved the same way, with three special
+coordinates:
+
+* **intersection** (`card_ball_inter_dist_three`): `2Σ_{i<t−2}C(n−3,i) +
+  6Σ_{i<t−1}C(n−3,i)`, the paper's `2#₂ + 6#₁`.  The characterisation
+  `mem_ball_inter_iff_dist_three` gives `d(x,u) = |S| + k` and
+  `d(x,v) = |S| + (3−k)`, where `k = |D(x,u) ∩ T|`, so membership in both balls is
+  `|S| + max k (3−k) ≤ t`; `card_allowed_triple` counts the admissible sets by
+  splitting `D ∩ T` into `∅`, `T` (cost `3`) and the six other patterns (cost `2`),
+  each half being `card_filter_inter_eq_card` fibres with the index cardinalities
+  `1`, `6` and `1` (the middle one via `T.powerset.filter (· ≠ ∅ ∧ · ≠ T)` having
+  `8 − 2` elements).
+* **union**: `Finset.card_union_add_card_inter` with `card_ball` on both balls and
+  `Σ_{i<t−1}C(n−3,i) = Σ_{i<t−2}C(n−3,i) + C(n−3,t−2)` to recover the printed
+  `−8Σ − 6C`.
+
+With `#theorem 18#` this means the whole appendix (and hence the §VIII bounds
+`#theorem 15#`/`#theorem 16#`/`#corollary 14#`) is now unblocked: the appendix
+counting layer is complete.
 
 ## Not formalized (and why)
 
