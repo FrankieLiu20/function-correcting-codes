@@ -511,6 +511,65 @@ Still open in §VIII-A: `#lemma 13#` (`plotkin_bound`), which needs the *sharp*
 constant `a⌈M/q⌉(M−⌈M/q⌉) + (q−a)⌊M/q⌋(M−⌊M/q⌋)` (`a = M mod q`) rather than the
 Cauchy–Schwarz estimate, and `#lemma 11#` (quoted from [1], external).
 
+## Phase 3.11 (part 2) — `#lemma 13#`, the sharp Plotkin bound (2026-10-02)
+
+`#lemma 13#` (`plotkin_bound`) is proved: over `F_q` (a finite field, `q = |F|`), for any
+distance matrix `D ∈ ℕ^{M×M}` and `a = M mod q`,
+
+```text
+N(D) ≥ 2q / (M²(q−1) − a(q−a)) · Σ_{1≤i<j≤M} [D]_{i,j}.
+```
+
+Statement re-read against the PDF (the paper's `a = M mod q`, the sum over `i < j`, and
+the factor `2`: the `2` comes from `Σ_{i≠j} = 2·Σ_{i<j}`); no `ISSUES.md` entry.
+
+The proof is the paper's double count, with the *sharp* balanced-distribution constant
+in place of the Cauchy–Schwarz estimate used by `#theorem 14#`:
+
+* **the sharp per-coordinate estimate.**  `card_mul_sum_sq_ge` (`FCC/Balls.lean`): for
+  counts `n_ε` with total `M`, `q·Σ n_ε² ≥ M² + a(q−a)` — the sum of squares is minimal
+  exactly at the balanced distribution (`a` symbols `⌈M/q⌉` times, the rest `⌊M/q⌋`
+  times).  The proof is three lines of integer arithmetic: with `t = M/q` the pointwise
+  inequality `(n−t)(n−t−1) ≥ 0` (integrality!) gives `n(2t+1) ≤ n² + t(t+1)`, summing
+  over the alphabet and multiplying by `q` turns the left side into `M² + a(q−a)`.
+  Combining it with the counting identity `#(differing pairs) = M² − Σn_ε²` gives the
+  sharp per-coordinate bound `card_ne_pairs_mul_le_sharp`:
+  `q·#{(i,j) : symbols differ} ≤ M²(q−1) − a(q−a)`.
+* **the double count.**  `total_pair_eq_sum_coord` (the per-coordinate count, for an
+  *arbitrary* index type — a `D`-code is indexed by `Fin M`, not by `Word F k`) and the
+  factor `2` of the paper's constant via `two_mul_sum_lt_eq_sum_filter_ne`
+  (`2·Σ_{i<j} = Σ_{i≠j}`: the pairs `i ≠ j` split into `i < j` and `j < i` by
+  `Finset.filter_or`, and swapping the coordinates is a bijection of the second half
+  onto the first that `hammingDist`'s symmetry does not see), with
+  `sum_erase_eq_sum_filter_ne` moving between the row-sum and product-filter forms.
+  Together: `plotkin_total_le_sharp` — for any family of words,
+  `q·2·Σ_{i<j} d(p_i,p_j) ≤ n·(M²(q−1) − a(q−a))`; over `ℚ`,
+  `plotkin_total_le_rat` (with the non-truncation hypothesis on the `ℕ` subtraction).
+* **the `ℚ`/`sInf` finish** in `FCC/Paper.lean`: every `D`-code of length `r` satisfies
+  `2q·Σ_{i<j}[D]_{i,j} ≤ r·A` with `A = M²(q−1) − a(q−a)`; if `A ≤ 0` the statement is
+  trivial (the paper's constant is negative and the left side is `≤ 0`), otherwise the
+  bound gives `2q·Σ/A ≤ r` for every valid `r`, and since the set of valid lengths is
+  non-empty (`exists_isDCode_const` applied to the constant matrix `Σ[D]`, which needs
+  `2 ≤ q`), the `Nat.sInf_def`/`Nat.find_spec` idiom turns it into the bound on `N(D)`.
+
+Two supporting lemmas were added for the cast bookkeeping (`plotkin_const_cast`, the
+paper's constant as the cast of the `ℕ` expression) and the *out-of-tree scratch file*
+technique was introduced (see `DEVLOG.md`, 2026-10-02): the `ℚ` casts of the constant
+were iterated in a scratch file in the visualizations folder with `lake env lean`, so
+that failures could not redden the deliverable.
+
+Verified (separately, after the full build):
+
+| Check | Result |
+| --- | --- |
+| `lake build` | green (1876 jobs; 2 `sorry` warnings — both the external `#lemma 11#` rows) |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 2 `sorry`) |
+| `scripts/axioms_check.ps1` | green — 60 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+
+With that, every numbered result of the paper that is not an externally quoted row is
+proved; what remains are the two `#lemma 11#` rows (quoted from [1]) and the final
+assembly (examples, `TODO.md` phase 1b, tagged release).
+
 ## Not formalized (and why)
 
 Nothing yet; this section is filled in as results are classified.

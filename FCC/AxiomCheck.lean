@@ -82,6 +82,8 @@ namespace FCC
 #print axioms card_ball_union_three
 #print axioms card_ball_union_dist_three
 #print axioms plotkin_bound_fcc
+-- §VIII (the generalized Plotkin bound of Lemma 13):
+#print axioms plotkin_bound
 -- §VII-A (coset codes of a linear FCC):
 #print axioms kernelSubcode_finrank
 #print axioms cosetDist_eq

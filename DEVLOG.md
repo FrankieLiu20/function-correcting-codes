@@ -1767,3 +1767,61 @@ manipulations were isolated into their own `have` (`Nat.cast_mul`,
 case `q = 0`, where `Fintype.card ι = 0` forces `M = 0`), and the `conv_lhs => rw`
 form was used for the `M = q·t + a` rewrite.  `smul_eq_mul` does not apply to the
 `ℕ`-scalar `Fintype.card ι • _` (it is `nsmul`), `nsmul_eq_mul` does.
+
+## 2026-10-02 — §VIII: `#lemma 13#` proved (`plotkin_bound`), the sharp Plotkin bound
+
+`sorry` 3 → **2** (only the two externally quoted `#lemma 11#` rows are left),
+headline 59 → **60**.  Every numbered result of the paper that is not an external quote
+is now proved.
+
+The proof is the paper's double count with the *sharp* balanced-distribution constant,
+and it needed three pieces beyond `#theorem 14#`'s Cauchy–Schwarz estimate:
+
+1. **`card_mul_sum_sq_ge`** (`FCC/Balls.lean`) — for counts `n_ε` with total `M`,
+   `q·Σ n_ε² ≥ M² + a(q−a)` (`a = M % q`): the sum of squares is minimal at the
+   *balanced* distribution.  The surprising part is how short the proof is: with
+   `t = M / q` the pointwise inequality `(n−t)(n−t−1) ≥ 0` (true because `n − t` is an
+   *integer*), summed over the alphabet, gives `(2t+1)M ≤ Σn² + q·t(t+1)`; multiplying
+   by `q` and substituting `M = qt + a` turns the left side into `M² + a(q−a)`.  No
+   induction, no exchange argument, no Cauchy–Schwarz.
+2. **the sharp per-coordinate count** (`card_ne_pairs_mul_le_sharp`) — combine (1) with
+   the counting identity `#(differing pairs) = M² − Σn_ε²`.
+3. **the double count with the factor `2`** — `total_pair_eq_sum_coord` gives the
+   per-coordinate count for an *arbitrary* index type (`D`-codes are indexed by `Fin M`,
+   not by `Word F k`), and the paper's `2` is `Σ_{i≠j} = 2·Σ_{i<j}`
+   (`two_mul_sum_lt_eq_sum_filter_ne`, `sum_erase_eq_sum_filter_ne`).
+   Together, `plotkin_total_le_sharp`/`plotkin_total_le_rat`:
+   `q·2·Σ_{i<j} d(p_i,p_j) ≤ n·(M²(q−1) − a(q−a))`, over `ℕ` and then over `ℚ`.
+4. **the `ℚ`/`sInf` finish** in `FCC/Paper.lean`: for every `D`-code of length `r`,
+   `2q·Σ_{i<j}[D] ≤ r·A` with `A = M²(q−1) − a(q−a)`; the case `A ≤ 0` is trivial (the
+   constant is negative), and otherwise `A > 0` gives `2 ≤ q` (so
+   `exists_isDCode_const` supplies a witness, `Nat.sInf_def` + `Nat.find_spec` supply the
+   `sInf` step).
+
+**The process lesson (worth more than the lemma).**  The `ℚ` cast bookkeeping defeated
+two in-repo attempts — each ending with a `git checkout` rollback, because a failed
+`proof` leaves the deliverable red.  The third attempt moved the *experiment* out of the
+repository (`...visualizations.../scratch13b.lean`, compiled with `lake env lean` from
+the repo root) and only the finished lemma was moved in.  From then on there were no
+rollbacks: the scratch file absorbed all the failed `rw`s, `omega`s and `nlinarith`s.
+**Use the scratch file for every fiddly cast/bookkeeping step from now on.**
+
+The cast pitfalls themselves, for the record: (i) the paper's constant is written
+*pushed* (`(M:ℚ)^2 * ((q:ℚ)−1) − …`) while the `ℕ` side is `↑(M²(q−1) − a(q−a))`; the two
+must be bridged by an explicit `have` using `Nat.cast_mul`/`Nat.cast_pow`/`Nat.cast_sub`
+plus `push_cast`, because `nlinarith` sees unpushed casts as unrelated atoms;
+(ii) `push_cast at h` leaves `↑(X − Y)` alone when the side condition is not in the
+context — rewrite it explicitly, then `push_cast` again;
+(iii) `Nat.sub_add_le` does not exist in this pin and `(X−Y)+Y ≤ X` is false without
+`Y ≤ X`, so the non-truncation hypothesis has to be carried explicitly;
+(iv) `plotkin_total_le_rat`'s hypotheses mention `Fintype.card ι`, so at `ι = Fin M` they
+need `simpa [Fintype.card_fin]`, and the paper's constant must be folded back with
+`simpa [hAq, Fintype.card_fin]` — otherwise the two sides differ by `Fintype.card (Fin M)`
+vs `M`.
+
+**Verification.**  Full `lake build` green (1876 jobs, 2 `sorry` warnings), then
+`consistency_check.ps1 -Strict` green (78 markers, 73 rows stated, 2 `sorry`) and
+`axioms_check.ps1` green (60 audited results; `plotkin_bound` depends only on `propext`,
+`Classical.choice`, `Quot.sound`).  `plotkin_bound` was added to
+`scripts/headline_theorems.txt` and `FCC/AxiomCheck.lean`; `PLAN.md`, `TODO.md` and
+`VERIFICATION.md` updated.

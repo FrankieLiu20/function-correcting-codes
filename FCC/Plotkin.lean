@@ -605,4 +605,22 @@ theorem plotkin_total_le_rat {ι : Type*} [Fintype ι] [DecidableEq ι] [LinearO
   norm_num at h'
   nlinarith [h']
 
+/-- `(internal, §VIII-A — used by `#lemma 13#`)` — the paper's constant `M²(q−1) − a(q−a)`
+as a `ℚ` expression, rewritten as the cast of the corresponding `ℕ` expression.  The two
+inner subtractions `q−1` and `q−a` never truncate (`1 ≤ q`, `a = M % q ≤ q`), so this is
+an identity, unlike the *outer* subtraction, which is why `#lemma 13#`'s remaining case
+`¬ a(q−a) ≤ M²(q−1)` has to be treated separately. -/
+theorem plotkin_const_cast {F : Type*} [Zero F] [Fintype F] [DecidableEq F] (M : ℕ) :
+    ((M : ℚ) ^ 2 * ((Fintype.card F : ℚ) - 1) -
+        ((M % Fintype.card F : ℕ) : ℚ) *
+          ((Fintype.card F : ℚ) - ((M % Fintype.card F : ℕ) : ℚ)))
+      = (((M ^ 2 * (Fintype.card F - 1) : ℕ) : ℚ) -
+          ((((M % Fintype.card F) * (Fintype.card F - M % Fintype.card F) : ℕ) : ℚ))) := by
+  have hq1 : 1 ≤ Fintype.card F := by
+    have h := Fintype.card_pos_iff.mpr ⟨(0 : F)⟩
+    omega
+  have hale : M % Fintype.card F ≤ Fintype.card F :=
+    le_of_lt (Nat.mod_lt _ (by omega))
+  simp only [Nat.cast_mul, Nat.cast_pow, Nat.cast_sub hq1, Nat.cast_sub hale, Nat.cast_one]
+
 end FCC

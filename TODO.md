@@ -339,7 +339,7 @@ in the same commit that does the work.
       `C`, `D` as *injective* linear maps (the Lean statements currently take them
       as plain functions and state linearity/distances only — the gap is recorded
       in `VERIFICATION.md` §"Statement-level caveats").
-- [ ] 3.11 (in progress). `#lemma 13#` (`plotkin_bound`) — `#theorem 14#`
+- [x] 3.11 (**done** 2026-10-02). `#lemma 13#` (`plotkin_bound`) — `#theorem 14#`
       (`plotkin_bound_fcc`) is **done** (2026-10-01, new module
       `FCC/Plotkin.lean`); `#lemma 11#` (quoted from [1]) stays a hypothesis like
       the other external rows.

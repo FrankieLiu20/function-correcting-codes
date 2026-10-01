@@ -85,6 +85,8 @@ card_ball_union_three
 card_ball_union_dist_three
 # §VIII-A (the generalized Plotkin bound of Theorem 14):
 plotkin_bound_fcc
+# §VIII (the Plotkin bound for irregular distance codes, Lemma 13):
+plotkin_bound
 # §VII-A (the coset-distance bridge and Lemma 9):
 kernelSubcode_finrank
 cosetDist_eq

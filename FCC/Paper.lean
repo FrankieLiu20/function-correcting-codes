@@ -3564,7 +3564,119 @@ theorem plotkin_bound {M : ℕ} (D : Fin M → Fin M → ℕ) :
           ((M % Fintype.card F : ℕ) : ℚ) * ((Fintype.card F : ℚ) - ((M % Fintype.card F : ℕ) : ℚ))) *
         (∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), (D p.1 p.2 : ℚ))
       ≤ (N (F := F) (ι := Fin M) D : ℚ) := by
-  sorry
+  classical
+  set S : ℕ := ∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), D p.1 p.2
+    with hS
+  have hSq : (∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), (D p.1 p.2 : ℚ))
+      = (S : ℚ) := by
+    rw [hS]
+    push_cast
+    rfl
+  rw [hSq]
+  set Aq : ℚ := (M : ℚ) ^ 2 * ((Fintype.card F : ℚ) - 1) -
+      ((M % Fintype.card F : ℕ) : ℚ) *
+        ((Fintype.card F : ℚ) - ((M % Fintype.card F : ℕ) : ℚ)) with hAq
+  by_cases hpos : 0 < Aq
+  · rw [hAq] at hpos
+    -- the non-truncation hypothesis, from `Aq > 0`
+    have hXY : ((M % Fintype.card F) * (Fintype.card F - M % Fintype.card F)) <
+        M ^ 2 * (Fintype.card F - 1) := by
+      have hcast := plotkin_const_cast (F := F) M
+      rw [hcast] at hpos
+      exact_mod_cast (show (((M % Fintype.card F) *
+            (Fintype.card F - M % Fintype.card F) : ℕ) : ℚ) <
+          ((M ^ 2 * (Fintype.card F - 1) : ℕ) : ℚ) by linarith)
+    have hle : (M % Fintype.card F) * (Fintype.card F - M % Fintype.card F)
+        ≤ M ^ 2 * (Fintype.card F - 1) := le_of_lt hXY
+    have hq2 : 2 ≤ Fintype.card F := by
+      have hX : 0 < M ^ 2 * (Fintype.card F - 1) := lt_of_le_of_lt (Nat.zero_le _) hXY
+      by_contra hq
+      have h1 : 1 ≤ Fintype.card F := by
+        have h := Fintype.card_pos_iff.mpr ⟨(0 : F)⟩
+        omega
+      have hq1' : Fintype.card F = 1 := by omega
+      simp [hq1'] at hX
+    have hMpos : 0 < M := by
+      have hX : 0 < M ^ 2 * (Fintype.card F - 1) := lt_of_le_of_lt (Nat.zero_le _) hXY
+      by_contra hM
+      simp only [Nat.not_lt, Nat.le_zero] at hM
+      simp [hM] at hX
+    -- the set of valid lengths is non-empty
+    have hne : ∃ n : ℕ, IsDCode (F := F) (ι := Fin M) D n := by
+      obtain ⟨x, y, hxy⟩ := Fintype.exists_pair_of_one_lt_card (by omega : 1 < Fintype.card F)
+      obtain ⟨r, hr⟩ := exists_isDCode_const (F := F) (m := M)
+        (D₀ := ∑ i : Fin M, ∑ j : Fin M, D i j) ⟨x, y, hxy⟩
+      obtain ⟨p, hp⟩ := hr
+      refine ⟨r, p, fun i j hij => le_trans ?_ (hp i j hij)⟩
+      have h1 : D i j ≤ ∑ j : Fin M, D i j :=
+        Finset.single_le_sum (fun _ _ => Nat.zero_le _) (Finset.mem_univ j)
+      have h2 : (∑ j : Fin M, D i j) ≤ ∑ i : Fin M, ∑ j : Fin M, D i j :=
+        Finset.single_le_sum (s := Finset.univ) (f := fun i : Fin M => ∑ j : Fin M, D i j)
+          (fun _ _ => Nat.zero_le _) (Finset.mem_univ i)
+      exact le_trans h1 h2
+    have hN : N (F := F) (ι := Fin M) D = Nat.find hne := by
+      rw [N]
+      exact Nat.sInf_def hne
+    rw [hN]
+    -- every valid length satisfies the bound
+    have hkey : ∀ r : ℕ, IsDCode (F := F) (ι := Fin M) D r →
+        (2 * (Fintype.card F : ℚ)) * (S : ℚ) ≤ (r : ℚ) * Aq := by
+      intro r hr
+      obtain ⟨p, hp⟩ := hr
+      have hSle' : S ≤ ∑ q ∈ (Finset.univ : Finset (Fin M × Fin M)).filter
+          (fun q => q.1 < q.2), hammingDist (p q.1) (p q.2) := by
+        rw [hS]
+        refine Finset.sum_le_sum fun q hq => ?_
+        exact hp q.1 q.2 (ne_of_lt (Finset.mem_filter.mp hq).2)
+      have hSle : (S : ℚ) ≤ (∑ q ∈ (Finset.univ : Finset (Fin M × Fin M)).filter
+          (fun q => q.1 < q.2), (hammingDist (p q.1) (p q.2) : ℚ)) := by
+        have hcast : (∑ q ∈ (Finset.univ : Finset (Fin M × Fin M)).filter
+              (fun q => q.1 < q.2), (hammingDist (p q.1) (p q.2) : ℚ))
+            = ((∑ q ∈ (Finset.univ : Finset (Fin M × Fin M)).filter
+              (fun q => q.1 < q.2), hammingDist (p q.1) (p q.2) : ℕ) : ℚ) := by
+          push_cast
+          rfl
+        rw [hcast]
+        exact_mod_cast hSle'
+      have h1 : (2 * (Fintype.card F : ℚ)) *
+            (∑ q ∈ (Finset.univ : Finset (Fin M × Fin M)).filter
+              (fun q => q.1 < q.2), (hammingDist (p q.1) (p q.2) : ℚ))
+          ≤ (r : ℚ) * Aq := by
+        have h := plotkin_total_le_rat (ι := Fin M) (n := r) p
+          (by simpa [Fintype.card_fin] using hle)
+        simpa [hAq, Fintype.card_fin] using h
+      have hq0 : (0 : ℚ) ≤ 2 * (Fintype.card F : ℚ) := by positivity
+      have h2 : (2 * (Fintype.card F : ℚ)) * (S : ℚ)
+          ≤ (2 * (Fintype.card F : ℚ)) * (∑ q ∈ (Finset.univ : Finset (Fin M × Fin M)).filter
+              (fun q => q.1 < q.2), (hammingDist (p q.1) (p q.2) : ℚ)) :=
+        mul_le_mul_of_nonneg_left hSle hq0
+      exact le_trans h2 h1
+    have h3 : (2 * (Fintype.card F : ℚ)) * (S : ℚ) / Aq
+        ≤ ((Nat.find hne : ℕ) : ℚ) := by
+      have h2 := hkey (Nat.find hne) (Nat.find_spec hne)
+      have hsub : (2 * (Fintype.card F : ℚ)) * (S : ℚ) -
+          ((Nat.find hne : ℕ) : ℚ) * Aq ≤ 0 := by linarith [h2]
+      have h4 := div_nonpos_of_nonpos_of_nonneg hsub (le_of_lt hpos)
+      rw [sub_div, mul_div_cancel_right₀ _ (ne_of_gt hpos)] at h4
+      linarith [h4]
+    have hrw : (2 * (Fintype.card F : ℚ)) / Aq * (S : ℚ)
+        = (2 * (Fintype.card F : ℚ)) * (S : ℚ) / Aq := by ring
+    rw [hrw]
+    exact h3
+  · rw [hAq] at hpos
+    have h1 : (2 * (Fintype.card F : ℚ)) /
+        ((M : ℚ) ^ 2 * ((Fintype.card F : ℚ) - 1) -
+          ((M % Fintype.card F : ℕ) : ℚ) *
+            ((Fintype.card F : ℚ) - ((M % Fintype.card F : ℕ) : ℚ))) ≤ 0 :=
+      div_nonpos_of_nonneg_of_nonpos (by positivity) (le_of_not_gt hpos)
+    have h2 : (0 : ℚ) ≤ (S : ℚ) := Nat.cast_nonneg _
+    have h3 : (2 * (Fintype.card F : ℚ)) /
+        ((M : ℚ) ^ 2 * ((Fintype.card F : ℚ) - 1) -
+          ((M % Fintype.card F : ℕ) : ℚ) *
+            ((Fintype.card F : ℚ) - ((M % Fintype.card F : ℕ) : ℚ))) * (S : ℚ) ≤ 0 :=
+      mul_nonpos_of_nonpos_of_nonneg h1 h2
+    have h4 : (0 : ℚ) ≤ (N (F := F) (ι := Fin M) D : ℚ) := Nat.cast_nonneg _
+    linarith
 
 /-- `#theorem 14#` (§VIII-A) — "for an `(f : d_d, d_f)`-FCC over `F_q`, where
 `f : F_q^k → Im(f)`,
