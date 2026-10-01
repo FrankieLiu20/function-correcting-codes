@@ -589,6 +589,25 @@ in the same commit that does the work.
 
 ## `#lemma 13#` — the final `ℚ`/`sInf` step: what did *not* work (2026-10-02)
 
+**Scratch workspace (outside the repo, so failures cannot redden the build):**
+`C:\Users\lenovo\.codex\visualizations\2026\10\01\01a0f759-fefa-7482-b569-5892c3ba79e6\scratch13b.lean`
+(checked with `lake env lean <path>` from the repo root).  It currently contains a
+*verified* `plotkin_total_le_rat`-style lemma and a nearly complete
+`plotkin_bound_scratch`; the remaining compile errors there are mechanical
+(`Finset.single_le_sum` needs its summand named for the outer sum; `rw [N,
+Nat.sInf_def hne]` must be an `exact`/`have` because `IsDCode` is a `def` and does not
+match the unfolded pattern syntactically; `ring` after `simp only` may have no goals
+left; `plotkin_const_cast` needs `omit [DecidableEq F] in`).  `plotkin_total_le_rat`
+itself is already in `FCC/Plotkin.lean` (commit `fe9f221`).
+
+Status of the scratch file at the end of 2026-10-02: the two `Finset.single_le_sum`
+steps and the `Nat.sInf_def` step are fixed; still failing: (i) the
+`hXY : a(q−a) < M²(q−1)` derivation (cast the ℚ inequality `Aq > 0` down to ℕ —
+`plotkin_const_cast` + `exact_mod_cast` needs the two sides written in the *same*
+cast shape, cf. the pitfall above), and (ii) `plotkin_total_le_rat`'s `hle` is stated
+with `Fintype.card ι`, so it must be fed with `simpa [Fintype.card_fin] using hle`
+when `ι = Fin M`.
+
 Two attempts at the `ℚ` bridging lemma (`plotkin_total_le_rat`, to be used by
 `plotkin_bound`) were rolled back; the repo is green at `b7434f4`.  Learned:
 
