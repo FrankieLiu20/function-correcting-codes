@@ -74,5 +74,6 @@ namespace FCC
 #print axioms hamming_bound_fcc_sphere
 #print axioms card_ball_union_dist_one
 #print axioms card_ball_inter_dist_two
+#print axioms card_ball_union_three
 
 end FCC

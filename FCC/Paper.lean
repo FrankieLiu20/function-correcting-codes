@@ -3682,7 +3682,102 @@ theorem card_ball_union_three {n t : ℕ} (u₁ u₂ u₃ : Word (ZMod 2) n)
       3 * (∑ i ∈ Finset.range (t + 1), n.choose i) -
         6 * (∑ i ∈ Finset.range t, (n - 1).choose i) + (n - 2).choose (t - 1) +
         4 * (∑ i ∈ Finset.range (t - 1), (n - 2).choose i) := by
-  sorry
+  classical
+  obtain ⟨c₁, hc₁⟩ := exists_diffSet_eq_singleton h12
+  obtain ⟨c₂, hc₂⟩ := exists_diffSet_eq_singleton h13
+  -- `c₁ ≠ c₂`: otherwise `u₂` and `u₃` both differ from `u₁` in the same coordinate,
+  -- and in `F₂` there is only one value to differ to, so they would be equal.
+  have hne : c₁ ≠ c₂ := by
+    rintro rfl
+    have hout₁ : ∀ j : Fin n, j ≠ c₁ → u₂ j = u₁ j := by
+      intro j hj
+      by_contra hne'
+      have hmem : u₁ j ≠ u₂ j := fun hh => hne' hh.symm
+      have : j ∈ diffSet u₁ u₂ := by simpa [diffSet] using hmem
+      rw [hc₁] at this
+      exact hj (Finset.mem_singleton.mp this)
+    have hout₂ : ∀ j : Fin n, j ≠ c₁ → u₃ j = u₁ j := by
+      intro j hj
+      by_contra hne'
+      have hmem : u₁ j ≠ u₃ j := fun hh => hne' hh.symm
+      have : j ∈ diffSet u₁ u₃ := by simpa [diffSet] using hmem
+      rw [hc₂] at this
+      exact hj (Finset.mem_singleton.mp this)
+    have hempty : diffSet u₂ u₃ = ∅ := by
+      rw [Finset.eq_empty_iff_forall_notMem]
+      intro j hj
+      have hjn : u₂ j ≠ u₃ j := by simpa [diffSet] using hj
+      by_cases hjc : j = c₁
+      · have hmem₂ : u₁ j ≠ u₂ j := by
+          rw [hjc]
+          have : c₁ ∈ diffSet u₁ u₂ := by rw [hc₁]; simp
+          simpa [diffSet] using this
+        have hmem₃ : u₁ j ≠ u₃ j := by
+          rw [hjc]
+          have : c₁ ∈ diffSet u₁ u₃ := by rw [hc₂]; simp
+          simpa [diffSet] using this
+        have h2 : u₂ j ≠ u₁ j := fun hh => hmem₂ hh.symm
+        have h3 : u₃ j ≠ u₁ j := fun hh => hmem₃ hh.symm
+        rw [zmod2_eq_add_one_of_ne h2, zmod2_eq_add_one_of_ne h3] at hjn
+        exact hjn rfl
+      · rw [hout₁ j hjc, hout₂ j hjc] at hjn
+        exact hjn rfl
+    have hz : hammingDist u₂ u₃ = 0 := by
+      rw [hammingDist_eq_card_diffSet, hempty, Finset.card_empty]
+    omega
+  have hn1 : 1 ≤ n := by
+    have hc : (diffSet u₁ u₂).card = 1 := by rw [← hammingDist_eq_card_diffSet]; exact h12
+    have hle : (diffSet u₁ u₂).card ≤ n := by
+      have := Finset.card_le_card (Finset.subset_univ (diffSet u₁ u₂))
+      rwa [Finset.card_univ, Fintype.card_fin] at this
+    omega
+  have hn2 : 2 ≤ n := by
+    have hc : (diffSet u₂ u₃).card = 2 := by rw [← hammingDist_eq_card_diffSet]; exact h23
+    have hle : (diffSet u₂ u₃).card ≤ n := by
+      have := Finset.card_le_card (Finset.subset_univ (diffSet u₂ u₃))
+      rwa [Finset.card_univ, Fintype.card_fin] at this
+    omega
+  -- the four cardinalities of the inclusion–exclusion (all with `q = 2`)
+  have hball : ∀ z : Word (ZMod 2) n, (ball z t).card = ∑ i ∈ Finset.range (t + 1), n.choose i := by
+    intro z
+    rw [card_ball, ZMod.card]
+    exact Finset.sum_congr rfl fun i _ => by simp
+  have hpair₁ : (ball u₁ t ∩ ball u₂ t).card = 2 * (∑ i ∈ Finset.range t, (n - 1).choose i) := by
+    rw [card_ball_inter_dist_one u₁ u₂ t h12, ZMod.card]
+    congr 1
+    exact Finset.sum_congr rfl fun i _ => by simp
+  have hpair₂ : (ball u₁ t ∩ ball u₃ t).card = 2 * (∑ i ∈ Finset.range t, (n - 1).choose i) := by
+    rw [card_ball_inter_dist_one u₁ u₃ t h13, ZMod.card]
+    congr 1
+    exact Finset.sum_congr rfl fun i _ => by simp
+  have hpair₃ : (ball u₂ t ∩ ball u₃ t).card = 2 * (∑ i ∈ Finset.range t, (n - 1).choose i) :=
+    card_ball_inter_dist_two u₂ u₃ h23
+  have htriple : (ball u₁ t ∩ ball u₂ t ∩ ball u₃ t).card
+      = (∑ i ∈ Finset.range t, (n - 2).choose i)
+        + 3 * (∑ i ∈ Finset.range (t - 1), (n - 2).choose i) :=
+    card_ball_inter_three hne hc₁ hc₂
+  -- the paper's inclusion–exclusion, in subtraction-free form
+  have hIE := card_union_three_add (ball u₁ t) (ball u₂ t) (ball u₃ t)
+  rw [hball u₁, hball u₂, hball u₃, hpair₁, hpair₂, hpair₃, htriple] at hIE
+  -- summed Pascal and the binomial identities that turn it into the printed shape
+  have hSsplit : (∑ i ∈ Finset.range (t + 1), (n - 1).choose i)
+      = (∑ i ∈ Finset.range t, (n - 1).choose i) + (n - 1).choose t :=
+    Finset.sum_range_succ (fun i => (n - 1).choose i) t
+  have hTsplit : (∑ i ∈ Finset.range (t + 1), n.choose i)
+      = (∑ i ∈ Finset.range (t + 1), (n - 1).choose i)
+        + (∑ i ∈ Finset.range t, (n - 1).choose i) :=
+    sum_range_choose_succ n t hn1
+  have hPascal : (n - 1).choose t = (n - 2).choose (t - 1) + (n - 2).choose t := by
+    have h := Nat.choose_succ_succ (n - 2) (t - 1)
+    have h1 : (n - 2).succ = n - 1 := by omega
+    have h2 : (t - 1).succ = t := by omega
+    rw [h1, h2] at h
+    exact h
+  have hRsplit : (∑ i ∈ Finset.range t, (n - 2).choose i)
+      = (∑ i ∈ Finset.range (t - 1), (n - 2).choose i) + (n - 2).choose (t - 1) := by
+    have h := Finset.sum_range_succ (fun i => (n - 2).choose i) (t - 1)
+    rwa [show (t - 1) + 1 = t from by omega] at h
+  omega
 
 /-- `#theorem 19#` (Appendix) — over `F₂`: "consider two vectors `u₁, u₂ ∈ F₂^n`
 such that `d(u₁,u₂) = 3`.  Then for `t ≥ 2`,

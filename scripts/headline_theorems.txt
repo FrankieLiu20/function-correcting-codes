@@ -71,3 +71,5 @@ hamming_bound_fcc_sphere
 card_ball_union_dist_one
 # Appendix (two balls at distance two):
 card_ball_inter_dist_two
+# Appendix (three balls at pairwise distances 1, 1, 2):
+card_ball_union_three
