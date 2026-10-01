@@ -558,4 +558,51 @@ theorem plotkin_total_le_sharp {ι : Type*} [Fintype ι] [DecidableEq ι] [Linea
             (Fintype.card F - (Fintype.card ι) % Fintype.card F)) := by
         rw [Finset.sum_const, smul_eq_mul, Finset.card_univ, Fintype.card_fin]
 
+/-- `(internal, §VIII-A — the `ℚ` form of the sharp bound of `#lemma 13#`)` — for any
+family of `n`-letter words `p`, with `M = Fintype.card ι`, `q = Fintype.card F` and
+`a = M % q`,
+
+`2q · Σ_{i<j} d(p_i,p_j) ≤ n · (M²(q−1) − a(q−a))`   (over `ℚ`),
+
+the form of the paper's constant that `plotkin_bound` needs.  The hypothesis `hle` says
+that the `ℕ`-subtraction in `plotkin_total_le_sharp`'s right-hand side does not
+truncate, so that it casts across `Nat.cast_sub` (`#lemma 13#`'s remaining case, where
+`¬ hle`, has a negative constant and a trivial inequality — see `FCC/Paper.lean`). -/
+theorem plotkin_total_le_rat {ι : Type*} [Fintype ι] [DecidableEq ι] [LinearOrder ι]
+    {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {n : ℕ} (p : ι → Word F n)
+    (hle : (Fintype.card ι % Fintype.card F) *
+        (Fintype.card F - Fintype.card ι % Fintype.card F)
+      ≤ (Fintype.card ι) ^ 2 * (Fintype.card F - 1)) :
+    (2 * (Fintype.card F : ℚ)) * (∑ q ∈ (Finset.univ : Finset (ι × ι)).filter
+        (fun q => q.1 < q.2), (hammingDist (p q.1) (p q.2) : ℚ))
+      ≤ (n : ℚ) * ((Fintype.card ι : ℚ) ^ 2 * ((Fintype.card F : ℚ) - 1) -
+          ((Fintype.card ι % Fintype.card F : ℕ) : ℚ) *
+            ((Fintype.card F : ℚ) - ((Fintype.card ι % Fintype.card F : ℕ) : ℚ))) := by
+  have hq1 : 1 ≤ Fintype.card F := by
+    have h := Fintype.card_pos_iff.mpr ⟨(0 : F)⟩
+    omega
+  have hale : Fintype.card ι % Fintype.card F ≤ Fintype.card F :=
+    le_of_lt (Nat.mod_lt _ (by omega))
+  have h := plotkin_total_le_sharp (ι := ι) (n := n) p
+  have h' : ((Fintype.card F * (2 * (∑ q ∈ (Finset.univ : Finset (ι × ι)).filter
+          (fun q => q.1 < q.2), hammingDist (p q.1) (p q.2))) : ℕ) : ℚ)
+      ≤ (n : ℚ) * (((Fintype.card ι) ^ 2 * (Fintype.card F - 1) : ℕ) : ℚ)
+        - (n : ℚ) * ((((Fintype.card ι) % Fintype.card F) *
+            (Fintype.card F - Fintype.card ι % Fintype.card F) : ℕ) : ℚ) := by
+    have hcast : ((n * ((Fintype.card ι) ^ 2 * (Fintype.card F - 1) -
+            (Fintype.card ι) % Fintype.card F *
+              (Fintype.card F - Fintype.card ι % Fintype.card F)) : ℕ) : ℚ)
+        = (n : ℚ) * (((Fintype.card ι) ^ 2 * (Fintype.card F - 1) : ℕ) : ℚ)
+          - (n : ℚ) * ((((Fintype.card ι) % Fintype.card F) *
+              (Fintype.card F - Fintype.card ι % Fintype.card F) : ℕ) : ℚ) := by
+      rw [Nat.cast_mul, Nat.cast_sub hle]
+      push_cast
+      ring
+    rw [← hcast]
+    exact_mod_cast h
+  push_cast at h'
+  rw [Nat.cast_sub hq1, Nat.cast_sub hale] at h'
+  norm_num at h'
+  nlinarith [h']
+
 end FCC
