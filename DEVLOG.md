@@ -1501,3 +1501,19 @@ stray `Scratch.lean` at the package root before this — the guard works), then
 (53 audited results).  Commit `389f348`.  Remaining `sorry`s:
 `#lemma 11#` (two, external), `#lemma 13#`, `#theorem 14#`, and the five §VII
 bricks/`#theorem 13#`.
+
+## 2026-10-01 — §VIII-A: the Cauchy–Schwarz brick of the Plotkin bounds
+
+`sum_sq_le_card_mul_sum_sq` (`FCC/Balls.lean`): `(Σ_ε n_ε)² ≤ q·Σ_ε n_ε²` for a
+`q`-ary alphabet.  Both Plotkin bounds (`#lemma 13#`, `#theorem 14#`) rest on the
+"symbols are most evenly spread" estimate, and `#theorem 14#` needs this weak form
+(`Σ_ε n_ε(M−n_ε) ≤ M²(q−1)/q`).  Mathlib's Cauchy–Schwarz is not reachable from the
+project's imports (neither `Finset.sum_mul_sum_le_card_mul_sum_sq` nor the
+`MeanInequalities` version is available), so it is proved here from the doubled
+sum-of-squares identity `Σ_{ε,δ}(n_ε−n_δ)² = 2q·Σn_ε² − 2(Σn_ε)² ≥ 0`; the only
+inequality used is AM–GM (`2ab ≤ a²+b²`, closed by `nlinarith [sq_nonneg (a−b)]`).
+
+Still to do for the pair: the per-coordinate pair count
+(`M² − Σ_ε n_ε²`, the `Fin M × Fin M` fibre square), the two-sided counting of
+`Σ_{x≠y} d(x,y)` and the `sInf`/attainment arguments.  `lake build`,
+`consistency_check -Strict` (9 `sorry`) and `axioms_check` (53) all green.

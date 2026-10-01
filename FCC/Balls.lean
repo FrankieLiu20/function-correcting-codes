@@ -2361,5 +2361,46 @@ theorem card_ball_inter_dist_three {n t : ℕ} {u v : Word (ZMod 2) n} {c₁ c�
   have h2 : t + 1 - 2 = t - 1 := by omega
   rw [h3, h2, hTCcard]
 
+/-! ### §VIII-A — the per-coordinate estimate of the Plotkin bounds (`#lemma 13#`,
+`#theorem 14#`)
+
+Both Plotkin bounds rest on one counting fact: for `M` words over a `q`-ary alphabet,
+the number of pairs of positions carrying *different* symbols is maximised when the
+symbols are as evenly distributed as possible.  The weak form needed by
+`#theorem 14#` is `Σ_ε n_ε(M − n_ε) ≤ M²(q−1)/q`, i.e. `q·Σ_ε n_ε² ≥ M²` — the
+Cauchy–Schwarz inequality, obtained from the doubled sum-of-squares identity
+`Σ_{ε,δ}(n_ε − n_δ)² = 2q·Σ n_ε² − 2(Σ n_ε)² ≥ 0`. -/
+
+/-- `(internal, §VIII-A — the Cauchy–Schwarz step of `#theorem 14#`)` — for a
+`q`-ary alphabet, `(Σ_ε n_ε)² ≤ q · Σ_ε n_ε²`. -/
+theorem sum_sq_le_card_mul_sum_sq {F : Type*} [Fintype F] (n : F → ℕ) :
+    (∑ ε, n ε) ^ 2 ≤ Fintype.card F * ∑ ε, n ε ^ 2 := by
+  have hA : (∑ ε, n ε) * (∑ ε, n ε) = ∑ ε, ∑ δ, n ε * n δ := by
+    rw [Finset.sum_mul_sum]
+  have hB : ∑ ε, ∑ δ, (2 * (n ε * n δ)) ≤ ∑ ε, ∑ δ, (n ε ^ 2 + n δ ^ 2) := by
+    refine Finset.sum_le_sum fun ε _ => Finset.sum_le_sum fun δ _ => ?_
+    nlinarith [sq_nonneg ((n ε : ℤ) - n δ)]
+  have hC : ∑ ε, ∑ δ, (2 * (n ε * n δ)) = 2 * ∑ ε, ∑ δ, n ε * n δ := by
+    rw [Finset.mul_sum]
+    refine Finset.sum_congr rfl fun ε _ => ?_
+    rw [Finset.mul_sum]
+  have hD : ∑ ε, ∑ δ, (n ε ^ 2 + n δ ^ 2)
+      = 2 * (Fintype.card F * ∑ ε, n ε ^ 2) := by
+    have h1 : ∑ ε, ∑ _δ : F, n ε ^ 2 = Fintype.card F * ∑ ε, n ε ^ 2 := by
+      rw [Finset.mul_sum]
+      refine Finset.sum_congr rfl fun ε _ => ?_
+      rw [Finset.sum_const, smul_eq_mul, Finset.card_univ]
+    have h2 : ∑ _ε : F, ∑ δ, n δ ^ 2 = Fintype.card F * ∑ δ, n δ ^ 2 := by
+      rw [Finset.sum_const, smul_eq_mul, Finset.card_univ]
+    simp only [Finset.sum_add_distrib]
+    rw [h1, h2]
+    ring
+  have key : 2 * ((∑ ε, n ε) * (∑ ε, n ε)) ≤ 2 * (Fintype.card F * ∑ ε, n ε ^ 2) := by
+    calc 2 * ((∑ ε, n ε) * (∑ ε, n ε))
+        = ∑ ε, ∑ δ, (2 * (n ε * n δ)) := by rw [hA, hC]
+      _ ≤ ∑ ε, ∑ δ, (n ε ^ 2 + n δ ^ 2) := hB
+      _ = 2 * (Fintype.card F * ∑ ε, n ε ^ 2) := hD
+  exact Nat.le_of_mul_le_mul_left (by simpa [pow_two] using key) (by norm_num : 0 < 2)
+
 end FCC
 
