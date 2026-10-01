@@ -41,6 +41,16 @@ labelling conventions follow Shenghao Yang's
 
 ## Status
 
+**2026-10-02.**  Every numbered result of the paper that is *not* an externally quoted
+row is now **proved** — §II–§VIII in full, including the §VII linear-FCC family
+(`#lemma 7#`–`#lemma 10#`, `#theorem 13#`), the §VIII Plotkin bounds (`#lemma 13#`,
+`#theorem 14#`), the §VIII Hamming bounds (`#theorem 15#`, `#theorem 16#`,
+`#corollary 13#`, `#corollary 14#`) and all four appendix ball counts (`#theorem 17#`,
+`#lemma 14#`, `#theorem 18#`, `#theorem 19#`).  The only remaining `sorry`s are the two
+`#lemma 11#` rows (quoted from [1]); whether they should also be formalized is the
+*Open question* deliberately left to the end in `TODO.md`.  The table below is the
+original phase-by-phase record and its "18 `sorry`" figures are historical.
+
 | Module | Contents | Status |
 | --- | --- | --- |
 | `FCC/Paper.lean` | **the main file**: every numbered item of the paper, in paper order, under the paper's section headings | All 65 numbered items are present: Definitions 1–18 stated, 12 of the 17 examples formalized, every theorem/lemma/corollary stated.  **Proved**: `#corollary 1#`, `#theorem 1#`, `#corollary 2#` (§II); `#theorem 2#`, `#theorem 3#`, `#theorem 4#`, `#theorem 5#`, `#corollary 4#`, `#theorem 6#`, `#theorem 7#` (§IV); `#theorem 8#`, `#theorem 9#` (§V-A); `#theorem 10#`, `#corollary 7#`, `#lemma 2#`, `#theorem 11#`, `#corollary 8#` (§V-B, i.e. all of §V); `#lemma 3#`, `#corollary 9#`–`#corollary 12#` (§VI-A, i.e. all of §VI-A); `#lemma 5#`, `#theorem 12#`, `#lemma 6#` (§VI-B/C, i.e. all of §VI); `#corollary 13#` (§VIII-B); plus the non-vacuity bricks.  The rest carry `sorry` (18 in total) |
