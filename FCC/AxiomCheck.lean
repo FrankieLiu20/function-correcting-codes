@@ -84,6 +84,9 @@ namespace FCC
 #print axioms plotkin_bound_fcc
 -- §VIII (the generalized Plotkin bound of Lemma 13):
 #print axioms plotkin_bound
+-- §VIII (the binary Plotkin bounds of Lemma 11, derived from Lemma 13):
+#print axioms plotkin_bound_binary
+#print axioms plotkin_bound_binary_odd
 -- §VII-A (coset codes of a linear FCC):
 #print axioms kernelSubcode_finrank
 #print axioms cosetDist_eq

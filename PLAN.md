@@ -128,7 +128,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 
 | Label | § | Statement | Lean name | Status |
 | --- | --- | --- | --- | --- |
-| `#lemma 11#` | VIII | Plotkin bound `N(D) ≥ 4/(M²)·Σ[D]ᵢⱼ` (`M` even) resp. `4/(M²−1)·Σ` (`M` odd) | `plotkin_bound_binary` | stated |
+| `#lemma 11#` | VIII | Plotkin bound `N(D) ≥ 4/(M²)·Σ[D]ᵢⱼ` (`M` even) resp. `4/(M²−1)·Σ` (`M` odd) — the binary case `q = 2` of `#lemma 13#` (Remark 2); **proved** (not quoted) and carrying the necessary `Fintype.card F = 2` (`ISSUES.md` §27); the two declarations sit just after `#lemma 13#` because their proofs use it | `plotkin_bound_binary`, `plotkin_bound_binary_odd` | proved |
 | `#lemma 12#` | VIII | Gilbert–Varshamov-type upper bound `N(D) ≤ min{r : 2^r > max_j Σ_{i<j} V(r,[D]−1)}` | — | external ([1]): used as hypothesis if needed |
 | `#lemma 13#` | VIII | over `F_q`: `N(D) ≥ 2q/(M²(q−1)−a(q−a))·Σ_{i<j}[D]ᵢⱼ`, `a = M mod q` (sharp Plotkin bound: the balanced-distribution constant `a(q−a)`, `FCC/Plotkin.lean` + `#lemma 13#`'s `ℚ`/`sInf` step in `FCC/Paper.lean`) | `plotkin_bound` | proved |
 | `#theorem 14#` | VIII-A | `r_f(k:d_d,d_f) ≥ ((L−1)d_d+(q^k−L)d_f)/(q^{k−1}(q−1)) − k`, `L = max_α |f⁻¹(α)|`, for `d_f > d_d` (double count of `Σ_{x≠y} d(x,y)`, `FCC/Plotkin.lean`) | `plotkin_bound_fcc` | proved |

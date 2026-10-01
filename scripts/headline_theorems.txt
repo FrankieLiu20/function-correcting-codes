@@ -87,6 +87,9 @@ card_ball_union_dist_three
 plotkin_bound_fcc
 # §VIII (the Plotkin bound for irregular distance codes, Lemma 13):
 plotkin_bound
+# §VIII (the binary Plotkin bounds of Lemma 11, now proved rather than quoted):
+plotkin_bound_binary
+plotkin_bound_binary_odd
 # §VII-A (the coset-distance bridge and Lemma 9):
 kernelSubcode_finrank
 cosetDist_eq

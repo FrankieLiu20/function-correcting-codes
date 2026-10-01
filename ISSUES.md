@@ -592,3 +592,22 @@ carries the paper's hypotheses — `hC : IsLinearFCC f C dd df` (which includes
 is rank–nullity: `msgPart` is onto by `hstd`, and `dim C = k = dim F_q^k` makes
 it injective, so `C ≃ₗ F_q^k`; pulling `ker f` back along that equivalence is
 dimension-preserving (`Submodule.map_comap_eq_self`, `LinearEquiv.finrank_map_eq`).
+
+## 27. `#lemma 11#`: the binary constant `4` needs the hypothesis `q = 2`
+
+**Found and fixed 2026-10-02**, while formalizing the two rows of `#lemma 11#` (which
+the paper quotes from [1]).  As transcribed in phase 2 the statements were
+`N(D) ≥ 4/M² · Σ_{i<j}[D]_{i,j}` (`M` even) and `N(D) ≥ 4/(M²−1) · Σ_{i,j}` (`M` odd)
+over an arbitrary alphabet `F` with `[Zero F]`.  The paper is describing the *binary*
+case: `4 = 2q` with `q = 2`, and indeed the paper's Remark 2 derives precisely these two
+inequalities from `#lemma 13#` by substituting `q = 2`, `a = M mod 2 ∈ {0,1}`.  Without
+`q = 2` the statement is false: over `F₃` take `M = 3` and `D ≡ 1`; then
+`Σ_{i<j}[D] = 3`, so the (false) odd-`M` claim reads `4/(9−1)·3 = 1.5 ≤ N(D)`, but the
+three codewords `0, 1, 2 ∈ F₃` are pairwise at distance `1 ≥ D i j`, so `N(D) = 1`.
+
+The statements now carry `hF : Fintype.card F = 2`, and — since `#lemma 11#` is not an
+independent result but the binary case of `#lemma 13#` — they are **proved** from
+`plotkin_bound` (via `M % 2 = 0` resp. `M % 2 = 1` rather than quoted from [1].
+Consequently they are declared *after* `#lemma 13#` in `FCC/Paper.lean` (the paper prints
+them before it, as a quotation); `PLAN.md` §1.1 keeps the paper's order, and
+`VERIFICATION.md` records this.

@@ -3569,21 +3569,6 @@ inequalities are stated over `ℚ`, so that the paper's fractions
 (`4/M²`, `2q/(M²(q−1) − a(q−a))`, `1/(q^{k−1}(q−1))`) appear literally instead
 of being truncated by `ℕ`-division. -/
 
-/-- `#lemma 11#` (§VIII, quoted from [1]) — "for any distance matrix
-`D ∈ ℕ^{M×M}`, `N(D) ≥ 4/M² · Σ_{i<j} [D]_{i,j}` if `M` is even". -/
-theorem plotkin_bound_binary {M : ℕ} (D : Fin M → Fin M → ℕ) (hM : Even M) :
-    (4 : ℚ) / (M : ℚ) ^ 2 *
-        (∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), (D p.1 p.2 : ℚ))
-      ≤ (N (F := F) (ι := Fin M) D : ℚ) := by
-  sorry
-
-/-- `#lemma 11#` (§VIII, quoted from [1]) — "…, and
-`N(D) ≥ 4/(M²−1) · Σ_{i<j} [D]_{i,j}` if `M` is odd". -/
-theorem plotkin_bound_binary_odd {M : ℕ} (D : Fin M → Fin M → ℕ) (hM : Odd M) :
-    (4 : ℚ) / ((M : ℚ) ^ 2 - 1) *
-        (∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), (D p.1 p.2 : ℚ))
-      ≤ (N (F := F) (ι := Fin M) D : ℚ) := by
-  sorry
 
 /-- `#lemma 13#` (§VIII) — "for any distance matrix `D ∈ ℕ^{M×M}` and for
 irregular distance codes over `F_q`, we have
@@ -3708,6 +3693,37 @@ theorem plotkin_bound {M : ℕ} (D : Fin M → Fin M → ℕ) :
       mul_nonpos_of_nonpos_of_nonneg h1 h2
     have h4 : (0 : ℚ) ≤ (N (F := F) (ι := Fin M) D : ℚ) := Nat.cast_nonneg _
     linarith
+
+omit [DecidableEq α] in
+/-- `#lemma 11#` (§VIII, quoted from [1]; it is the binary case `q = 2` of `#lemma 13#` —
+see the paper's Remark 2) — "for any distance matrix `D ∈ ℕ^{M×M}`,
+`N(D) ≥ 4/M² · Σ_{i<j} [D]_{i,j}` if `M` is even".  The paper prints this *before*
+`#lemma 13#` (it is a quotation from [1]); here it is declared after `#lemma 13#` and
+proved from it, so `PLAN.md` §1.1 keeps the paper's order. -/
+theorem plotkin_bound_binary {M : ℕ} (D : Fin M → Fin M → ℕ) (hF : Fintype.card F = 2)
+    (hM : Even M) :
+    (4 : ℚ) / (M : ℚ) ^ 2 *
+        (∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), (D p.1 p.2 : ℚ))
+      ≤ (N (F := F) (ι := Fin M) D : ℚ) := by
+  have h := plotkin_bound (F := F) D
+  have hmod : M % 2 = 0 := Nat.dvd_iff_mod_eq_zero.mp (even_iff_two_dvd.mp hM)
+  rw [hF, hmod] at h
+  norm_num at h ⊢
+  exact h
+
+omit [DecidableEq α] in
+/-- `#lemma 11#` (§VIII, quoted from [1]; the binary case `q = 2`, `M` odd) — "…, and
+`N(D) ≥ 4/(M²−1) · Σ_{i<j} [D]_{i,j}` if `M` is odd". -/
+theorem plotkin_bound_binary_odd {M : ℕ} (D : Fin M → Fin M → ℕ) (hF : Fintype.card F = 2)
+    (hM : Odd M) :
+    (4 : ℚ) / ((M : ℚ) ^ 2 - 1) *
+        (∑ p ∈ Finset.univ.filter (fun p : Fin M × Fin M => p.1 < p.2), (D p.1 p.2 : ℚ))
+      ≤ (N (F := F) (ι := Fin M) D : ℚ) := by
+  have h := plotkin_bound (F := F) D
+  have hmod : M % 2 = 1 := Nat.odd_iff.mp hM
+  rw [hF, hmod] at h
+  norm_num at h ⊢
+  exact h
 
 /-- `#theorem 14#` (§VIII-A) — "for an `(f : d_d, d_f)`-FCC over `F_q`, where
 `f : F_q^k → Im(f)`,
