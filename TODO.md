@@ -303,6 +303,30 @@ in the same commit that does the work.
       family of §VIII-A.  They use the appendix's *union* counts as well
       (`#theorem 17#`/`#theorem 18#`), so the same machinery applies; `#lemma 11#`
       (quoted from [1]) stays a hypothesis like the other external rows.
+
+      **Both bricks are now in `FCC/Balls.lean`** (2026-10-01, commits `1d5af92`,
+      `f756e7f`): `sum_sq_le_card_mul_sum_sq` (`(Σn_ε)² ≤ q·Σn_ε²`, Cauchy–Schwarz
+      from the doubled sum-of-squares identity) and `card_ne_pairs_mul_le`
+      (`q·#{(i,j) : symbols differ} ≤ M²(q−1)`, the per-coordinate estimate).
+      Remaining steps for `#theorem 14#`:
+
+      * lower bound: for each codeword `x` of an `(f : d_d, d_f)`-FCC,
+        `S(x) = Σ_{y≠x} d(x,y) ≥ (|f⁻¹(f x)|−1)d_d + (q^k − |f⁻¹(f x)|)d_f`, and
+        `|f⁻¹(f x)| ≤ L := maxPreimageCard f` with `d_f > d_d` gives
+        `S(x) ≥ (L−1)d_d + (q^k−L)d_f`; summing over `x` gives the lower bound
+        `q^k((L−1)d_d+(q^k−L)d_f)`;
+      * upper bound: `Σ_{x≠y} d(x,y) = Σ_j #(pairs differing in coordinate `j`)`
+        and each term is `≤ q^{2k−1}(q−1)/(q·?)`-style by `card_ne_pairs_mul_le`
+        with `M = q^k`, giving `≤ n·q^{2k−1}(q−1)` with `n = k + r`;
+      * compare, divide by `q^k` (ℚ), and use that `optimalRedundancyData` is
+        *attained* (`Nat.find_spec` on the definition's `dite`, or
+        `optimalRedundancyData_le_of` + `exists_isFCCData`) to turn "every FCC of
+        length `k+r` satisfies …" into the bound on `r_f`.
+
+      For `#lemma 13#` the sharp constant additionally needs the
+      balanced-distribution value `a⌈M/q⌉(M−⌈M/q⌉) + (q−a)⌊M/q⌋(M−⌊M/q⌋)`
+      (`a = M % q`), i.e. the exact maximisation of `Σ_ε n_ε(M−n_ε)` over
+      distributions; the weak `M²(q−1)/q` form above is not enough there.
 - [x] Statement review of the appendix counts (2026-10-01): `#theorem 17#`,
       `#lemma 14#`, `#theorem 18#`, `#theorem 19#` were re-read against the PDF and
       match verbatim (`DEVLOG.md`); no change needed.  Their proofs are the next
@@ -425,3 +449,4 @@ in the same commit that does the work.
       is only defeq to).  After that: the `t ≥ 1` case of the intersection
       (`+1 ≤ t` ↔ `≤ t−1`), the `t = 0` case (both sides are `0`), and finally
       `#theorem 17#` by inclusion–exclusion with `card_ball`.
+
