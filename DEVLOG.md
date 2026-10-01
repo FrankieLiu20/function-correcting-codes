@@ -1825,3 +1825,43 @@ vs `M`.
 `Classical.choice`, `Quot.sound`).  `plotkin_bound` was added to
 `scripts/headline_theorems.txt` and `FCC/AxiomCheck.lean`; `PLAN.md`, `TODO.md` and
 `VERIFICATION.md` updated.
+
+## 2026-10-02 — §VIII: `#lemma 11#` proved, not quoted (**`sorry` count 0**)
+
+`sorry` 2 → **0**, headline 60 → **62**.  `FCC/Paper.lean` no longer contains a single
+`sorry`: every numbered item of the paper is stated *and proved*.
+
+The user decided (2026-10-02) that the externally quoted rows are to be formalized as
+well, starting with `#lemma 11#`.  That one turns out to need no new mathematics: the
+paper's own Remark 2 derives it from `#lemma 13#` by substituting `q = 2`
+(`a = M mod 2 ∈ {0,1}`), so `plotkin_bound_binary` and `plotkin_bound_binary_odd` are
+proved by instantiating `plotkin_bound`:
+
+```lean
+have h := plotkin_bound (F := F) D
+have hmod : M % 2 = 0 := Nat.dvd_iff_mod_eq_zero.mp (even_iff_two_dvd.mp hM)  -- resp. Nat.odd_iff
+rw [hF, hmod] at h
+norm_num at h ⊢
+exact h
+```
+
+**Statement fix first** (`ISSUES.md` §27): as transcribed in phase 2 the two statements
+carried the constant `4` over an *arbitrary* alphabet.  That is the binary case:
+`4 = 2q` with `q = 2`, and without `q = 2` the claim is false — over `F₃`, `M = 3`,
+`D ≡ 1` gives `Σ_{i<j}[D] = 3`, so the odd-`M` claim reads `4/8·3 = 1.5 ≤ N(D)`, but the
+three codewords `0, 1, 2` are pairwise at distance `1 ≥ D i j`, so `N(D) = 1`.  The
+statements now carry `hF : Fintype.card F = 2`.
+
+**Declaration order.**  The paper prints `#lemma 11#` *before* `#lemma 13#` (it quotes it
+from [1]), but the formalized proof uses `#lemma 13#`, so the two declarations were moved
+to just after `plotkin_bound` (a note in the file and in `VERIFICATION.md` records this;
+`PLAN.md` §1.1 keeps the paper's order).  Two mechanical lessons: a `def`/`theorem` cannot
+be used before it is declared, so "quoted early, proved late" items have to be ordered by
+dependency; and two consecutive `/-- … -/` docstrings before one declaration are a syntax
+error — merge them.
+
+**Verification.**  Full `lake build` green (1879 jobs, **no `sorry` warnings and no other
+warnings**), then `consistency_check.ps1 -Strict` green (78 markers, 73 rows stated,
+**0 `sorry`**) and `axioms_check.ps1` green (62 audited results, all depending only on
+`propext`, `Classical.choice`, `Quot.sound`).  Both new declarations were added to
+`scripts/headline_theorems.txt` and `FCC/AxiomCheck.lean`.

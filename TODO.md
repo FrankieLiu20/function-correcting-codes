@@ -3,7 +3,19 @@
 Near-term, in the order the project works through `PLAN.md` §4.  Tick items off
 in the same commit that does the work.
 
-## Open question (deliberately deferred to the end, 2026-10-01)
+## Open question — **settled 2026-10-02: the quoted rows are to be formalized**
+
+- [x] **Decision (user, 2026-10-02): yes, formalize the externally quoted rows.**
+      `#lemma 11#` is done: it is the binary case `q = 2` of `#lemma 13#` (the paper says
+      so in Remark 2), so `plotkin_bound_binary`/`plotkin_bound_binary_odd` are now
+      **proved** from `plotkin_bound` — with the statement fix `Fintype.card F = 2`
+      (`ISSUES.md` §27) and declared after `#lemma 13#` for the dependency.  Still open:
+      `#lemma 1#` ([10]), `#lemma 4#` ([14]), `#lemma 12#` ([1]), `#corollary 3#` ([14]),
+      `#corollary 5#` ([1, App.]) — each currently enters as an explicit hypothesis
+      (`hbound`, `hcol`, …).  They need the source papers' statements (only
+      `Spectral_Conditions…`, `MDS_Irregular_Convertible_Code` and `Torn-Paper…` are in
+      `papers/`, not [1]/[10]/[14]) — the next step is to identify [1], [10], [14] and
+      decide for each whether to formalize it or keep it as a hypothesis.
 
 - [ ] **Do the externally quoted results have to be *proved* as well?**
       `#lemma 1#` ([10]), `#lemma 4#` ([14]), `#lemma 12#` ([1]), `#corollary 3#`
