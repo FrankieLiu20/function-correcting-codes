@@ -587,3 +587,26 @@ in the same commit that does the work.
       (`+1 ≤ t` ↔ `≤ t−1`), the `t = 0` case (both sides are `0`), and finally
       `#theorem 17#` by inclusion–exclusion with `card_ball`.
 
+## `#lemma 13#` — the final `ℚ`/`sInf` step: what did *not* work (2026-10-02)
+
+Two attempts at the `ℚ` bridging lemma (`plotkin_total_le_rat`, to be used by
+`plotkin_bound`) were rolled back; the repo is green at `b7434f4`.  Learned:
+
+* The lemma **must** carry `hle : (M % q)*(q − M % q) ≤ M²(q−1)`: without it the
+  statement is false (when the `ℕ` subtraction truncates, the `ℕ` bound
+  `plotkin_total_le_sharp` says nothing and the `ℚ` right-hand side is negative).
+  The `¬ hle` case belongs to `plotkin_bound` itself, where the constant is negative
+  and the inequality is trivial.
+* The cast mismatch is the whole difficulty: the paper's constant is written
+  *pushed* (`(M:ℚ)^2 * ((q:ℚ)−1) − (a:ℚ) * ((q:ℚ)−(a:ℚ))`), while
+  `plotkin_total_le_sharp` gives `↑(M²(q−1) − a(q−a))`, an atom that `nlinarith`
+  cannot relate to `(↑M)^2 * (↑q − 1)`.  `push_cast at h` alone leaves `↑(X − Y)`
+  untouched.  Instead: state an explicit `have` rewriting the *goal's* denominator
+  into the `↑X − ↑Y` form (`rw [Nat.cast_mul, Nat.cast_pow, Nat.cast_sub hq1,
+  Nat.cast_mul, Nat.cast_sub hale]` + `norm_num`), rewrite the goal with it, then
+  `rw [Nat.cast_mul, Nat.cast_sub hle] at h` on the cast `ℕ` bound and close with
+  `nlinarith`.
+* `Nat.sub_add_le` does not exist in this pin (and `(X − Y) + Y ≤ X` is false
+  without `Y ≤ X`); use `Nat.cast_sub`/`Nat.sub_add_cancel` with the explicit
+  hypothesis rather than trying to get it from `omega`.
+
