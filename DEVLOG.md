@@ -1245,3 +1245,62 @@ New internal helpers, all in `FCC/Balls.lean`: `card_erase_erase_add`,
 `card_ball_inter_dist_two` was added to `scripts/headline_theorems.txt` and
 `FCC/AxiomCheck.lean`.  Next: `#theorem 18#` (three balls at distances `1,1,2`),
 then `#theorem 19#`.
+
+## 2026-10-01 — `#theorem 18#`: the printed statement is false at `t = 0`
+
+Before proving `#theorem 18#` (the union of three balls at pairwise distances
+`1, 1, 2`) I re-read the statement against the PDF, as always.  The printed formula
+
+```text
+|B(u₁,t) ∪ B(u₂,t) ∪ B(u₃,t)| = 3 Σ_{i≤t} C(n,i) − 6 Σ_{i≤t−1} C(n−1,i)
+                                  + C(n−2,t−1) + 4 Σ_{i≤t−2} C(n−2,i)
+```
+
+is meant with `C(n−2,−1) = 0` at `t = 0` (there the identity is just `3 = 3`, the
+union of three singleton balls).  Lean's truncated `ℕ`-subtraction reads
+`t - 1 = 0`, hence `C(n−2,0) = 1`, and the transcription is then **false**:
+for `n = 2` and centres `u₁ = 00`, `u₂ = 10`, `u₃ = 01`,
+
+```text
+left  = |{u₁} ∪ {u₂} ∪ {u₃}| = 3,
+right = 3·C(2,0) − 0 + C(0,0) + 0 = 3 + 1 = 4.
+```
+
+(The numeric side was checked in Lean: `norm_num` evaluates the printed right-hand
+side to `4`.)  The statement now carries `(ht : 1 ≤ t)`, which makes every `t - 1`
+and `t - 2` exact while leaving the printed formula verbatim — the same convention
+the paper prints for the twin result `#theorem 19#` (`t ≥ 2`).  Recorded as
+`ISSUES.md` §22.
+
+**Machinery landed (all proved, so the next session only has to assemble).**
+
+* `card_union_three_add` — `|A∪B∪C| + |A∩B| + |A∩C| + |B∩C| = |A| + |B| + |C| +
+  |A∩B∩C|`.  Written in this *subtraction-free* form on purpose: the paper's
+  inclusion–exclusion has three subtractions, each of which would need a
+  `≤`-proof in `ℕ`; adding the pairwise terms instead makes it pure additive
+  arithmetic (`omega`), and the paper's shape is recovered at the very end by
+  `Nat.sub_eq_of_eq_add`-style reasoning.
+* `diffSet_surjective`, `diffSet_injective`, `card_filter_diffSet` — over `F₂` the
+  map `x ↦ D(x,u)` is a bijection onto `Finset (Fin n)`: `x j = u j + 1` exactly on
+  `D` (`zmod2_eq_add_one_of_ne`, `zmod2_add_one_ne`).  Hence counting words with a
+  property of their disagreement set is counting the sets, which is what both
+  appendix theorems need.  This replaces the "each fibre has exactly one word"
+  argument used inline in `#lemma 14#`.
+* `erase_erase_eq_sdiff_pair` — `(D.erase c₁).erase c₂ = D \ {c₁,c₂}`, bridging the
+  `erase`-style statements already in `FCC/Balls.lean` with the `\`-style counting.
+* `card_filter_inter_eq_card` — for `P ⊆ T`, the family `{D | D ∩ T = P, |D \ T| +
+  s ≤ t}` has the same cardinality as `{S ⊆ Tᶜ | |S| + s ≤ t}` (bijection
+  `S ↦ S ∪ P`, inverse `D ↦ D \ T`; `Finset.card_bij'`).
+
+**Plan for the next session** (in `TODO.md` 3.13 part 3, in full detail): the triple
+intersection is `Σ_{i<t}C(n−2,i) + 3Σ_{i<t−1}C(n−2,i)` — pattern "agree at both
+special coordinates" costs `1`, the other three patterns cost `2` — which the fibre
+lemma turns into `C(n−2,t−1) + 4Σ_{i<t−1}C(n−2,i)`; then inclusion–exclusion with
+the two distance-one intersections (`#theorem 17#`) and the distance-two one
+(`#lemma 14#`) and the final arithmetic
+`3Σ_{i≤t}C(n,i) − 6Σ_{i≤t−1}C(n−1,i) = 3C(n−1,t)` (summed Pascal) followed by
+`3C(n−1,t) = 3C(n−2,t−1) + 3C(n−2,t)` (`Nat.choose_succ_succ`).
+
+**Verification.**  Standalone `lake build` green, then (separately)
+`consistency_check.ps1 -Strict` green (16 `sorry`) and `axioms_check.ps1` green
+(46 audited results); commit `5cf9305`.  No headline result changed.

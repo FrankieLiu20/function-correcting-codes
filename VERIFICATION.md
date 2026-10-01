@@ -274,6 +274,21 @@ summed Pascal (`sum_range_choose_pred`) gives the printed
 `sum_range_choose_succ/pred`) is generic and will be reused by
 `#theorem 18#`/`#theorem 19#`.
 
+**Statement fix, same day.**  `#theorem 18#` as printed is *false* at `t = 0` in
+Lean's `ℕ`: the term `C(n−2,t−1)` truncates to `C(n−2,0) = 1`, while the paper's
+convention reads `C(n−2,−1) = 0` (and the identity there is the trivial `3 = 3`).
+Concretely, for `n = 2` and the centres `00, 10, 01` the left side is `3` and the
+printed right side evaluates to `4`.  The statement now carries `1 ≤ t`
+(`card_ball_union_three`), the convention the paper itself prints for the twin
+result `#theorem 19#` (`t ≥ 2`); the counterexample and the reasoning are
+`ISSUES.md` §22.  The shared machinery needed by both appendix results is now in
+`FCC/Balls.lean` and audited: `card_union_three_add` (subtraction-free 3-set
+inclusion–exclusion), `diffSet_surjective`/`diffSet_injective` +
+`card_filter_diffSet` (over `F₂` a word and its disagreement set determine each
+other), `zmod2_eq_add_one_of_ne`, `zmod2_add_one_ne`,
+`erase_erase_eq_sdiff_pair`, and `card_filter_inter_eq_card`.  Proving
+`#theorem 18#` (and then `#theorem 19#`) from this machinery is the next step.
+
 ## Not formalized (and why)
 
 Nothing yet; this section is filled in as results are classified.

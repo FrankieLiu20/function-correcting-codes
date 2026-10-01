@@ -339,11 +339,42 @@ in the same commit that does the work.
       `Finset.erase_insert`; and `by decide` proves the two-element facts about
       `ZMod 2` (`x ≠ a ↔ x = b` for `a ≠ b`), because the type is finite so the
       quantified proposition is decidable.
-- [ ] 3.13 (part 3, next). `#theorem 18#` (three balls at pairwise distances
-      `1,1,2`) and `#theorem 19#` (`F₂`, distance `3`, `t ≥ 2`): the same split into
-      the special coordinates plus inclusion–exclusion over three balls, reusing
-      `card_ball_inter_dist_one`/`card_ball_inter_dist_two` and the case analysis
-      `mem_ball_inter_iff_dist_two` already provides.  These unlock
+- [ ] 3.13 (part 3, in progress 2026-10-01). `#theorem 18#` (three balls at pairwise
+      distances `1,1,2`) and `#theorem 19#` (`F₂`, distance `3`, `t ≥ 2`).
+      **Statement fix first**: the printed `#theorem 18#` is false at `t = 0` in
+      Lean's `ℕ` (`C(n−2,t−1)` becomes `C(n−2,0) = 1` instead of the paper's
+      `C(n−2,−1) = 0`; at `n = 2` the two sides are `3` and `4`), so it now carries
+      `(ht : 1 ≤ t)` — `ISSUES.md` §22, the same convention as the printed `t ≥ 2`
+      of `#theorem 19#`.  **Machinery in place** (all proved, `FCC/Balls.lean`):
+      `card_union_three_add` (subtraction-free 3-set inclusion–exclusion:
+      `|A∪B∪C| + |A∩B| + |A∩C| + |B∩C| = |A| + |B| + |C| + |A∩B∩C|`, so no
+      `ℕ`-truncation can arise in the paper's inclusion–exclusion step),
+      `zmod2_eq_add_one_of_ne`, `zmod2_add_one_ne`, `diffSet_surjective`,
+      `diffSet_injective`, `card_filter_diffSet` (over `F₂` a word and its
+      disagreement set with `u` determine each other, so counting words reduces to
+      counting sets), `erase_erase_eq_sdiff_pair`, and `card_filter_inter_eq_card`
+      (the fibre `D ∩ T = P` is in bijection with the subsets of `Tᶜ` via
+      `S ↦ S ∪ P`, preserving `|D \ T|`).
+
+      **Plan for `#theorem 18#`** (following the paper): prove the triple
+      intersection `|B(u₁,t) ∩ B(u₂,t) ∩ B(u₃,t)| = #₁ + 3#₂` with
+      `#₁ = Σ_{i<t}C(n−2,i)` (the pattern "agree at both special coordinates",
+      cost `1`) and `#₂ = Σ_{i<t−1}C(n−2,i)` (the other three patterns, cost `2`),
+      i.e. `C(n−2,t−1) + 4Σ_{i<t−1}C(n−2,i)` for `t ≥ 1`.  Its coordinate model is
+      `mem_ball_inter_iff_dist_two` with `c₁ ∈ D ↔ c₂ ∈ D` replaced by
+      `c₁ ∈ D ∨ c₂ ∈ D` (cost `2` unless both special coordinates agree), and the
+      count splits into "`D ∩ {c₁,c₂} = ∅`" — where the filter *is* the powerset
+      filter, card `Σ_{i<t}C(n−2,i)` — plus the three non-empty patterns, each of
+      card `Σ_{i<t−1}C(n−2,i)` by `card_filter_inter_eq_card`.  Then
+      `card_union_three_add` + the two `card_ball_inter_dist_one`s +
+      `card_ball_inter_dist_two` + `card_ball`, and the arithmetic identities
+      `Σ_{i≤t}C(n,i) = Σ_{i≤t}C(n−1,i) + Σ_{i≤t−1}C(n−1,i)` (`sum_range_choose_succ`)
+      and `C(n,t) = C(n−1,t−1) + C(n−1,t)` (`Nat.choose_succ_succ`) close it:
+      `3Σ_{i≤t}C(n,i) − 6Σ_{i≤t−1}C(n−1,i) = 3C(n−1,t)`, and then
+      `3C(n−1,t) + C(n−2,t−1) + 4Σ_{i≤t−2}C(n−2,i) = 4Σ_{i≤t−1}C(n−2,i) + 3C(n−2,t)`.
+      `#theorem 19#` is the same pattern with three special coordinates (8 patterns:
+      `#₁` for six of them, `#₂` for `000`/`111`) and the pairwise intersection
+      replaced by `card_ball_inter_dist_three`.  These unlock
       `#theorem 15#`/`#theorem 16#`/`#corollary 14#`.
 - [x] 3.13 (old note, superseded — finished 2026-10-01). `#theorem 17#`'s counting layer: three pieces
       are in `FCC/Balls.lean` (`exists_diffSet_eq_singleton`,

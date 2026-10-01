@@ -138,7 +138,7 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#corollary 14#` | VIII-C | `E ≤ q^n/(ℓ·Σ_{i≤t_d} C(n,i)(q−1)^i)` | `hamming_bound_fcc_data_sphere` | todo |
 | `#theorem 17#` | App. | `|B(u,t) ∪ B(v,t)| = 2Σ_{i≤t}C(n,i)(q−1)^i − qΣ_{i≤t−1}C(n−1,i)(q−1)^i` for `d(u,v)=1` (via the internal `card_ball_inter_dist_one` / `card_filter_erase_le`) | `card_ball_union_dist_one` | proved |
 | `#lemma 14#` | App. | `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)` for `d(u₁,u₂)=2` over `F₂` | `card_ball_inter_dist_two` | proved |
-| `#theorem 18#` | App. | union of three balls at pairwise distances `1,1,2` | `card_ball_union_three` | stated |
+| `#theorem 18#` | App. | union of three balls at pairwise distances `1,1,2` (with `1 ≤ t`: the printed `C(n−2,t−1)` truncates at `t = 0`, `ISSUES.md` §22) | `card_ball_union_three` | stated |
 | `#theorem 19#` | App. | `|B(u₁,t) ∪ B(u₂,t)| = 2Σ_{i≤t}C(n,i) − 8Σ_{i≤t−3}C(n−3,i) − 6C(n−3,t−2)` for `d(u₁,u₂)=3`, `t ≥ 2` | `card_ball_union_dist_three` | stated |
 
 ### 1.2 Numbered examples (optional, high value as regression tests)
