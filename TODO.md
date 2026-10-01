@@ -300,6 +300,19 @@ in the same commit that does the work.
       distances `1,1,2`) and `#theorem 19#` (`F₂`, distance `3`), by the same
       coordinate-splitting and inclusion–exclusion; these unlock
       `#theorem 15#`/`#theorem 16#`/`#corollary 14#`.
+
+      **Plan worked out for `#lemma 14#`** (2026-10-01): write `{c₁,c₂}` for the two
+      differing coordinates and `a` for the number of *other* coordinates where `x`
+      disagrees with `u`, and `k = #{i ∈ {c₁,c₂} : x i ≠ u i} ∈ {0,1,2}`.  Then
+      `d(x,u) = a + k` and (over `F₂`) `d(x,v) = a + 2 − k`, so `x` lies in both
+      balls iff `a + max(k, 2−k) ≤ t`, i.e. `k = 1 ∧ a ≤ t−1` or `k ∈ {0,2} ∧ a ≤ t−2`.
+      Counting the `n−2` remaining coordinates gives
+      `2Σ_{i≤t−1}C(n−2,i) + 2Σ_{i≤t−2}C(n−2,i)`, which equals the printed
+      `2Σ_{i≤t−1}C(n−1,i)` by Pascal (`C(n−1,i) = C(n−2,i) + C(n−2,i−1)`, the same
+      identity as in `sum_range_choose_mul_pow_succ`).  The counting lemma to prove
+      first is the two-coordinate analogue of `card_filter_erase_le`:
+      `|{x | |D(x,u) \ {c₁,c₂}| ≤ s}| = Σ_{j≤2} (number of ways to choose the
+      pattern on `{c₁,c₂}` at "cost" j) · (sums over the rest)`.
 - [ ] 3.13 (old note, kept for the record). `#theorem 17#`'s counting layer: three pieces
       are in `FCC/Balls.lean` (`exists_diffSet_eq_singleton`,
       `mem_ball_inter_iff_of_dist_one`, `card_fiber_erase`).  The next piece is
