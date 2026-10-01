@@ -23,7 +23,8 @@ pairwise distance `Σ_{x≠y} d(x,y)` of a code `C : Word F k → Word F (k+r)`:
   least `d_d` from `x` (and there are `|f⁻¹(f x)| − 1` of them), the others at
   distance at least `d_f`, so summing over `x` gives `q^k((L−1)d_d+(q^k−L)d_f)`;
 * **upper bound** (`plotkin_total_le`) — summing over the `n = k+r` coordinates
-  and using the per-coordinate estimate gives `Σ_{x≠y} d(x,y) ≤ n·q^{2k−1}(q−1)`.
+  and using the per-coordinate estimate `q·#{pairs differing in a coordinate}
+  ≤ q^{2k}(q−1)` gives `q·Σ_{x≠y} d(x,y) ≤ (k+r)·q^{2k}(q−1)`.
 
 Comparing the two and cancelling the positive factor `q^k` is the arithmetic
 content of `#theorem 14#`; `plotkin_bound_fcc_aux` does that comparison and
@@ -156,10 +157,9 @@ variable {k r : ℕ}
 
 /-- `(internal, §VIII-A — first step of the upper bound of `#theorem 14#`)` — for a
 fixed coordinate `j`, summing "the two codewords differ in coordinate `j`" over the
-pairs of distinct messages counts the ordered pairs of codewords that differ there.
-(A pair of codewords agreeing in coordinate `j` cannot come from two distinct
-messages here only through `C`; the sum is over *messages*, which is what the
-paper's `n_ε` counts.) -/
+pairs of *distinct messages* is the number of *all* ordered pairs of messages whose
+codewords differ there: `(C u) j ≠ (C v) j` forces `u ≠ v`, so dropping the
+condition costs nothing, and the diagonal contributes `0`. -/
 theorem sum_erase_ite_eq_card_filter (C : Word F k → Word F (k + r)) (j : Fin (k + r)) :
     (∑ u : Word F k, ∑ v ∈ (Finset.univ : Finset (Word F k)).erase u,
         (if (C u) j ≠ (C v) j then 1 else 0))
