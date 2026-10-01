@@ -7,6 +7,7 @@ import Mathlib.Algebra.Module.LinearMap.Basic
 import Mathlib.Combinatorics.SimpleGraph.Basic
 import Mathlib.Combinatorics.SimpleGraph.Connectivity.Connected
 import Mathlib.LinearAlgebra.FiniteDimensional.Basic
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.Order.Lattice.Nat
 
 /-!
@@ -3289,16 +3290,52 @@ Statements only, in the paper's order (proofs are phase 3.10).  `#theorem 13#`
 needs the concatenation `(C(u), D(f(u)))` as a single word, i.e. an
 append/`Matrix`-free plumbing step, and is the next slice. -/
 
+omit [Fintype F] in
 /-- `#lemma 7#` (§VII-A) — "if `f : F_q^k → Im(f)` is a linear function and `C`
 is a linear `(f : d_d, d_f)`-FCC of length `n` in standard form, then the subcode
 `D_f = {c = (u,p) ∈ C | u ∈ Ker(f)}` forms a subspace of `C`.  Furthermore, the
 dimension of `D_f` is the same as the dimension of `Ker(f)`."  (That `D_f` is a
 subspace is definitional in Lean — `kernelSubcode` is a kernel — so what is left
-to prove is the dimension statement.) -/
-theorem kernelSubcode_finrank {k r : ℕ} (f : Word F k →ₗ[F] Word F r)
-    (C : Submodule F (Word F (k + r))) :
+to prove is the dimension statement.  The hypotheses transcribed here are the
+paper's: `C` is a linear `(f : d_d, d_f)`-FCC (`hC`, which carries
+`dim C = k`) **and** in standard form (`hstd`, every message is the message part
+of a codeword); the second is essential — without it the dimension statement is
+false, `ISSUES.md` §26.) -/
+theorem kernelSubcode_finrank {k r dd df : ℕ} (f : Word F k →ₗ[F] Word F r)
+    (C : Submodule F (Word F (k + r))) (hC : IsLinearFCC f C dd df)
+    (hstd : ∀ u : Word F k, ∃ c ∈ C, msgPart c = u) :
     Module.finrank F (kernelSubcode f C) = Module.finrank F (LinearMap.ker f) := by
-  sorry
+  -- the message part is onto: that is the paper's "standard form"
+  have hsurj : Function.Surjective (msgPartLinear C) := by
+    intro u
+    obtain ⟨c, hc, hcu⟩ := hstd u
+    exact ⟨⟨c, hc⟩, hcu⟩
+  -- `dim C = k = dim F_q^k`, so `g` is injective as well (rank–nullity)
+  have hinj : Function.Injective (msgPartLinear C) := by
+    rw [← LinearMap.ker_eq_bot, ← Submodule.finrank_eq_zero]
+    have h := LinearMap.finrank_range_add_finrank_ker (msgPartLinear C)
+    have htop : Module.finrank F (⊤ : Submodule F (Word F k)) = k := by
+      rw [finrank_top F (Word F k), Module.finrank_fin_fun F]
+    rw [LinearMap.range_eq_top.mpr hsurj, htop, hC.1] at h
+    omega
+  -- hence `C ≃ₗ F_q^k`, and pulling `ker f` back along it keeps the dimension
+  set e : C ≃ₗ[F] Word F k := LinearEquiv.ofBijective (msgPartLinear C) ⟨hinj, hsurj⟩
+  have hcomap : kernelSubcode f C = (LinearMap.ker f).comap (e : C →ₗ[F] Word F k) := by
+    rw [kernelSubcode]
+    rfl
+  have hmap : ((LinearMap.ker f).comap (e : C →ₗ[F] Word F k)).map (e : C →ₗ[F] Word F k)
+      = LinearMap.ker f := by
+    refine Submodule.map_comap_eq_self ?_
+    have hr : (e : C →ₗ[F] Word F k).range = ⊤ := LinearMap.range_eq_top.mpr e.surjective
+    rw [hr]
+    exact le_top
+  rw [hcomap]
+  have h1 : Module.finrank F (((LinearMap.ker f).comap (e : C →ₗ[F] Word F k)).map
+        (e : C →ₗ[F] Word F k))
+      = Module.finrank F ((LinearMap.ker f).comap (e : C →ₗ[F] Word F k)) :=
+    LinearEquiv.finrank_map_eq e _
+  rw [hmap] at h1
+  exact h1.symm
 
 omit [Fintype F] in
 /-- `#lemma 8#` (§VII-A) — "let `C` be a subspace of `F_q^n` and `D` a subspace of

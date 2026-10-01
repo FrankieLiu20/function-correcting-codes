@@ -86,6 +86,7 @@ card_ball_union_dist_three
 # §VIII-A (the generalized Plotkin bound of Theorem 14):
 plotkin_bound_fcc
 # §VII-A (the coset-distance bridge and Lemma 9):
+kernelSubcode_finrank
 cosetDist_eq
 wt_ge_of_not_mem_kernel
 # §VII-B (linearity and the distance guarantees of the concatenated code):

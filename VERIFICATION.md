@@ -401,9 +401,23 @@ Verified (separately, after the full build):
 
 | Check | Result |
 | --- | --- |
-| `lake build` | green (1819 jobs; 4 `sorry` warnings, `#lemma 7#`/`#lemma 13#`/`#lemma 11#`×2) |
-| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 4 `sorry`) |
-| `scripts/axioms_check.ps1` | green — 58 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+| `lake build` | green (1876 jobs; 3 `sorry` warnings: `#lemma 13#` and the two external `#lemma 11#` rows) |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 3 `sorry`) |
+| `scripts/axioms_check.ps1` | green — 59 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+
+**`#lemma 7#`, same day — with a statement fix.**  `kernelSubcode_finrank` was
+stated in phase 2 with *no* hypotheses, and that version is **false**:
+`C = span{(0,1)} ⊂ F₂²` has `msgPart ≡ 0`, so `D_f = C` has dimension `1` while
+`ker id` has dimension `0` (`ISSUES.md` §26).  The paper's hypothesis "in
+standard form" is what rules this out, and the statement now carries the paper's
+`hC : IsLinearFCC f C dd df` together with
+`hstd : ∀ u : Word F k, ∃ c ∈ C, msgPart c = u`.  Proof: `hstd` makes the message
+part onto; `dim C = k = dim F_q^k` plus rank–nullity
+(`LinearMap.finrank_range_add_finrank_ker`, which needed the import
+`Mathlib.LinearAlgebra.FiniteDimensional.Lemmas`) makes it injective; so
+`C ≃ₗ F_q^k` (`LinearEquiv.ofBijective`) and pulling `ker f` back along it
+preserves the dimension (`Submodule.map_comap_eq_self`,
+`LinearEquiv.finrank_map_eq`).
 
 **§VII-B, same day.**  `#lemma 10#` (`image_linear_concat`) and `#theorem 13#`
 (`isLinearFCC_concat`):

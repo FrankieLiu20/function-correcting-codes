@@ -323,8 +323,18 @@ in the same commit that does the work.
         `f u ≠ f v` forces `u ≠ v`, `d_f − d_d ≤ d(D(fu),D(fv))` plus
         `d_d ≤ d(Cu,Cv)` gives `d_f ≤ d(cat)` (`omega` with `hadd`).
 
-      **Still to do in 3.10**: `#lemma 7#` (see below — it needs a statement fix),
-      and the *dimension* half of `#lemma 10#`/`#theorem 13#` ("a linear code of
+      * `#lemma 7#` (`kernelSubcode_finrank`) — **statement fix first**
+        (`ISSUES.md` §26): as transcribed in phase 2 it had no hypotheses and was
+        *false* (take `C = span{(0,1)} ⊂ F_q²`: `msgPart` vanishes on `C`, so
+        `dim D_f = 1` while `dim ker f` can be `0`).  It now carries the paper's
+        `hC : IsLinearFCC f C dd df` and the "standard form" hypothesis
+        `hstd : ∀ u, ∃ c ∈ C, msgPart c = u`.  Proof: `hstd` makes `msgPart` onto,
+        and `dim C = k = dim F_q^k` (rank–nullity) makes it injective, so
+        `C ≃ₗ F_q^k`; pulling `ker f` back along an equivalence preserves the
+        dimension (`Submodule.map_comap_eq_self` + `LinearEquiv.finrank_map_eq`).
+
+      **Still to do in 3.10**: the *dimension* half of `#lemma 10#`/`#theorem 13#`
+      ("a linear code of
       dimension `k` and total redundancy `(n−k)+r'`"), which needs the encoders
       `C`, `D` as *injective* linear maps (the Lean statements currently take them
       as plain functions and state linearity/distances only — the gap is recorded

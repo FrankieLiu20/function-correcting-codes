@@ -573,3 +573,22 @@ written that way in phase 2), not a change of the identity itself; nothing in th
 development uses the `v_i ≠ v_j` case, so no counterexample-style correction is
 involved.  Recorded here because the project transcribes the paper's hypotheses
 literally wherever they are needed.
+
+## 26. `#lemma 7#`: the dimension statement is false without "standard form"
+
+**Found and fixed 2026-10-01**, while proving `#lemma 7#`.  As transcribed in
+phase 2, `kernelSubcode_finrank` carried **no** hypotheses at all:
+`finrank F D_f = finrank F (ker f)` for every subspace `C ≤ F_q^{k+r}` and every
+linear `f : F_q^k → F_q^r`.  That is false: take `F = F₂`, `k = r = 1` and
+`C = span{(0,1)} ⊂ F₂²`.  The message part `c ↦ c 0` is identically `0` on `C`,
+so `D_f = {c ∈ C | msgPart c ∈ ker f} = C` has dimension `1`, while with
+`f = id` the kernel is `{0}` of dimension `0`.
+
+The paper's hypothesis "`C` … in standard form" is exactly what rules this out:
+a linear code in standard form has generator matrix `[I_k | P]`, i.e. *every*
+message `u ∈ F_q^k` occurs as the message part of a codeword.  The statement now
+carries the paper's hypotheses — `hC : IsLinearFCC f C dd df` (which includes
+`dim C = k`) and `hstd : ∀ u : Word F k, ∃ c ∈ C, msgPart c = u` — and the proof
+is rank–nullity: `msgPart` is onto by `hstd`, and `dim C = k = dim F_q^k` makes
+it injective, so `C ≃ₗ F_q^k`; pulling `ker f` back along that equivalence is
+dimension-preserving (`Submodule.map_comap_eq_self`, `LinearEquiv.finrank_map_eq`).

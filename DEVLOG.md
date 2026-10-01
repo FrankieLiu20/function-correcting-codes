@@ -1681,3 +1681,50 @@ inline, `TODO.md` 3.10 lists it as still open, and the note is in
 `VERIFICATION.md` §"Statement-level caveats" — the label-level consistency
 checker cannot see a gap like this, so it is written down where a reader will
 find it.
+
+**Same session, `#lemma 7#` — a false statement found and fixed.**  `sorry` 4 → 3
+(the three left are `#lemma 13#` and the two external `#lemma 11#` rows),
+headline 58 → 59.
+
+As transcribed in phase 2, `kernelSubcode_finrank` had **no** hypotheses:
+`finrank F D_f = finrank F (ker f)` for every subspace `C` and every linear `f`.
+That is false, and the counterexample is small: over `F₂` with `k = r = 1`, take
+`C = span{(0,1)} ⊂ F₂²` (dimension `1`); the message part `c ↦ c 0` is
+identically `0` on `C`, so `D_f = C` has dimension `1`, while `f = id` has
+`ker f = 0` of dimension `0`.  The paper's phrase "`C` … in standard form" — a
+generator matrix `[I_k | P]`, i.e. every message occurs as the message part of a
+codeword — is exactly what rules this out, so the statement now carries the
+paper's `hC : IsLinearFCC f C dd df` plus `hstd : ∀ u, ∃ c ∈ C, msgPart c = u`
+(`ISSUES.md` §26).
+
+The proof is rank–nullity, and it is the first place in this project where the
+dimension bookkeeping is done by hand: `hstd` gives that the message part
+`g = msgPartLinear C` is onto; rank–nullity
+(`LinearMap.finrank_range_add_finrank_ker`, plus `k = finrank F (F_q^k)` from
+`finrank_top`/`Module.finrank_fin_fun`) gives `finrank F (ker g) = 0`, hence
+`ker g = ⊥` (`Submodule.finrank_eq_zero`) and `g` injective; then
+`LinearEquiv.ofBijective g ⟨hinj, hsurj⟩` gives `C ≃ₗ F_q^k`, and
+`Submodule.map_comap_eq_self` + `LinearEquiv.finrank_map_eq` show that pulling
+`ker f` back along an equivalence of `C` with the whole space preserves the
+dimension.
+
+Two Lean lessons: `FiniteDimensional.Lemmas` (rank–nullity) and
+`finrank_top` are *not* reachable from `FiniteDimensional.Basic`, so
+`FCC/Paper.lean` gained the import `Mathlib.LinearAlgebra.FiniteDimensional.Lemmas`
+(and `finrank_top` is a root-level name, not `Submodule.finrank_top`); and
+`omit` must name the variable the *declaration* actually uses — here
+`omit [Fintype F] in` (the linter's message names the unused one, which is the
+quickest way to find out).
+
+**Verification.**  Full `lake build` green (1876 jobs, 3 `sorry` warnings, no
+other warnings), then `consistency_check.ps1 -Strict` green (78 markers, 73 rows
+stated, 3 `sorry`) and `axioms_check.ps1` green (59 audited results; the new
+lemma depends only on `propext`, `Classical.choice`, `Quot.sound`).
+`kernelSubcode_finrank` was added to `scripts/headline_theorems.txt` and
+`FCC/AxiomCheck.lean`.
+
+With that, **phase 3.10 is complete** except for the *dimension half* of
+`#lemma 10#`/`#theorem 13#` (recorded in `TODO.md` 3.10 and in
+`VERIFICATION.md` §"Statement-level caveats").  What is left in the whole
+development is `#lemma 13#` (the sharp Plotkin/balanced-distribution constant)
+and the two external `#lemma 11#` rows that the user has deliberately deferred.
