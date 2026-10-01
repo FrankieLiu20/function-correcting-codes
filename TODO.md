@@ -299,6 +299,22 @@ in the same commit that does the work.
       transcriptions had left the ball radius free of the distances; they now carry
       `2t_f+1 ≤ d_f` (resp. `2t_d+1 ≤ d_d, d_f`) — `ISSUES.md` §23 has the
       counterexample.
+- [ ] 3.10 (in progress). §VII, the linear/algebraic side: `#lemma 7#`–`#lemma 10#`
+      and `#theorem 13#`.  Done 2026-10-01:
+
+      * `#lemma 8#` (`cosetDist_eq`) — the two sides are the same set of weights:
+        `c₁ ∈ v_i + D`, `c₂ ∈ v_j + D` is `c₁ = x + d`, `c₂ = y`, and
+        `c₁ - c₂ = (x - y) + ((c₁ - x) - (c₂ - y))`, so both `sInf`s are
+        `sInf {wt ((x-y) + d) | d ∈ D}` (`Set.ext` + `abel`, then `rw [h, cosetDist]`).
+        The printed hypothesis `v_i ≠ v_j` is **not needed** (`ISSUES.md` §25): at
+        `v_i = v_j` both sides are `0`.
+      * `#lemma 9#` (`wt_ge_of_not_mem_kernel`) — `d(C/D_f) ≥ d_f` (`hC.2`), the
+        coset of `v` is one the minimum of `cosetCodeMinDist` ranges over (take
+        `x = v`, `y = 0`), and `wt v = wt (v + 0)` with `0 ∈ D_f`, so
+        `d_f ≤ cosetCodeMinDist ≤ cosetDist (D_f) v ≤ wt v` (three `Nat.sInf_le`).
+
+      Still to do: `#lemma 7#` (see below — it needs a statement fix),
+      `#lemma 10#` and `#theorem 13#` (the §VII-B concatenation).
 - [ ] 3.11 (in progress). `#lemma 13#` (`plotkin_bound`) — `#theorem 14#`
       (`plotkin_bound_fcc`) is **done** (2026-10-01, new module
       `FCC/Plotkin.lean`); `#lemma 11#` (quoted from [1]) stays a hypothesis like

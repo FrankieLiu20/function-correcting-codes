@@ -82,5 +82,8 @@ namespace FCC
 #print axioms card_ball_union_three
 #print axioms card_ball_union_dist_three
 #print axioms plotkin_bound_fcc
+-- §VII-A (coset codes of a linear FCC):
+#print axioms cosetDist_eq
+#print axioms wt_ge_of_not_mem_kernel
 
 end FCC

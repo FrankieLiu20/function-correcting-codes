@@ -559,3 +559,17 @@ with `2(t_f − t_d)`).  The statement now carries `IsSystematic C` and `td ≤ 
 The companion `N_cdrm_le_bounded` (`#corollary 6#`'s step) needed no change: it is
 the transitivity of the already-proved `#theorem 6#` (`N_cdrm_le_Nconst`) with the
 external numerical bound supplied as `hbound`.
+
+## 25. `#lemma 8#`: the printed hypothesis `v_i ≠ v_j` is not needed
+
+**Found 2026-10-01**, while proving `#lemma 8#`.  The paper states the coset
+distance identity for `v_i, v_j ∈ C` with `v_i ≠ v_j`; the identity holds for
+*all* `x, y ∈ C` (it is a statement about the sets `x + D` and `y + D`, not about
+their being distinct), and the Lean statement `cosetDist_eq` therefore omits the
+hypothesis.  At `x = y` both sides are `0`: the left-hand minimum is witnessed by
+`c₁ = c₂ = x`, and the right-hand one by `d = 0 ∈ D`.  This is a deliberate,
+harmless weakening of the *hypothesis* (the catalogue row `PLAN.md` §1.1 was
+written that way in phase 2), not a change of the identity itself; nothing in the
+development uses the `v_i ≠ v_j` case, so no counterexample-style correction is
+involved.  Recorded here because the project transcribes the paper's hypotheses
+literally wherever they are needed.

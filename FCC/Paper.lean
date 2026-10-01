@@ -3300,6 +3300,7 @@ theorem kernelSubcode_finrank {k r : ℕ} (f : Word F k →ₗ[F] Word F r)
     Module.finrank F (kernelSubcode f C) = Module.finrank F (LinearMap.ker f) := by
   sorry
 
+omit [Fintype F] in
 /-- `#lemma 8#` (§VII-A) — "let `C` be a subspace of `F_q^n` and `D` a subspace of
 `C`.  Then for any `v_i, v_j ∈ C`,
 `min{wt(c₁ − c₂) | c₁ ∈ v_i + D, c₂ ∈ v_j + D} = min_{d ∈ D} wt(v_i − v_j + d)`".
@@ -3308,14 +3309,40 @@ The right-hand side is our `cosetDist`, so this lemma is the bridge between
 theorem cosetDist_eq (D : Submodule F (Word F n)) (x y : Word F n) :
     sInf {w : ℕ | ∃ c₁ : Word F n, c₁ - x ∈ D ∧ ∃ c₂ : Word F n, c₂ - y ∈ D ∧
         w = wt (c₁ - c₂)} = cosetDist D (x - y) := by
-  sorry
+  -- both sides are the set of weights `wt (d + (x - y))` for `d ∈ D`: the pairs
+  -- `c₁ ∈ x + D`, `c₂ ∈ y + D` are exactly `c₁ = x + d`, `c₂ = y`, and
+  -- `c₁ - c₂ = (x - y) + d`
+  have h : {w : ℕ | ∃ c₁ : Word F n, c₁ - x ∈ D ∧ ∃ c₂ : Word F n, c₂ - y ∈ D ∧
+        w = wt (c₁ - c₂)}
+      = {w : ℕ | ∃ d ∈ D, w = wt ((x - y) + d)} := by
+    ext w
+    constructor
+    · rintro ⟨c₁, h₁, c₂, h₂, rfl⟩
+      exact ⟨(c₁ - x) - (c₂ - y), D.sub_mem h₁ h₂, by congr 1; abel⟩
+    · rintro ⟨d, hd, rfl⟩
+      exact ⟨x + d, by simpa using hd, y, by simp, by congr 1; abel⟩
+  rw [h, cosetDist]
 
+omit [Fintype F] in
 /-- `#lemma 9#` (§VII-A) — "let `C` be a linear `(f : d_d, d_f)`-FCC of a linear
 function `f`.  Then `wt(v) ≥ d_f` for all `v ∈ C \ D_f`." -/
 theorem wt_ge_of_not_mem_kernel {k r dd df : ℕ} (f : Word F k →ₗ[F] Word F r)
     (C : Submodule F (Word F (k + r))) (hC : IsLinearFCCKernel f C dd df) :
     ∀ v : C, v ∉ kernelSubcode f C → df ≤ wt (v : Word F (k + r)) := by
-  sorry
+  intro v hv
+  -- `d(C/D_f) ≥ d_f`, and the coset of `v` is one of the cosets the minimum of
+  -- `cosetCodeMinDist` runs over, so `cosetDist v ≥ d_f`
+  have h₁ : df ≤ cosetCodeMinDist C (kernelSubcode f C) := hC.2
+  have h₂ : cosetCodeMinDist C (kernelSubcode f C) ≤
+      cosetDist ((kernelSubcode f C).map C.subtype) (v : Word F (k + r)) := by
+    rw [cosetCodeMinDist]
+    exact Nat.sInf_le ⟨v, 0, by simpa using hv, by simp⟩
+  -- `0 ∈ D_f`, so `wt v = wt (v + 0)` and the coset distance is at most it
+  have h₃ : cosetDist ((kernelSubcode f C).map C.subtype) (v : Word F (k + r))
+      ≤ wt (v : Word F (k + r)) := by
+    rw [cosetDist]
+    exact Nat.sInf_le ⟨0, Submodule.zero_mem _, by simp⟩
+  linarith
 
 /-- `(internal, §VII — used by `#lemma 10#`, `#theorem 13#`)` — the concatenation
 of a word of length `m` with one of length `n`, i.e. the paper's pair

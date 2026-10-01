@@ -1609,3 +1609,43 @@ green (78 markers, 73 rows stated, 8 `sorry`) and `axioms_check.ps1` green
 `FCC/AxiomCheck.lean`.  Next: `#lemma 13#` (the sharp balanced-distribution
 constant `a⌈M/q⌉(M−⌈M/q⌉) + (q−a)⌊M/q⌋(M−⌊M/q⌋)`), then the §VII linear-FCC
 bricks.
+
+## 2026-10-01 — §VII-A: `#lemma 8#` and `#lemma 9#` (the coset-distance bridge)
+
+`sorry` 8 → **6**, headline 54 → **56**.  The first two results of the linear side
+(§VII-A) are in, both proved by their paper proofs:
+
+* `#lemma 8#` (`cosetDist_eq`): for a subspace `D ≤ F_q^n` and any `x, y`,
+  `min{wt(c₁ − c₂) | c₁ ∈ x + D, c₂ ∈ y + D} = min_{d ∈ D} wt((x − y) + d)`, the
+  right-hand side being `#definition 17#`'s `cosetDist D (x - y)`.  The two sets
+  of weights are literally equal: `c₁ = x + d`, `c₂ = y` parametrises the pairs
+  with `c₁ - x ∈ D`, `c₂ - y ∈ D`, and
+  `c₁ - c₂ = (x - y) + ((c₁ - x) - (c₂ - y))` (`abel`), so both `sInf`s are the
+  same (`Set.ext` + `rw [h, cosetDist]`).  One `omit [Fintype F] in`: the identity
+  is additive-group algebra and needs no finiteness.
+* `#lemma 9#` (`wt_ge_of_not_mem_kernel`): `wt v ≥ d_f` for `v ∈ C \ D_f`, in the
+  `d(C/D_f) ≥ d_f` form of `#definition 18#` (`IsLinearFCCKernel`) that is exactly
+  how the paper uses it.  Three `Nat.sInf_le` steps: `hC.2` bounds
+  `cosetCodeMinDist` by `d_f`; the coset of `v` is one of the cosets the minimum
+  ranges over (`x = v`, `y = 0` — and `v ∉ D_f` is exactly the hypothesis that
+  makes the pair admissible); and `wt v = wt (v + 0)` with `0 ∈ D_f` gives
+  `cosetDist v ≤ wt v`.  `linarith` composes the chain.  (Note this does *not*
+  need `#lemma 8#`: `cosetDist`'s definition is already the `min_d wt(z+d)` form.)
+
+**Statement review of §VII-A.**  `#lemma 8#`'s printed hypothesis `v_i ≠ v_j` is
+not needed — the identity is about the sets `x + D`, `y + D` and holds trivially
+at `x = y` (both sides `0`).  The Lean statement (like the phase-2 catalogue row)
+omits it; the finding is recorded as `ISSUES.md` §25 so that the deviation from
+the printed hypothesis is on the record.  `#lemma 9#`'s statement matches the
+paper's (via `#definition 18#`'s equivalent form).
+
+**Verification.**  Full `lake build` green (1819 jobs, 6 `sorry` warnings, no
+other warnings), then `consistency_check.ps1 -Strict` green (78 markers, 73 rows
+stated, 6 `sorry`) and `axioms_check.ps1` green (56 audited results; both new
+lemmas depend only on `propext`, `Classical.choice`, `Quot.sound`).  Both were
+added to `scripts/headline_theorems.txt` and `FCC/AxiomCheck.lean`.  Next:
+`#lemma 10#`/`#theorem 13#` (the §VII-B concatenation), then `#lemma 7#`, which
+needs a statement fix — as written in Phase 2 it has **no** hypotheses and is
+false (take `C = span{(0,1)} ⊂ F_q²`, `msgPart` is `0` on `C`, so
+`finrank D_f = 1` while `finrank ker f` can be `0`); the paper's
+"in standard form" is essential and will be made explicit.

@@ -370,6 +370,41 @@ over distinct vectors, and the finset form makes "a set with at least ℓ words 
 least as large as the minimum over ℓ-element sets" immediate
 (`Finset.exists_subset_card_eq` + `Nat.sInf_le`).
 
+## Phase 3.10 (part 1) — §VII-A: the coset-distance bridge (2026-10-01)
+
+`#lemma 8#` (`cosetDist_eq`) and `#lemma 9#` (`wt_ge_of_not_mem_kernel`) are
+proved, the first two results of the linear side (§VII).
+
+`#lemma 8#`: for a subspace `D ≤ F_q^n` and arbitrary `x, y`,
+
+```text
+min{wt(c₁ − c₂) | c₁ ∈ x + D, c₂ ∈ y + D} = min_{d ∈ D} wt((x − y) + d),
+```
+
+the right-hand side being `#definition 17#`'s `cosetDist D (x - y)`.  Statement
+re-read against the PDF: the printed version asks for `v_i ≠ v_j`; the identity
+holds without it (at `v_i = v_j` both sides are `0`), and the Lean statement (like
+the catalogue row) omits the hypothesis — recorded in `ISSUES.md` §25 as a
+deliberate, harmless weakening.  Proof: the two sets of weights are equal, because
+`c₁ = x + d`, `c₂ = y` runs through the pairs with `c₁ - x ∈ D`, `c₂ - y ∈ D`
+and `c₁ - c₂ = (x - y) + ((c₁ - x) - (c₂ - y))` (`Set.ext`, `Submodule.sub_mem`,
+`abel`), so the two `sInf`s agree.
+
+`#lemma 9#`: in a linear `(f : d_d, d_f)`-FCC of a linear `f`, `wt v ≥ d_f` for
+all `v ∈ C \ D_f` — stated with the `d(C/D_f) ≥ d_f` form of `#definition 18#`
+(`IsLinearFCCKernel`), which is exactly how the paper uses it.  Proof: the coset of
+`v` is one of the cosets the minimum in `cosetCodeMinDist` ranges over (`x = v`,
+`y = 0`, and `v ∉ D_f` is the hypothesis), and `wt v = wt (v + 0)` with `0 ∈ D_f`
+shows the coset distance is at most `wt v`; the three `Nat.sInf_le` steps compose.
+
+Verified (separately, after the full build):
+
+| Check | Result |
+| --- | --- |
+| `lake build` | green (1819 jobs; 6 `sorry` warnings, all in phases 3.10–3.11) |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 6 `sorry`) |
+| `scripts/axioms_check.ps1` | green — 56 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+
 ## Phase 3.11 (part 1) — `#theorem 14#`, the generalized Plotkin bound (2026-10-01)
 
 `#theorem 14#` (`plotkin_bound_fcc`) is proved, in the new module
