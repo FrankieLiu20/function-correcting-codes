@@ -2470,5 +2470,89 @@ theorem card_ne_pairs_mul_le {ι : Type*} [Fintype ι] [DecidableEq ι]
     rw [hne_eq, Nat.mul_sub_left_distrib]
     exact Nat.sub_le_sub_left h1 (Fintype.card F * T)
 
+/-- `(internal, §VIII-A — the *sharp* balanced-distribution estimate of `#lemma 13#`)` —
+for `M` positions carrying symbols of a `q`-ary alphabet (`M` = the sum of the
+symbol counts `n_ε`), the sum of squares of the counts is minimal when the symbols
+are as evenly distributed as possible: with `a = M % q`,
+`q · Σ_ε n_ε² ≥ M² + a(q−a)`  (equality for `a` symbols `⌈M/q⌉` times and the
+remaining `q−a` symbols `⌊M/q⌋` times).
+
+Proof: with `t = M / q` the pointwise inequality `(n−t)(n−t−1) ≥ 0` (integrality!)
+says `n(2t+1) ≤ n² + t(t+1)`; summing over `ε` and using `M = qt + a` gives
+`(2t+1)M − q·t(t+1) ≤ Σ n_ε²`, and multiplying by `q` turns the left side into
+`M² + a(q−a)`.  This is the sharpening of `sum_sq_le_card_mul_sum_sq` (which is
+the `a = 0` case up to the correction term) that `#lemma 13#` needs. -/
+theorem card_mul_sum_sq_ge {ι : Type*} [Fintype ι] (n : ι → ℕ) :
+    Fintype.card ι * (∑ ε, n ε ^ 2) ≥
+      (∑ ε, n ε) ^ 2 + (∑ ε, n ε) % Fintype.card ι *
+        (Fintype.card ι - (∑ ε, n ε) % Fintype.card ι) := by
+  classical
+  set M := ∑ ε, n ε with hM
+  set q := Fintype.card ι with hq
+  set t := M / q with ht
+  have hMta : q * t + M % q = M := by
+    rw [ht, hq]
+    exact Nat.div_add_mod M (Fintype.card ι)
+  -- the pointwise inequality `(n − t)(n − t − 1) ≥ 0` over `ℤ`
+  have hkey : ∀ m : ℤ, 0 ≤ m * (m - 1) := by
+    intro m
+    by_cases h : m ≤ 0
+    · exact mul_nonneg_of_nonpos_of_nonpos h (by linarith)
+    · have h1 : 1 ≤ m := by omega
+      exact mul_nonneg (by linarith) (by linarith)
+  have hpoint : ∀ ε, (n ε : ℤ) * (2 * (t : ℤ) + 1) ≤
+      (n ε : ℤ) ^ 2 + (t : ℤ) * ((t : ℤ) + 1) := by
+    intro ε
+    have h := hkey ((n ε : ℤ) - (t : ℤ))
+    nlinarith [h]
+  -- sum it over `ε`
+  have hsum : (2 * (t : ℤ) + 1) * (M : ℤ) - (q : ℤ) * ((t : ℤ) * ((t : ℤ) + 1))
+      ≤ ∑ ε, (n ε : ℤ) ^ 2 := by
+    have h1 : (∑ ε, (n ε : ℤ) * (2 * (t : ℤ) + 1))
+        ≤ ∑ ε, ((n ε : ℤ) ^ 2 + (t : ℤ) * ((t : ℤ) + 1)) :=
+      Finset.sum_le_sum fun ε _ => hpoint ε
+    have h2 : (∑ ε, (n ε : ℤ) * (2 * (t : ℤ) + 1)) = (M : ℤ) * (2 * (t : ℤ) + 1) := by
+      rw [hM]
+      push_cast
+      rw [Finset.sum_mul]
+    have h3 : (∑ ε, ((n ε : ℤ) ^ 2 + (t : ℤ) * ((t : ℤ) + 1)))
+        = (∑ ε, (n ε : ℤ) ^ 2) + (q : ℤ) * ((t : ℤ) * ((t : ℤ) + 1)) := by
+      rw [Finset.sum_add_distrib, Finset.sum_const, Finset.card_univ, ← hq, nsmul_eq_mul]
+    rw [h2, h3] at h1
+    linarith
+  -- multiply by `q` and evaluate at `M = q·t + a`
+  have hMcast : (M : ℤ) = (q : ℤ) * (t : ℤ) + ((M % q : ℕ) : ℤ) := by
+    conv_lhs => rw [← hMta]
+    simp only [Nat.cast_add, Nat.cast_mul]
+  have hident : (q : ℤ) * ((2 * (t : ℤ) + 1) * (M : ℤ) -
+        (q : ℤ) * ((t : ℤ) * ((t : ℤ) + 1)))
+      = (M : ℤ) ^ 2 + (((M % q) * (q - M % q) : ℕ) : ℤ) := by
+    have h1 : (((M % q) * (q - M % q) : ℕ) : ℤ)
+        = ((M % q : ℕ) : ℤ) * ((q : ℤ) - ((M % q : ℕ) : ℤ)) := by
+      have hle : M % q ≤ q := by
+        rcases Nat.eq_zero_or_pos q with h0 | h0
+        · have hempty : IsEmpty ι := Fintype.card_eq_zero_iff.mp (by rw [← hq]; exact h0)
+          have hM0 : M = 0 := by
+            rw [hM]
+            exact Finset.sum_eq_zero fun ε _ => (hempty.false ε).elim
+          omega
+        · exact le_of_lt (Nat.mod_lt M h0)
+      rw [Nat.cast_mul, Nat.cast_sub hle]
+    rw [h1, hMcast]
+    ring
+  have hmul := mul_le_mul_of_nonneg_left hsum (Int.natCast_nonneg q)
+  have hmain : (M : ℤ) ^ 2 + (((M % q) * (q - M % q) : ℕ) : ℤ)
+      ≤ (q : ℤ) * (∑ ε, (n ε : ℤ) ^ 2) := by
+    linarith [hmul, hident]
+  have hgoal : ((M ^ 2 + M % q * (q - M % q) : ℕ) : ℤ)
+      ≤ ((q * ∑ ε, n ε ^ 2 : ℕ) : ℤ) := by
+    have hcast : ((M ^ 2 + M % q * (q - M % q) : ℕ) : ℤ)
+        = (M : ℤ) ^ 2 + (((M % q) * (q - M % q) : ℕ) : ℤ) := by
+      rw [Nat.cast_add, Nat.cast_pow]
+    rw [hcast]
+    push_cast
+    exact hmain
+  exact_mod_cast hgoal
+
 end FCC
 

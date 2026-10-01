@@ -369,10 +369,28 @@ in the same commit that does the work.
       from the doubled sum-of-squares identity) and `card_ne_pairs_mul_le`
       (`q·#{(i,j) : symbols differ} ≤ M²(q−1)`, the per-coordinate estimate).
 
-      For `#lemma 13#` the sharp constant additionally needs the
+      **3.11 (part 2, in progress).**  For `#lemma 13#` the sharp constant needs the
       balanced-distribution value `a⌈M/q⌉(M−⌈M/q⌉) + (q−a)⌊M/q⌋(M−⌊M/q⌋)`
       (`a = M % q`), i.e. the exact maximisation of `Σ_ε n_ε(M−n_ε)` over
-      distributions; the weak `M²(q−1)/q` form above is not enough there.
+      distributions; the weak `M²(q−1)/q` form above is not enough there.  The
+      arithmetic heart landed 2026-10-01 as **`card_mul_sum_sq_ge`**
+      (`FCC/Balls.lean`): for `M = Σ_ε n_ε` and `a = M % q`,
+      `q·Σ_ε n_ε² ≥ M² + a(q−a)` — i.e. `Σ n_ε²` is minimal at the balanced
+      distribution, with equality for `a` symbols `⌈M/q⌉` times and the rest
+      `⌊M/q⌋` times.  The proof is short: with `t = M / q` the pointwise
+      inequality `(n−t)(n−t−1) ≥ 0` (integrality!) says `n(2t+1) ≤ n² + t(t+1)`;
+      summing and multiplying by `q` turns `(2t+1)M − q·t(t+1)` into `M² + a(q−a)`.
+
+      Remaining for `#lemma 13#`: (a) the sharp per-coordinate pair count
+      `q·#{(i,j) : symbols differ} ≤ M²(q−1) − a(q−a)` (the analogue of
+      `card_ne_pairs_mul_le` with the correction term — `#ne = M² − Σn_ε²`,
+      `M²(q−1) = qM² − M²`, then `Nat.sub_le_sub_left` against
+      `card_mul_sum_sq_ge`); (b) the same double count as in `#theorem 14#` but
+      over *unordered* pairs (the paper's `Σ_{i<j}`), giving
+      `2q·Σ_{i<j}[D]_{i,j} ≤ r·(M²(q−1) − a(q−a))` for every `D`-code of length
+      `r`; (c) the `ℚ`/`sInf` finish: every valid `r` satisfies the bound, and the
+      set of valid lengths is nonempty (so `sInf` is a valid lower bound — the
+      `A = M²(q−1) − a(q−a) = 0` cases, i.e. `M ≤ 1` or `q = 1`, are trivial).
 - [x] Statement review of the appendix counts (2026-10-01): `#theorem 17#`,
       `#lemma 14#`, `#theorem 18#`, `#theorem 19#` were re-read against the PDF and
       match verbatim (`DEVLOG.md`); no change needed.  Their proofs are the next

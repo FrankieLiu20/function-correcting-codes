@@ -1728,3 +1728,42 @@ With that, **phase 3.10 is complete** except for the *dimension half* of
 `VERIFICATION.md` §"Statement-level caveats").  What is left in the whole
 development is `#lemma 13#` (the sharp Plotkin/balanced-distribution constant)
 and the two external `#lemma 11#` rows that the user has deliberately deferred.
+
+## 2026-10-01 — §VIII-A: the sharp balanced-distribution brick of `#lemma 13#`
+
+`card_mul_sum_sq_ge` (`FCC/Balls.lean`): for `n : ι → ℕ` with `M = Σ_ε n_ε` and
+`a = M % Fintype.card ι`,
+
+```text
+Fintype.card ι * Σ_ε n_ε²  ≥  M² + a(q−a),
+```
+
+the sharpening of `sum_sq_le_card_mul_sum_sq` that `#lemma 13#` needs: the sum of
+squares of the symbol counts is minimal exactly when the symbols are as evenly
+distributed as possible (`a` of them `⌈M/q⌉` times, the rest `⌊M/q⌋` times, where
+both sides are equal).  This is the arithmetic heart of the lemma; the assembly
+(sharp per-coordinate pair count, the unordered double count, and the `ℚ`/`sInf`
+finish) is recorded step by step in `TODO.md` 3.11.
+
+The proof is three short moves, and the second one is the pleasant part:
+
+1. **Pointwise, over `ℤ`**: with `t = M / q`, `(n−t)(n−t−1) ≥ 0` — true because
+   `n − t` is an *integer* (`m(m−1) ≥ 0` for every `m : ℤ`, split on `m ≤ 0`),
+   which is exactly where integrality is used.  Expanding gives
+   `n(2t+1) ≤ n² + t(t+1)`.
+2. **Sum**: `(2t+1)·M ≤ Σ n_ε² + q·t(t+1)`, i.e. `(2t+1)M − q·t(t+1) ≤ Σ n_ε²`.
+3. **Multiply by `q` and substitute `M = q·t + a`** (`Nat.div_add_mod`): the left
+   side becomes `q·((2t+1)M − q·t(t+1)) = M² + a(q−a)` (`ring`), which is the
+   sharp bound.
+
+No division, no induction, and no Cauchy–Schwarz: the "balanced distribution"
+intuition is captured by the single integer inequality in step 1.  (`Cauchy–Schwarz`
+still gives the weaker `q·Σn² ≥ M²` used by `#theorem 14#`.)
+
+**Lean notes.**  `push_cast` rewrites `↑(M % q)` in its `Int`-mod shape and
+`← hMta` rewrites *inside* `M % q` as well — both bit me until the cast
+manipulations were isolated into their own `have` (`Nat.cast_mul`,
+`Nat.cast_sub hle` with `hle : M % q ≤ q` proved by `Nat.mod_lt` plus the empty
+case `q = 0`, where `Fintype.card ι = 0` forces `M = 0`), and the `conv_lhs => rw`
+form was used for the `M = q·t + a` rewrite.  `smul_eq_mul` does not apply to the
+`ℕ`-scalar `Fintype.card ι • _` (it is `nsmul`), `nsmul_eq_mul` does.
