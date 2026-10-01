@@ -522,3 +522,23 @@ every `t - 1`, `t - 2` exact and leaves the formula verbatim; this is the same
 convention the paper prints explicitly for the twin result `#theorem 19#`
 (`t ≥ 2` there).  The identity is provable for all `t ≥ 1` — the paper's proof
 (four cases for the triple intersection, then inclusion–exclusion) is unaffected.
+
+## 23. `#theorem 16#`/`#corollary 14#`: the ball radius must be tied to the distance
+
+**Found and fixed 2026-10-01, before proving them.**  An `(f : d_d, d_f)`-FCC has
+*two* error-correction radii `t_d ≤ t_f`, and the paper fixes `d_d = 2t_d + 1`,
+`d_f = 2t_f + 1` (`Notation.md` §5).  The transcriptions of `#theorem 16#` and
+`#corollary 14#` had left the ball radius (`t_f`, respectively `t_d`) as a free
+parameter with no link to the distances, which makes both statements false:
+
+counterexample: `F = Bool`, `k = 1`, `r = 0` (so `n = 1` and `q^n = 2`),
+`f = C = id` (the identity is systematic and preserves distances) and
+`d_d = d_f = 1`.  Then `E = 2`, `ℓ = 1`, and with `t_d = 1` the ball `B(0,1)` is
+the whole space, so `#corollary 14#` would read `2 · 1 · 2 = 4 ≤ 2` — false.
+
+The fix restores the paper's convention as explicit hypotheses: `#theorem 16#`
+carries `2t_f + 1 ≤ d_f`, and `#corollary 14#` carries `2t_d + 1 ≤ d_d` and
+`2t_d + 1 ≤ d_f` (the second is automatic in the paper, where `t_d ≤ t_f` forces
+`d_f = 2t_f + 1 ≥ 2t_d + 1`).  With them the statements are exactly the paper's,
+and the proofs are the usual ball-packing argument (`#theorem 15#`'s proof, with the
+same-value balls also disjoint).

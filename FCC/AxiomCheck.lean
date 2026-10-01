@@ -72,6 +72,7 @@ namespace FCC
 #print axioms hammingWeight_redundancy_le
 #print axioms hammingWeight_redundancy_le_optimal
 #print axioms hamming_bound_fcc_sphere
+#print axioms hamming_bound_fcc
 #print axioms card_ball_union_dist_one
 #print axioms card_ball_inter_dist_two
 #print axioms card_ball_union_three

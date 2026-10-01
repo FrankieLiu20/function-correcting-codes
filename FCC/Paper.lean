@@ -3531,6 +3531,7 @@ theorem hamming_bound_fcc_sphere {k r : ℕ} (f : Word F k → α) (t : ℕ)
   have := card_mul_card_ball_le S t hpairs
   rwa [hScard] at this
 
+omit [Zero F] in
 /-- `#theorem 15#` (§VIII-B) — "consider a function `f : F_q^k → Im(f)` with
 `Im(f) = {f₁,…,f_E}`.  Let `ℓ = min_{i∈[E]} |f⁻¹(fᵢ)|`, then there exists an
 `(f,t)`-FCC with length `n` if `E ≤ q^n/|∪_{j≤ℓ} B(v_j,t)|`, where `v₁,…,v_ℓ`
@@ -3545,7 +3546,85 @@ theorem hamming_bound_fcc {k r : ℕ} (f : Word F k → α) (t : ℕ)
     (C : Word F k → Word F (k + r)) (hC : IsFCC f C t) :
     (Finset.univ.image f).card * minUnionCard (F := F) (minPreimageCard f) (k + r) t ≤
       Fintype.card F ^ (k + r) := by
-  sorry
+  classical
+  set ℓ := minPreimageCard f with hℓ
+  -- a systematic encoding is injective
+  have hCinj : Function.Injective C := by
+    intro u v huv
+    funext i
+    calc u i = C u (Fin.castAdd r i) := (hC.1 u i).symm
+      _ = C v (Fin.castAdd r i) := by rw [huv]
+      _ = v i := hC.1 v i
+  -- the ball-union over the codewords of one preimage
+  set U : α → Finset (Word F (k + r)) := fun a =>
+    unionBalls ((Finset.univ.filter (fun u : Word F k => f u = a)).image C) t with hU
+  have hUmem : ∀ a x, x ∈ U a ↔ ∃ u : Word F k, f u = a ∧ x ∈ ball (C u) t := by
+    intro a x
+    simp only [hU, unionBalls, Finset.mem_biUnion, Finset.mem_image]
+    constructor
+    · rintro ⟨w, ⟨u, hu, rfl⟩, hxw⟩
+      exact ⟨u, by simpa using hu, hxw⟩
+    · rintro ⟨u, hu, hx⟩
+      exact ⟨C u, ⟨u, by simpa using hu, rfl⟩, hx⟩
+  -- every attained value has a preimage of size at least `ℓ`
+  have hpre : ∀ a ∈ Finset.univ.image f,
+      ℓ ≤ (Finset.univ.filter (fun u : Word F k => f u = a)).card := by
+    intro a ha
+    have hmem : (Finset.univ.filter (fun u : Word F k => f u = a)).card ∈
+        {c : ℕ | ∃ b : α, (Finset.univ.filter (fun u : Word F k => f u = b)).card = c} :=
+      ⟨a, rfl⟩
+    have hthis : minPreimageCard f ≤
+        (Finset.univ.filter (fun u : Word F k => f u = a)).card := Nat.sInf_le hmem
+    rwa [← hℓ] at hthis
+  -- so each `U a` is at least the minimum over `ℓ`-element families
+  have hlow : ∀ a ∈ Finset.univ.image f, minUnionCard (F := F) ℓ (k + r) t ≤ (U a).card := by
+    intro a ha
+    obtain ⟨s, hsS, hscard⟩ := Finset.exists_subset_card_eq (hpre a ha)
+    have hscard' : (s.image C).card = ℓ := by
+      rw [Finset.card_image_of_injective _ hCinj, hscard]
+    refine le_trans (Nat.sInf_le ⟨s.image C, hscard', rfl⟩) (Finset.card_le_card ?_)
+    intro x hx
+    rw [hUmem a x]
+    rw [unionBalls, Finset.mem_biUnion] at hx
+    obtain ⟨w, hw, hxw⟩ := hx
+    obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hw
+    exact ⟨u, by simpa using hsS hu, hxw⟩
+  -- the unions of different values are disjoint: otherwise two codewords of
+  -- different function values would be within `2t`, contradicting `IsFCC`
+  have hdisj : ∀ a ∈ Finset.univ.image f, ∀ b ∈ Finset.univ.image f,
+      a ≠ b → Disjoint (U a) (U b) := by
+    intro a ha b hb hab
+    rw [Finset.disjoint_left]
+    intro x hx hx'
+    obtain ⟨u, hu, hxu⟩ := (hUmem a x).mp hx
+    obtain ⟨v, hv, hxv⟩ := (hUmem b x).mp hx'
+    have hne : f u ≠ f v := by rw [hu, hv]; exact hab
+    have h2t := hC.2 u v hne
+    have h1 : hammingDist x (C u) ≤ t := by simpa [ball] using hxu
+    have h2 : hammingDist x (C v) ≤ t := by simpa [ball] using hxv
+    have htri := hammingDist_triangle (C u) x (C v)
+    rw [hammingDist_comm (C u) x] at htri
+    omega
+  -- they are disjoint subsets of the code space
+  have hsum : ∑ a ∈ Finset.univ.image f, (U a).card ≤ Fintype.card F ^ (k + r) := by
+    have hpd : Set.PairwiseDisjoint (fun a => a ∈ Finset.univ.image f) U :=
+      fun a ha b hb hab => hdisj a ha b hb hab
+    rw [← Finset.card_biUnion hpd]
+    calc ((Finset.univ.image f).biUnion U).card
+        ≤ (Finset.univ : Finset (Word F (k + r))).card :=
+          Finset.card_le_card (Finset.subset_univ _)
+      _ = Fintype.card F ^ (k + r) := by rw [Finset.card_univ]; exact card_word (k + r)
+  have hcomb : (Finset.univ.image f).card * minUnionCard (F := F) ℓ (k + r) t
+      ≤ ∑ a ∈ Finset.univ.image f, (U a).card := by
+    have hconst : ∑ a ∈ Finset.univ.image f, minUnionCard (F := F) ℓ (k + r) t
+        = (Finset.univ.image f).card * minUnionCard (F := F) ℓ (k + r) t := by
+      rw [Finset.sum_const, smul_eq_mul]
+    rw [← hconst]
+    exact Finset.sum_le_sum (fun a ha => hlow a ha)
+  calc (Finset.univ.image f).card * minUnionCard (F := F) (minPreimageCard f) (k + r) t
+      = (Finset.univ.image f).card * minUnionCard (F := F) ℓ (k + r) t := by rw [← hℓ]
+    _ ≤ ∑ a ∈ Finset.univ.image f, (U a).card := hcomb
+    _ ≤ Fintype.card F ^ (k + r) := hsum
 
 /-- `#theorem 16#` (§VIII-C) — the same statement for an `(f : d_d, d_f)`-FCC:
 "let `ℓ = min_{i∈[E]} |f⁻¹(fᵢ)|` and `v₁, v₂, …, v_ℓ` be distinct vectors in
@@ -3553,9 +3632,12 @@ theorem hamming_bound_fcc {k r : ℕ} (f : Word F k → α) (t : ℕ)
 Then there exists an `(f : d_d, d_f)`-FCC with length `n` if
 `E ≤ q^n/|∪_{j≤ℓ} B(v_j,t_f)|`" — stated, for the same reason as `#theorem 15#`,
 in the necessity direction and without division; the minimising family here is
-`minUnionCardDist`, which carries the pairwise `d(vᵢ,vⱼ) ≥ d_d` condition. -/
+`minUnionCardDist`, which carries the pairwise `d(vᵢ,vⱼ) ≥ d_d` condition.
+
+The radius `t_f` is the paper's `d_f = 2t_f + 1` (Notation.md §5), so the statement
+also carries `2t_f + 1 ≤ d_f`: without it the assertion is false (`ISSUES.md` §23). -/
 theorem hamming_bound_fcc_data {k r : ℕ} (f : Word F k → α) (dd df tf : ℕ)
-    (C : Word F k → Word F (k + r)) (hC : IsFCCData f C dd df) :
+    (C : Word F k → Word F (k + r)) (hC : IsFCCData f C dd df) (hf : 2 * tf + 1 ≤ df) :
     (Finset.univ.image f).card *
         minUnionCardDist (F := F) (minPreimageCard f) dd (k + r) tf ≤
       Fintype.card F ^ (k + r) := by
@@ -3565,9 +3647,14 @@ theorem hamming_bound_fcc_data {k r : ℕ} (f : Word F k → α) (dd df tf : ℕ
 `Im(f) = {f₁,…,f_E}`, and `ℓ = min_{i∈[E]} |f⁻¹(fᵢ)|`.  Then there exists an
 `(f : d_d, d_f)`-FCC with length `n` if
 `E ≤ q^n/(ℓ · Σ_{i≤t_d} C(n,i)(q−1)^i)`" — again in the necessity direction and
-without division: `E · ℓ · |B(0,t_d)| ≤ q^n`. -/
+without division: `E · ℓ · |B(0,t_d)| ≤ q^n`.
+
+As in `#theorem 16#`, the radius `t_d` is the paper's `d_d = 2t_d + 1` (and
+`2t_d + 1 ≤ d_f` follows there from `t_d ≤ t_f`), so both links are explicit —
+without them the assertion is false (`ISSUES.md` §23). -/
 theorem hamming_bound_fcc_data_sphere {k r : ℕ} (f : Word F k → α) (dd df td : ℕ)
-    (C : Word F k → Word F (k + r)) (hC : IsFCCData f C dd df) :
+    (C : Word F k → Word F (k + r)) (hC : IsFCCData f C dd df)
+    (hd : 2 * td + 1 ≤ dd) (hf : 2 * td + 1 ≤ df) :
     (Finset.univ.image f).card * minPreimageCard f *
         (ball (0 : Word F (k + r)) td).card ≤ Fintype.card F ^ (k + r) := by
   sorry

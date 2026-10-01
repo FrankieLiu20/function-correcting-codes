@@ -165,25 +165,27 @@ end PreimageSizes
 section UnionBalls
 
 /-- `(internal, §VIII — used by `#theorem 15#`, `#theorem 16#` and the appendix)` —
-the union of the Hamming balls `∪_{j} B(v_j,t)`, i.e. the set whose cardinality
-the paper writes as `|∪_{j≤ℓ} B(v_j,t)|`. -/
-def unionBalls {F : Type*} [Fintype F] [DecidableEq F] {ι : Type*} [Fintype ι] {n : ℕ}
-    (v : ι → Word F n) (t : ℕ) : Finset (Word F n) :=
-  Finset.univ.biUnion (fun j => ball (v j) t)
+the union of the Hamming balls `∪_{w ∈ S} B(w,t)` around the words of a finite set
+`S`, i.e. the set whose cardinality the paper writes as `|∪_{j≤ℓ} B(v_j,t)|`.
+The paper minimises over *distinct* vectors `v₁,…,v_ℓ`, so the minimising object is
+a finset of words (an arbitrary family could repeat a vector and shrink the union). -/
+def unionBalls {F : Type*} [Fintype F] [DecidableEq F] {n : ℕ}
+    (S : Finset (Word F n)) (t : ℕ) : Finset (Word F n) :=
+  S.biUnion (fun w => ball w t)
 
 /-- `(internal, §VIII — used by `#theorem 15#`)` — the minimum of
-`|∪_{j≤ℓ} B(v_j,t)|` over all families `v₁,…,v_ℓ`, the quantity the paper
+`|∪_{w ∈ S} B(w,t)|` over the `ℓ`-element sets `S` of words, the quantity the paper
 describes as "`v₁,…,v_ℓ` … for which `|∪_{j≤ℓ} B(v_j,t)|` is minimum". -/
 noncomputable def minUnionCard {F : Type*} [Fintype F] [DecidableEq F] (ℓ n t : ℕ) : ℕ :=
-  sInf {c : ℕ | ∃ v : Fin ℓ → Word F n, (unionBalls v t).card = c}
+  sInf {c : ℕ | ∃ S : Finset (Word F n), S.card = ℓ ∧ (unionBalls S t).card = c}
 
-/-- `(internal, §VIII-C — used by `#theorem 16#`)` — the same minimum, but over
-families whose vectors are pairwise at distance at least `d_d`, as `#theorem 16#`
-requires ("`d(vᵢ,vⱼ) ≥ d_d` for all `i ≠ j`"). -/
+/-- `(internal, §VIII-C — used by `#theorem 16#`)` — the same minimum, but over sets
+whose words are pairwise at distance at least `d_d`, as `#theorem 16#` requires
+("`d(vᵢ,vⱼ) ≥ d_d` for all `i ≠ j`"). -/
 noncomputable def minUnionCardDist {F : Type*} [Fintype F] [DecidableEq F]
     (ℓ dd n t : ℕ) : ℕ :=
-  sInf {c : ℕ | ∃ v : Fin ℓ → Word F n,
-    (∀ i j : Fin ℓ, i ≠ j → dd ≤ hammingDist (v i) (v j)) ∧ (unionBalls v t).card = c}
+  sInf {c : ℕ | ∃ S : Finset (Word F n), S.card = ℓ ∧
+    (∀ x ∈ S, ∀ y ∈ S, x ≠ y → dd ≤ hammingDist x y) ∧ (unionBalls S t).card = c}
 
 end UnionBalls
 
