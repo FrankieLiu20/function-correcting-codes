@@ -1121,4 +1121,41 @@ theorem card_filter_erase_le {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {n
           fun i _ => by ring
         rw [Finset.sum_congr rfl hfactor, ← Finset.mul_sum]
 
+/-- `(internal, Appendix — the intersection step of `#theorem 17#`)` — for two words
+at Hamming distance one, the two radius-`t` balls meet in exactly
+`q · Σ_{i≤t−1} C(n−1,i)(q−1)^i` words.
+
+`mem_ball_inter_iff_of_dist_one` turns membership in the intersection into
+`|D(x,u) \ {c}| + 1 ≤ t`, which is exactly what `card_filter_erase_le` counts
+(`t ≥ 1`; for `t = 0` the filter is empty and the empty sum is `0`). -/
+theorem card_ball_inter_dist_one {F : Type*} [Zero F] [Fintype F] [DecidableEq F] {n : ℕ}
+    (u v : Word F n) (t : ℕ) (h : hammingDist u v = 1) :
+    (ball u t ∩ ball v t).card =
+      Fintype.card F *
+        (∑ i ∈ Finset.range t, (n - 1).choose i * (Fintype.card F - 1) ^ i) := by
+  classical
+  obtain ⟨c, hc⟩ := exists_diffSet_eq_singleton h
+  have hset : ball u t ∩ ball v t
+      = Finset.univ.filter (fun x : Word F n => ((diffSet x u).erase c).card + 1 ≤ t) := by
+    ext x
+    rw [mem_ball_inter_iff_of_dist_one hc]
+    simp
+  rw [hset]
+  rcases Nat.eq_zero_or_pos t with ht0 | htpos
+  · subst ht0
+    have hemp : (Finset.univ.filter fun x : Word F n =>
+        ((diffSet x u).erase c).card + 1 ≤ 0) = ∅ := by
+      refine Finset.eq_empty_iff_forall_notMem.mpr fun x hx => ?_
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx
+      omega
+    rw [hemp, Finset.card_empty]
+    simp
+  · have hfil : (Finset.univ.filter fun x : Word F n =>
+        ((diffSet x u).erase c).card + 1 ≤ t)
+        = Finset.univ.filter fun x : Word F n => ((diffSet x u).erase c).card ≤ t - 1 := by
+      ext x
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+      omega
+    rw [hfil, card_filter_erase_le u c (t - 1), Nat.sub_add_cancel htpos]
+
 end FCC

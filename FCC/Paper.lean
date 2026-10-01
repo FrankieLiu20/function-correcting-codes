@@ -3598,7 +3598,10 @@ theorem card_ball_union_dist_one {n t : ℕ} (u v : Word F n) (h : hammingDist u
       2 * (∑ i ∈ Finset.range (t + 1), n.choose i * (Fintype.card F - 1) ^ i) -
         Fintype.card F *
           (∑ i ∈ Finset.range t, (n - 1).choose i * (Fintype.card F - 1) ^ i) := by
-  sorry
+  have h1 : (ball u t ∪ ball v t).card + (ball u t ∩ ball v t).card
+      = (ball u t).card + (ball v t).card := Finset.card_union_add_card_inter _ _
+  rw [card_ball, card_ball, card_ball_inter_dist_one u v t h] at h1
+  omega
 
 /-- `#lemma 14#` (Appendix) — over `F₂`: "consider two vectors `u₁, u₂ ∈ F₂^n` such
 that `d(u₁,u₂) = 2`.  Then `|B(u₁,t) ∩ B(u₂,t)| = 2 Σ_{i≤t−1} C(n−1,i)`". -/
