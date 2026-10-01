@@ -3182,15 +3182,21 @@ where `C` is an `[n, k, 2t_d+1]` binary error-correcting code, and
 `n ≤ k + t_d⌈log n⌉`".  The `t_d log k` redundancy bound on such a binary code is
 the external result of [1, Appendix] (`Notation.md` §6), so it enters as the
 hypothesis `hbound : r ≤ b`; the corollary's own step is the upper bound on
-`r_f`. -/
+`r_f`.
+
+As in `#theorem 5#` (`ISSUES.md` §13(a)), the code must be in systematic form for
+the two-step construction, and `t_d ≤ t_f` is the paper's standing assumption; both
+are explicit here (`ISSUES.md` §24). -/
 theorem binary_optimalRedundancyData_le {k r td tf b : ℕ} (f : Word (ZMod 2) k → α)
-    (C : Word (ZMod 2) k → Word (ZMod 2) (k + r))
+    (C : Word (ZMod 2) k → Word (ZMod 2) (k + r)) (hCsys : IsSystematic C)
     (hC : ∀ v w : Word (ZMod 2) k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w))
-    (hbound : r ≤ b) :
+    (htd : td ≤ tf) (hbound : r ≤ b) :
     optimalRedundancyData f (2 * td + 1) (2 * tf + 1) ≤
       N (F := ZMod 2) (ι := Word (ZMod 2) k) (cdrm f C tf fun v => v) + b := by
-  sorry
+  refine le_trans (optimalRedundancyData_le_N_cdrm_add f td tf C hCsys hC (by omega)) ?_
+  omega
 
+omit [Zero F] in
 /-- `#corollary 6#` (§IV) — "let `C` be an `[n, k, 2t_d+1]` code.  Then for
 `t_f − t_d ≥ 5` and `M ≤ 4(t_f − t_d)²`,
 `N(D_{C,f}(t_f : u₁,…,u_M)) ≤ N(M, 2(t_f − t_d)) ≤ 4(t_f − t_d) − 2)/(1 − …)`",
@@ -3204,7 +3210,7 @@ theorem N_cdrm_le_bounded {k r m td tf b : ℕ} (f : Word F k → α)
     (hC : ∀ v w : Word F k, v ≠ w → 2 * td + 1 ≤ hammingDist (C v) (C w))
     (hbound : Nconst (F := F) m (2 * (tf - td)) ≤ b) :
     N (F := F) (ι := Fin m) (cdrm f C tf u) ≤ b := by
-  sorry
+  exact le_trans (N_cdrm_le_Nconst f td tf C u hC) hbound
 
 end CorollariesFiveSix
 

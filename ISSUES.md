@@ -542,3 +542,20 @@ carries `2t_f + 1 ≤ d_f`, and `#corollary 14#` carries `2t_d + 1 ≤ d_d` and
 `d_f = 2t_f + 1 ≥ 2t_d + 1`).  With them the statements are exactly the paper's,
 and the proofs are the usual ball-packing argument (`#theorem 15#`'s proof, with the
 same-value balls also disjoint).
+
+## 24. `#corollary 5#`: the code must be systematic, and `t_d ≤ t_f`
+
+**Found and fixed 2026-10-01**, while proving the two "own step" corollaries of §IV.
+
+`binary_optimalRedundancyData_le` (`#corollary 5#`'s step: turn a `[n,k,2t_d+1]`
+code into an upper bound for `r_f`) was stated with only the distance hypothesis on
+the code (`2t_d+1 ≤ d(C v, C w)` for `v ≠ w`).  Its proof, however, uses the
+systematic form of `C`, exactly as `#theorem 5#` does (`ISSUES.md` §13(a)): the
+two-step construction writes the answer as `(u, p_u)` and needs `C u` to start with
+the message `u` to identify messages with the message part of their codewords.  The
+paper's standing assumption `t_d ≤ t_f` is also used (the CDRM entries are compared
+with `2(t_f − t_d)`).  The statement now carries `IsSystematic C` and `td ≤ tf`.
+
+The companion `N_cdrm_le_bounded` (`#corollary 6#`'s step) needed no change: it is
+the transitivity of the already-proved `#theorem 6#` (`N_cdrm_le_Nconst`) with the
+external numerical bound supplied as `hbound`.

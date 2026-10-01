@@ -1472,3 +1472,32 @@ can match.  `omit [Zero F] in` is needed before the docstring (not before
 `axioms_check.ps1` green (51 audited results); commits `2881a4e` and `be903b7`.
 Next: §VIII-A's Plotkin pair `#lemma 13#`/`#theorem 14#`, then §VII (linear FCCs)
 and the remaining examples.
+
+## 2026-10-01 — §IV: the two "own step" corollaries (`#corollary 5#`, `#corollary 6#`)
+
+The two corollaries of §IV that had been left as `sorry` (their only missing
+ingredient was the external quoted bound, which enters as a hypothesis) are proved:
+
+* `binary_optimalRedundancyData_le` — `#corollary 5#`'s own step: for a systematic
+  binary `[k+r, k, 2t_d+1]` code `C` and the external [1, App.] redundancy bound
+  `r ≤ b`, one gets `r_f(k : 2t_d+1, 2t_f+1) ≤ N(D_{C,f}(t_f : v)) + b` by composing
+  the two-step construction `optimalRedundancyData_le_N_cdrm_add` with `hbound`.
+* `N_cdrm_le_bounded` — `#corollary 6#`'s own step: `N(D_{C,f}(t_f)) ≤ b` whenever
+  `N(m, 2(t_f−t_d)) ≤ b`; this is `#theorem 6#` (`N_cdrm_le_Nconst`) composed with
+  `hbound`.
+
+Both keep the external bounds as explicit hypotheses, which is the convention for
+every externally quoted row (`TODO.md`, deferred question).
+
+**Statement fix** (`ISSUES.md` §24).  `binary_optimalRedundancyData_le` had dropped
+the systematic form of `C` and the standing `t_d ≤ t_f`.  Both are genuinely needed:
+the two-step construction writes the codeword as `(u, p_u)` and identifies the
+message with the message part of `C u` — the same point as `ISSUES.md` §13(a) for
+`#theorem 5#`.  The statement now carries `IsSystematic C` and `td ≤ tf`.
+
+**Verification.**  Standalone `lake build` green (the consistency check caught a
+stray `Scratch.lean` at the package root before this — the guard works), then
+`consistency_check.ps1 -Strict` green (9 `sorry`) and `axioms_check.ps1` green
+(53 audited results).  Commit `be1f2f0`-ish (see the log).  Remaining `sorry`s:
+`#lemma 11#` (two, external), `#lemma 13#`, `#theorem 14#`, and the five §VII
+bricks/`#theorem 13#`.

@@ -54,6 +54,8 @@ namespace FCC
 #print axioms optimalRedundancyData_le_N_cdrm_add
 #print axioms N_cdrm_le_Nconst
 #print axioms two_step_redundancy_bounds
+#print axioms binary_optimalRedundancyData_le
+#print axioms N_cdrm_le_bounded
 -- §V (non-existence of strict FCCs):
 #print axioms not_isFCCData_of_connected
 #print axioms not_isFCCData_of_components

@@ -40,6 +40,9 @@ optimalRedundancyData_ge_N_subset
 optimalRedundancyData_ge_Nconst_sub
 optimalRedundancyData_le_N_cdrm_add
 two_step_redundancy_bounds
+# §IV (the two "own step" corollaries, external bounds as hypotheses):
+binary_optimalRedundancyData_le
+N_cdrm_le_bounded
 two_mul_le_optimalRedundancyData
 # §V (non-existence of strict FCCs):
 exists_mds_neighbor
