@@ -370,6 +370,76 @@ over distinct vectors, and the finset form makes "a set with at least ℓ words 
 least as large as the minimum over ℓ-element sets" immediate
 (`Finset.exists_subset_card_eq` + `Nat.sInf_le`).
 
+## Phase 3.11 (part 1) — `#theorem 14#`, the generalized Plotkin bound (2026-10-01)
+
+`#theorem 14#` (`plotkin_bound_fcc`) is proved, in the new module
+`FCC/Plotkin.lean`:
+
+```text
+r_f(k : d_d, d_f) ≥ ((L−1)d_d + (q^k − L)d_f)/(q^{k−1}(q−1)) − k,
+  L = max_{α ∈ Im(f)} |f⁻¹(α)|,  d_f > d_d.
+```
+
+Statement re-read against the PDF word by word (the checklist of
+`CONSISTENCY.md`): the paper's `f : F_q^k → Im(f)`, `L`, `d_f > d_d` and the
+fraction `1/(q^{k−1}(q−1))` are all reproduced; as everywhere in this file the
+inequality is stated over `ℚ`, so no `ℕ`-division truncates the paper's
+fraction.  No statement change, and no new `ISSUES.md` entry, was needed.  (The
+printed `q^{k−1}` presumes `k ≥ 1`; in Lean the statement is *also* true at
+`k = 0`, where `q^{k−1}` truncates to `q^0 = 1` and the numerator is `0` — note
+for the record, not a deviation.)
+
+Method — the paper's double count of the total pairwise distance
+`Σ_{x≠y} d(x,y) = Σ_{u} S(C u)`:
+
+* **lower bound** (`plotkin_total_ge`): for the codeword of a message `u`, the
+  `|f⁻¹(f u)| − 1` other messages with the same function value are at distance
+  `≥ d_d` from it, the remaining `q^k − |f⁻¹(f u)|` at distance `≥ d_f`
+  (`sum_erase_hammingDist_ge`, splitting `univ.erase u` by `f v = f u`).
+  Since the row `(n−1)d_d + (q^k−n)d_f` decreases in `n` when `d_d < d_f`
+  (`plotkin_row_le`, an integer arithmetic lemma), replacing `n = |f⁻¹(f u)|` by
+  its maximum `L = maxPreimageCard f` is legitimate for every `u`, so summing
+  over the `q^k` messages gives `q^k((L−1)d_d + (q^k−L)d_f) ≤ Σ_{x≠y} d(x,y)`.
+* **upper bound** (`plotkin_total_le`): `plotkin_total_eq_sum_card_filter`
+  rewrites the total pairwise distance as the sum over the `k+r` coordinates of
+  the number of ordered pairs of *messages* whose codewords differ in that
+  coordinate (`hammingDist` as a sum of indicators + `Finset.sum_comm`, and the
+  diagonal contributes `0`), and the per-coordinate estimate
+  `card_ne_pairs_mul_le` — the Cauchy–Schwarz bound `q·#differing pairs ≤
+  M²(q−1)` — summed over the coordinates gives
+  `q·Σ_{x≠y} d(x,y) ≤ (k+r)·q^{2k}(q−1)`.
+* **comparison** (`plotkin_bound_fcc_aux`): cancelling the positive factor `q^k`
+  leaves `q·B ≤ (k+r)·q^k(q−1)` with `B = (L−1)d_d + (q^k−L)d_f`, and cancelling
+  `q` (with `q^k = q^{k−1}·q`, i.e. `k ≥ 1`) gives
+  `B ≤ (k+r)·q^{k−1}(q−1)`, which is the paper's inequality over `ℚ`.  The two
+  degenerate corners are handled separately (`plotkin_num_nonpos`): when
+  `q^k = 1` — i.e. `k = 0`, or `q = 1` — the numerator is
+  `(L−1)(d_d−d_f) ≤ 0` because `L ≥ 1`.
+* `FCC/Paper.lean` instantiates `plotkin_bound_fcc_aux` at the **attained** value
+  of `optimalRedundancyData` (`exists_isFCCData` + `Nat.find_spec` on the
+  definition's `dite`, the same idiom as `#theorem 2#`): the bound holds for
+  *every* `(f : d_d, d_f)`-FCC of length `k+r`, hence for one of minimal length.
+
+Two supporting lemmas were changed rather than added:
+`card_ne_pairs_mul_le` was generalised from `Fin M` to an arbitrary finite index
+type (the codewords of `#theorem 14#` are indexed by the messages `Word F k`, so
+the `Fintype.card ι` form is what `plotkin_total_le` needs), and the preimage-size
+API `maxPreimageCard` gained `bddAbove_preimageCard`,
+`card_filter_le_maxPreimageCard`, `maxPreimageCard_le_card` and
+`one_le_maxPreimageCard`.
+
+Verified (separately, after the full build):
+
+| Check | Result |
+| --- | --- |
+| `lake build` | green (1819 jobs; 8 `sorry` warnings, all in phases 3.10–3.11) |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 8 `sorry`) |
+| `scripts/axioms_check.ps1` | green — 54 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+
+Still open in §VIII-A: `#lemma 13#` (`plotkin_bound`), which needs the *sharp*
+constant `a⌈M/q⌉(M−⌈M/q⌉) + (q−a)⌊M/q⌋(M−⌊M/q⌋)` (`a = M mod q`) rather than the
+Cauchy–Schwarz estimate, and `#lemma 11#` (quoted from [1], external).
+
 ## Not formalized (and why)
 
 Nothing yet; this section is filled in as results are classified.

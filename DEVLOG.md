@@ -1527,3 +1527,85 @@ card `Σ_ε n_ε²` via `card_biUnion`/`card_product`), uses
 `#theorem 14#` is only the two-sided count of `Σ_{x≠y} d(x,y)` (over messages, per
 coordinate) plus the `sInf`/attainment bookkeeping; `#lemma 13#` needs the sharp
 balanced-distribution constant on top.
+
+## 2026-10-01 — §VIII-A: `#theorem 14#` proved (`plotkin_bound_fcc`)
+
+`sorry` 9 → **8**, headline 53 → **54**.  New module `FCC/Plotkin.lean` (imported
+from the root module and from `FCC/Paper.lean`), because the Plotkin family is a
+proof phase of its own and its helpers use no ball counting at all — the two
+bricks stay in `FCC/Balls.lean`, where they were written.
+
+`#theorem 14#`: for an `(f : d_d, d_f)`-FCC over `F_q`,
+
+```text
+r_f(k : d_d, d_f) ≥ ((L−1)d_d + (q^k − L)d_f)/(q^{k−1}(q−1)) − k,
+  L = max_{α ∈ Im(f)} |f⁻¹(α)|,  d_f > d_d.
+```
+
+The statement was re-read against the PDF before starting and is faithful as
+printed; no `ISSUES.md` entry.  One record for the future: the printed
+`q^{k−1}` presumes `k ≥ 1`, but the Lean statement needs no such hypothesis —
+at `k = 0` the `ℕ`-truncated `k − 1` makes the denominator `q^0(q−1) = q−1` and
+the numerator `0`, so the inequality reads `0 − 0 ≤ r_f` and is true.  The proof
+therefore splits it off (`plotkin_num_nonpos`: when `q^k = 1`, i.e. `k = 0` or
+`q = 1`, the numerator is `(L−1)(d_d−d_f) ≤ 0`, using `1 ≤ L`).
+
+The paper's proof, exactly as carried out:
+
+1. **Lower bound** (`plotkin_total_ge`).  `sum_erase_hammingDist_ge` splits
+   `univ.erase u` by `f v = f u` (`Finset.filter_erase` +
+   `Finset.card_erase_of_mem` for the `|f⁻¹(f u)| − 1` count,
+   `Finset.card_filter_add_card_filter_not` for the `q^k − |f⁻¹(f u)|`) and
+   bounds each part by `card · d` (`Finset.sum_const`).  `plotkin_row_le` is the
+   step that produces `L`: `(L−1)d_d + (M−L)d_f ≤ (n−1)d_d + (M−n)d_f` for
+   `1 ≤ n ≤ L ≤ M`, `d_d < d_f`.  It is proved by casting to `ℤ`
+   (`Nat.cast_sub` via `omega`) and closing with `nlinarith` — the certificate is
+   `(L−n)(d_f−d_d) ≥ 0`.  Summing over the `q^k` messages (`Finset.sum_const`,
+   `card_word`) gives the paper's `q^k((L−1)d_d + (q^k−L)d_f)`.
+2. **Upper bound** (`plotkin_total_le`).  `plotkin_total_eq_sum_card_filter`
+   writes `Σ_{x≠y} d(x,y)` as `Σ_j #{(u,v) : (Cu)_j ≠ (Cv)_j}`: `hammingDist` as
+   a sum of indicators, `Finset.sum_comm` twice, and `sum_erase_ite_eq_card_filter`
+   for the per-coordinate identity (the diagonal contributes `0`, so the
+   `univ.erase u` sum *is* the unrestricted pair count —
+   `Finset.univ_product_univ` + `Finset.sum_product` +
+   `Finset.sum_erase_add`).  `card_ne_pairs_mul_le` then bounds each coordinate
+   (`simpa [Finset.card_univ, card_word k]`), and `q · Σ_j` is pushed through the
+   coordinate sum with `Finset.mul_sum`.
+3. **Comparison** (`plotkin_bound_fcc_aux`).  `q · (q^k·B) ≤ q·T ≤ (k+r)q^{2k}(q−1)`;
+   cancel `q^k` (`Nat.le_of_mul_le_mul_left`) to get `q·B ≤ (k+r)q^k(q−1)`, then
+   `q^k = q^{k−1}·q` (`Nat.sub_add_cancel hkpos`, `pow_add`) and cancel `q`.  The
+   `ℚ` finish divides with `div_nonpos_of_nonpos_of_nonneg` on
+   `B − (k+r)·den ≤ 0` (`sub_div`, `mul_div_cancel_right₀`), and
+   `FCC/Paper.lean` instantiates the whole thing at the *attained*
+   `optimalRedundancyData` (`exists_isFCCData` + `Nat.find_spec`, the same idiom
+   as `#theorem 2#`).
+
+**Changed, not added.**  `card_ne_pairs_mul_le` was generalised from
+`Fin M` to an arbitrary finite index type: `#theorem 14#` counts pairs of
+*messages*, i.e. of `Word F k`, and the `Fin M` statement cannot be applied to a
+`Word F k`-indexed family without transporting along `Fintype.equivFin`.  The
+proof went through verbatim with `Fintype.card ι` in place of `M`
+(`Finset.card_univ`/`Fintype.card_prod` instead of `Fintype.card_fin`) and is
+strictly more general; the `Fin M` case is its specialisation.  The new
+`maxPreimageCard` API (`bddAbove_preimageCard` — `sSup` on `ℕ` needs
+`BddAbove`; `maxPreimageCard_le_card`; `one_le_maxPreimageCard`) keeps the
+preimage bookkeeping in `FCC/Plotkin.lean`.
+
+**Lean notes.**  (i) `Fintype.sum_prod_type` produces `f (a, b)` with an
+un-reduced pair projection, which is *not* the syntactic form `rw` needs for
+`Finset.sum_erase_add`; `Finset.univ_product_univ` + `Finset.sum_product` gives
+the clean `∑ a, ∑ b, f (a, b)` instead.  (ii) `eq_or_lt_of_le h` orients the
+equality as `1 = q`, not `q = 1` — `exact_mod_cast` needs the `.symm`.  (iii) In
+the section with `[Zero F]` the linter flags every lemma whose *type* does not
+mention it; `plotkin_total_ge` and friends need `omit [Zero F] in`, while
+`one_le_maxPreimageCard` genuinely uses `0 : Word F k`.  (iv) `(a + b : ℚ)` is
+already `↑a + ↑b`, so `push_cast` there is a no-op (`ring` alone closes it).
+
+**Verification.**  Full `lake build` green (1819 jobs, warning-free apart from the
+8 remaining `sorry` stubs), then (separately) `consistency_check.ps1 -Strict`
+green (78 markers, 73 rows stated, 8 `sorry`) and `axioms_check.ps1` green
+(54 audited results, only `propext`, `Classical.choice`, `Quot.sound`).
+`plotkin_bound_fcc` was added to `scripts/headline_theorems.txt` and
+`FCC/AxiomCheck.lean`.  Next: `#lemma 13#` (the sharp balanced-distribution
+constant `a⌈M/q⌉(M−⌈M/q⌉) + (q−a)⌊M/q⌋(M−⌊M/q⌋)`), then the §VII linear-FCC
+bricks.

@@ -1,6 +1,7 @@
 import FCC.Definitions
 import FCC.Basic
 import FCC.Balls
+import FCC.Plotkin
 import FCC.Internal
 import FCC.Paper
 import FCC.AxiomCheck

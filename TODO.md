@@ -299,29 +299,35 @@ in the same commit that does the work.
       transcriptions had left the ball radius free of the distances; they now carry
       `2t_f+1 ≤ d_f` (resp. `2t_d+1 ≤ d_d, d_f`) — `ISSUES.md` §23 has the
       counterexample.
-- [ ] 3.11 (next). `#lemma 13#` (`plotkin_bound`) and `#theorem 14#`: the Plotkin
-      family of §VIII-A.  They use the appendix's *union* counts as well
-      (`#theorem 17#`/`#theorem 18#`), so the same machinery applies; `#lemma 11#`
-      (quoted from [1]) stays a hypothesis like the other external rows.
+- [ ] 3.11 (in progress). `#lemma 13#` (`plotkin_bound`) — `#theorem 14#`
+      (`plotkin_bound_fcc`) is **done** (2026-10-01, new module
+      `FCC/Plotkin.lean`); `#lemma 11#` (quoted from [1]) stays a hypothesis like
+      the other external rows.
 
-      **Both bricks are now in `FCC/Balls.lean`** (2026-10-01, commits `1d5af92`,
+      `#theorem 14#` followed the plan recorded below, in the paper's own two
+      steps, and cost no statement change (the printed statement has no removable
+      hypothesis; the `k = 0` and `q = 1` corners are covered by the same
+      statement because `q^{k−1}` then truncates to `1` — see `DEVLOG.md`):
+
+      * `plotkin_total_ge`: `sum_erase_hammingDist_ge` is the per-message lower
+        bound (`|f⁻¹(f u)| − 1` messages at distance `≥ d_d` from `C u`, the
+        remaining `q^k − |f⁻¹(f u)|` at `≥ d_f`), `plotkin_row_le` is the
+        arithmetic step replacing `|f⁻¹(f u)|` by `L = maxPreimageCard f`, and the
+        sum over the `q^k` messages gives `q^k((L−1)d_d+(q^k−L)d_f) ≤ Σ_{x≠y} d(x,y)`;
+      * `plotkin_total_le`: `plotkin_total_eq_sum_card_filter` writes the total
+        pairwise distance as `Σ_j #(pairs of *messages* whose codewords differ in
+        coordinate `j`)`, then `card_ne_pairs_mul_le` (Cauchy–Schwarz, generalised
+        from `Fin M` to an arbitrary finite index type because the messages are
+        indexed by `Word F k`) gives `q·Σ_{x≠y} d(x,y) ≤ (k+r)·q^{2k}(q−1)`;
+      * `plotkin_bound_fcc_aux` compares the two, cancels the positive `q^k` (then
+        `q`, using `q^k = q^{k−1}·q`) and finishes over `ℚ`; `FCC/Paper.lean`
+        instantiates it at the **attained** value of `optimalRedundancyData`
+        (`exists_isFCCData` + `Nat.find_spec`, the same idiom as `#theorem 2#`).
+
+      The two bricks are in `FCC/Balls.lean` (2026-10-01, commits `1d5af92`,
       `f756e7f`): `sum_sq_le_card_mul_sum_sq` (`(Σn_ε)² ≤ q·Σn_ε²`, Cauchy–Schwarz
       from the doubled sum-of-squares identity) and `card_ne_pairs_mul_le`
       (`q·#{(i,j) : symbols differ} ≤ M²(q−1)`, the per-coordinate estimate).
-      Remaining steps for `#theorem 14#`:
-
-      * lower bound: for each codeword `x` of an `(f : d_d, d_f)`-FCC,
-        `S(x) = Σ_{y≠x} d(x,y) ≥ (|f⁻¹(f x)|−1)d_d + (q^k − |f⁻¹(f x)|)d_f`, and
-        `|f⁻¹(f x)| ≤ L := maxPreimageCard f` with `d_f > d_d` gives
-        `S(x) ≥ (L−1)d_d + (q^k−L)d_f`; summing over `x` gives the lower bound
-        `q^k((L−1)d_d+(q^k−L)d_f)`;
-      * upper bound: `Σ_{x≠y} d(x,y) = Σ_j #(pairs differing in coordinate `j`)`
-        and each term is `≤ q^{2k−1}(q−1)/(q·?)`-style by `card_ne_pairs_mul_le`
-        with `M = q^k`, giving `≤ n·q^{2k−1}(q−1)` with `n = k + r`;
-      * compare, divide by `q^k` (ℚ), and use that `optimalRedundancyData` is
-        *attained* (`Nat.find_spec` on the definition's `dite`, or
-        `optimalRedundancyData_le_of` + `exists_isFCCData`) to turn "every FCC of
-        length `k+r` satisfies …" into the bound on `r_f`.
 
       For `#lemma 13#` the sharp constant additionally needs the
       balanced-distribution value `a⌈M/q⌉(M−⌈M/q⌉) + (q−a)⌊M/q⌋(M−⌊M/q⌋)`

@@ -83,3 +83,5 @@ card_ball_inter_dist_two
 card_ball_union_three
 # Appendix (two balls at distance three):
 card_ball_union_dist_three
+# §VIII-A (the generalized Plotkin bound of Theorem 14):
+plotkin_bound_fcc

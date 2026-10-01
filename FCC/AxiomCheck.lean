@@ -81,5 +81,6 @@ namespace FCC
 #print axioms card_ball_inter_dist_two
 #print axioms card_ball_union_three
 #print axioms card_ball_union_dist_three
+#print axioms plotkin_bound_fcc
 
 end FCC

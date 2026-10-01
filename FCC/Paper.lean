@@ -1,6 +1,7 @@
 import FCC.Definitions
 import FCC.Basic
 import FCC.Balls
+import FCC.Plotkin
 import FCC.Internal
 import Mathlib.Algebra.Module.LinearMap.Basic
 import Mathlib.Combinatorics.SimpleGraph.Basic
@@ -3483,14 +3484,29 @@ theorem plotkin_bound {M : ℕ} (D : Fin M → Fin M → ℕ) :
 /-- `#theorem 14#` (§VIII-A) — "for an `(f : d_d, d_f)`-FCC over `F_q`, where
 `f : F_q^k → Im(f)`,
 `r_f(k : d_d, d_f) ≥ ((L−1)d_d + (q^k − L)d_f)/(q^{k−1}(q−1)) − k`, where
-`L = max_{α ∈ Im(f)} |f⁻¹(α)|` and `d_f > d_d`".  `L` is supplied through the
-two hypotheses `hL`/`hL'` (it is a maximum of the preimage sizes). -/
+`L = max_{α ∈ Im(f)} |f⁻¹(α)|` and `d_f > d_d`".  Here `L` is the
+`maxPreimageCard f` of `FCC/Basic.lean` (the maximum of the preimage sizes), `q^k`
+is `Fintype.card F ^ k` and the whole inequality is stated over `ℚ`, so the
+paper's fraction appears literally instead of being truncated by `ℕ`-division
+(`FCC/Plotkin.lean` proves the arithmetic). -/
 theorem plotkin_bound_fcc {k : ℕ} (f : Word F k → α) (dd df : ℕ) (hlt : dd < df) :
     (((maxPreimageCard f - 1 : ℕ) : ℚ) * dd +
         ((Fintype.card F : ℚ) ^ k - maxPreimageCard f) * df) /
         ((Fintype.card F : ℚ) ^ (k - 1) * ((Fintype.card F : ℚ) - 1)) - k
       ≤ (optimalRedundancyData f dd df : ℚ) := by
-  sorry
+  classical
+  -- `r_f(k : d_d, d_f)` is attained: some `(f : d_d, d_f)`-FCC exists
+  -- (`exists_isFCCData`), so `optimalRedundancyData` is the length of an actual
+  -- code, and the bound for *every* code is a bound on it.
+  have hne : ∃ r : ℕ,
+      r ∈ {r : ℕ | ∃ C : Word F k → Word F (k + r), IsFCCData f C dd df} := by
+    obtain ⟨r, C, hC⟩ := exists_isFCCData f dd df
+    exact ⟨r, C, hC⟩
+  rw [optimalRedundancyData, dite_eq_left hne]
+  have hspec := Nat.find_spec hne
+  simp only [Set.mem_ofPred_eq] at hspec
+  obtain ⟨C₀, hC₀⟩ := hspec
+  exact plotkin_bound_fcc_aux f C₀ dd df hC₀.2.1 hC₀.2.2 hlt
 
 /-- `#corollary 13#` (§VIII-B) — "since `|∪_{j≤ℓ} B(v_j,t)| ≥ |B(v,t)|` for any
 `v ∈ F_q^n` and `|B(v,t)| = Σ_{i≤t} C(n,i)(q−1)^i`, we have
