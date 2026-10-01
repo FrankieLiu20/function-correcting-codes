@@ -69,3 +69,5 @@ hammingWeight_redundancy_le_optimal
 hamming_bound_fcc_sphere
 # Appendix (ball-union counts):
 card_ball_union_dist_one
+# Appendix (two balls at distance two):
+card_ball_inter_dist_two

@@ -3586,9 +3586,9 @@ variable {F : Type*} [Zero F] [Fintype F] [DecidableEq F]
 
 /-! ### Appendix results — counting the number of vectors in the union of balls
 
-Statements only (proofs are phase 3.13).  All four are `Finset.card` identities
-about the balls of §I-E; the paper's `Σ_{i=0}^{t}` is `Finset.range (t + 1)`, and
-`q = Fintype.card F`. -/
+`#theorem 17#` and `#lemma 14#` are proved (phase 3.13); the remaining two are
+statements only.  All four are `Finset.card` identities about the balls of §I-E;
+the paper's `Σ_{i=0}^{t}` is `Finset.range (t + 1)`, and `q = Fintype.card F`. -/
 
 /-- `#theorem 17#` (Appendix) — "consider two Hamming balls `B(u,t)` and `B(v,t)`
 for `u, v ∈ F_q^n` such that `d(u,v) = 1`.  Then
@@ -3608,7 +3608,63 @@ that `d(u₁,u₂) = 2`.  Then `|B(u₁,t) ∩ B(u₂,t)| = 2 Σ_{i≤t−1} C(n
 theorem card_ball_inter_dist_two {n t : ℕ} (u v : Word (ZMod 2) n)
     (h : hammingDist u v = 2) :
     (ball u t ∩ ball v t).card = 2 * (∑ i ∈ Finset.range t, (n - 1).choose i) := by
-  sorry
+  classical
+  obtain ⟨c₁, c₂, hne, hc⟩ := exists_diffSet_eq_pair h
+  -- `x` lies in both balls iff the disagreement set `D(x,u)` is "admissible"
+  have hset : ball u t ∩ ball v t = Finset.univ.filter (fun x : Word (ZMod 2) n =>
+      ((diffSet x u).erase c₁ |>.erase c₂).card +
+        (if c₁ ∈ diffSet x u ↔ c₂ ∈ diffSet x u then 2 else 1) ≤ t) := by
+    ext x
+    rw [mem_ball_inter_iff_dist_two hne hc]
+    simp
+  rw [hset]
+  -- split the words by their disagreement set with `u` (a partition of `F₂^n`)
+  have hpart : (Finset.univ.filter (fun x : Word (ZMod 2) n =>
+        ((diffSet x u).erase c₁ |>.erase c₂).card +
+          (if c₁ ∈ diffSet x u ↔ c₂ ∈ diffSet x u then 2 else 1) ≤ t))
+      = (Finset.univ.filter (fun D : Finset (Fin n) =>
+          ((D.erase c₁).erase c₂).card + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t)).biUnion
+        (fun D => Finset.univ.filter (fun x : Word (ZMod 2) n => diffSet x u = D)) := by
+    ext x
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_biUnion]
+    constructor
+    · intro hx
+      exact ⟨diffSet x u, hx, rfl⟩
+    · rintro ⟨D, hD, hDx⟩
+      rw [hDx]
+      exact hD
+  rw [hpart]
+  have hdisj : Set.PairwiseDisjoint
+      (fun D => D ∈ Finset.univ.filter (fun D : Finset (Fin n) =>
+          ((D.erase c₁).erase c₂).card + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t))
+      (fun D => Finset.univ.filter (fun x : Word (ZMod 2) n => diffSet x u = D)) := by
+    intro D _ D' _ hne'
+    change Disjoint (Finset.univ.filter (fun x : Word (ZMod 2) n => diffSet x u = D))
+      (Finset.univ.filter (fun x : Word (ZMod 2) n => diffSet x u = D'))
+    rw [Finset.disjoint_left]
+    intro x hx hx'
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and] at hx hx'
+    exact hne' (hx.symm.trans hx')
+  rw [Finset.card_biUnion hdisj]
+  -- over `F₂` each disagreement set is realised by exactly one word
+  have hterm : ∀ D ∈ (Finset.univ.filter (fun D : Finset (Fin n) =>
+        ((D.erase c₁).erase c₂).card + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t)),
+      (Finset.univ.filter (fun x : Word (ZMod 2) n => diffSet x u = D)).card = 1 := by
+    intro D _
+    rw [card_sphere_fiber, ZMod.card]
+    simp
+  rw [Finset.sum_congr rfl hterm, Finset.sum_const, smul_eq_mul, mul_one]
+  -- count the admissible disagreement sets (paper: `2#1 + 2#2`)
+  rw [card_allowed_dist_two hne]
+  have hn2 : 2 ≤ n := by
+    have hcard : (diffSet u v).card = 2 := by rw [← hammingDist_eq_card_diffSet]; exact h
+    have hle : (diffSet u v).card ≤ n := by
+      have := Finset.card_le_card (Finset.subset_univ (diffSet u v))
+      rwa [Finset.card_univ, Fintype.card_fin] at this
+    omega
+  -- Pascal's rule turns the two sums of `C(n−2,i)` into the paper's sum of `C(n−1,i)`
+  rw [sum_range_choose_pred hn2]
+  ring
 
 /-- `#theorem 18#` (Appendix) — "consider three distinct vectors `u₁, u₂, u₃ ∈ F₂^n`
 with pairwise distances `1, 1, 2`.  Then
@@ -3643,7 +3699,7 @@ outlook.
 
 /-! ## Appendix — Counting the number of vectors in the union of balls
 
-TODO: `#theorem 17#`, `#lemma 14#`, `#theorem 18#`, `#theorem 19#`.
+TODO: `#theorem 18#`, `#theorem 19#`.
 -/
 
 end FCC

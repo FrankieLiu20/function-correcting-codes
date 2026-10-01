@@ -1158,4 +1158,464 @@ theorem card_ball_inter_dist_one {F : Type*} [Zero F] [Fintype F] [DecidableEq F
       omega
     rw [hfil, card_filter_erase_le u c (t - 1), Nat.sub_add_cancel htpos]
 
+/-! ### Appendix — two balls at distance two (`#lemma 14#`)
+
+The paper proves `#lemma 14#` by normalising to `u₁ = 0`, `u₂ = (1,1,0,…,0)` and
+splitting on the first two coordinates of `x`.  Writing `c₁, c₂` for the two
+coordinates in which `u` and `v` differ and `a = |D(x,u) \ {c₁,c₂}|`:
+
+* outside `{c₁,c₂}` the two centres agree, so each disagreement costs `1` in both
+  distances;
+* at `c₁` and at `c₂` the centres differ, so each of those coordinates costs `1` in
+  exactly one of the two distances.
+
+Hence, in the four cases (agreement of `x` with `u` at `c₁` and at `c₂`), the pairs
+`(d(x,u), d(x,v))` are `(a, a+2)`, `(a+1, a+1)`, `(a+1, a+1)`, `(a+2, a)`, so `x`
+lies in both balls iff `a + 1 ≤ t` (the two inner cases) or `a + 2 ≤ t` (the two
+outer ones).  Counting the `C(n−2,i)` points with `a = i` (each of weight
+`(q−1)^i = 1` over `F₂`) gives the paper's
+`2 Σ_{i≤t−1} C(n−2,i) + 2 Σ_{i≤t−2} C(n−2,i)`, and Pascal's rule simplifies this to
+`2 Σ_{i≤t−1} C(n−1,i)`. -/
+
+/-- `(internal, Appendix — cardinal bookkeeping for `#lemma 14#`)` — erasing two
+*distinct* coordinates from a finset removes each of them at most once: the size of
+the doubly erased set plus the two membership indicators is the original size. -/
+theorem card_erase_erase_add {α : Type*} [DecidableEq α] {s : Finset α} {c₁ c₂ : α}
+    (hne : c₁ ≠ c₂) :
+    ((s.erase c₁).erase c₂).card + (if c₁ ∈ s then 1 else 0) + (if c₂ ∈ s then 1 else 0)
+      = s.card := by
+  classical
+  by_cases h1 : c₁ ∈ s <;> by_cases h2 : c₂ ∈ s
+  · have h21 : c₂ ∈ s.erase c₁ := Finset.mem_erase.mpr ⟨hne.symm, h2⟩
+    have e1 : ((s.erase c₁).erase c₂).card + 1 = (s.erase c₁).card :=
+      Finset.card_erase_add_one h21
+    have e2 : (s.erase c₁).card + 1 = s.card := Finset.card_erase_add_one h1
+    simp only [h1, h2, ↓reduceIte]
+    omega
+  · have h21 : c₂ ∉ s.erase c₁ := fun hh => h2 (Finset.mem_of_mem_erase hh)
+    rw [Finset.erase_eq_of_notMem h21]
+    have e2 : (s.erase c₁).card + 1 = s.card := Finset.card_erase_add_one h1
+    simp only [h1, h2, ↓reduceIte]
+    omega
+  · rw [Finset.erase_eq_of_notMem h1]
+    have e2 : (s.erase c₂).card + 1 = s.card := Finset.card_erase_add_one h2
+    simp only [h1, h2, ↓reduceIte]
+    omega
+  · have he : ((s.erase c₁).erase c₂) = s := by
+      rw [Finset.erase_eq_of_notMem h1, Finset.erase_eq_of_notMem h2]
+    rw [he]
+    simp only [h1, h2, ↓reduceIte]
+    omega
+
+/-- `(internal, Appendix — over `F₂`, for `#lemma 14#`)` — in `F₂` there is only one
+point other than `a`, so `x ≠ a ↔ x = b` whenever `a ≠ b`.  This is what turns "`x`
+agrees with `u` at `c₁`" into "`x` disagrees with `v` at `c₁`". -/
+theorem zmod2_ne_iff_eq (a b x : ZMod 2) (h : a ≠ b) : (x ≠ a ↔ x = b) := by
+  revert a b x
+  decide
+
+/-- `(internal, Appendix — the two special coordinates of `#lemma 14#`)` — over
+`F₂`, two words at Hamming distance two differ in exactly two coordinates
+`c₁ ≠ c₂`. -/
+theorem exists_diffSet_eq_pair {n : ℕ} {u v : Word (ZMod 2) n} (h : hammingDist u v = 2) :
+    ∃ c₁ c₂ : Fin n, c₁ ≠ c₂ ∧ diffSet u v = {c₁, c₂} := by
+  have hcard : (diffSet u v).card = 2 := by
+    rw [← hammingDist_eq_card_diffSet]
+    exact h
+  obtain ⟨c₁, c₂, hne, hpair⟩ := Finset.card_eq_two.mp hcard
+  exact ⟨c₁, c₂, hne, hpair⟩
+
+/-- `(internal, Appendix — the characterisation behind `#lemma 14#`)` — if `u` and
+`v` differ exactly in `c₁` and `c₂`, then `x` lies in both balls `B(u,t)`, `B(v,t)`
+iff `|D(x,u) \ {c₁,c₂}| + 1 ≤ t` when exactly one of `c₁`, `c₂` is a disagreement of
+`x` with `u`, and iff `|D(x,u) \ {c₁,c₂}| + 2 ≤ t` when both or neither is — that is
+the dichotomy encoded by the `if … then 2 else 1` below. -/
+theorem mem_ball_inter_iff_dist_two {n t : ℕ} {u v x : Word (ZMod 2) n} {c₁ c₂ : Fin n}
+    (hne : c₁ ≠ c₂) (hc : diffSet u v = {c₁, c₂}) :
+    x ∈ ball u t ∩ ball v t ↔
+      ((diffSet x u).erase c₁ |>.erase c₂).card +
+        (if c₁ ∈ diffSet x u ↔ c₂ ∈ diffSet x u then 2 else 1) ≤ t := by
+  classical
+  have huv₁ : u c₁ ≠ v c₁ := by
+    have : c₁ ∈ diffSet u v := by rw [hc]; simp
+    simpa [diffSet] using this
+  have huv₂ : u c₂ ≠ v c₂ := by
+    have : c₂ ∈ diffSet u v := by rw [hc]; simp
+    simpa [diffSet] using this
+  have hout : ∀ j : Fin n, j ≠ c₁ → j ≠ c₂ → u j = v j := by
+    intro j hj1 hj2
+    by_contra hne'
+    have hmem : j ∈ diffSet u v := by simp [diffSet, hne']
+    rw [hc] at hmem
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hmem
+    rcases hmem with h | h
+    · exact hj1 h
+    · exact hj2 h
+  have hswap₁ : c₁ ∈ diffSet x v ↔ c₁ ∉ diffSet x u := by
+    simp only [diffSet, Finset.mem_filter, Finset.mem_univ, true_and]
+    rw [zmod2_ne_iff_eq (v c₁) (u c₁) (x c₁) huv₁.symm]
+    exact (not_not (a := x c₁ = u c₁)).symm
+  have hswap₂ : c₂ ∈ diffSet x v ↔ c₂ ∉ diffSet x u := by
+    simp only [diffSet, Finset.mem_filter, Finset.mem_univ, true_and]
+    rw [zmod2_ne_iff_eq (v c₂) (u c₂) (x c₂) huv₂.symm]
+    exact (not_not (a := x c₂ = u c₂)).symm
+  have herase : ((diffSet x v).erase c₁).erase c₂ = ((diffSet x u).erase c₁).erase c₂ := by
+    ext j
+    simp only [Finset.mem_erase, diffSet, Finset.mem_filter, Finset.mem_univ, true_and]
+    constructor
+    · rintro ⟨hj2, hj1, hjv⟩
+      exact ⟨hj2, hj1, fun hju => hjv (hju.trans (hout j hj1 hj2))⟩
+    · rintro ⟨hj2, hj1, hju⟩
+      exact ⟨hj2, hj1, fun hjv => hju (hjv.trans (hout j hj1 hj2).symm)⟩
+  have hdu : hammingDist x u
+      = ((diffSet x u).erase c₁ |>.erase c₂).card
+        + (if c₁ ∈ diffSet x u then 1 else 0) + (if c₂ ∈ diffSet x u then 1 else 0) := by
+    rw [hammingDist_eq_card_diffSet]
+    exact (card_erase_erase_add hne).symm
+  have hb₁ : (if c₁ ∈ diffSet x v then (1:ℕ) else 0)
+      = 1 - (if c₁ ∈ diffSet x u then 1 else 0) := by
+    by_cases h : c₁ ∈ diffSet x u
+    · have h' : c₁ ∉ diffSet x v := fun hh => (hswap₁.mp hh) h
+      simp [h, h']
+    · have h' : c₁ ∈ diffSet x v := hswap₁.mpr h
+      simp [h, h']
+  have hb₂ : (if c₂ ∈ diffSet x v then (1:ℕ) else 0)
+      = 1 - (if c₂ ∈ diffSet x u then 1 else 0) := by
+    by_cases h : c₂ ∈ diffSet x u
+    · have h' : c₂ ∉ diffSet x v := fun hh => (hswap₂.mp hh) h
+      simp [h, h']
+    · have h' : c₂ ∈ diffSet x v := hswap₂.mpr h
+      simp [h, h']
+  have hdv : hammingDist x v
+      = ((diffSet x u).erase c₁ |>.erase c₂).card
+        + (1 - (if c₁ ∈ diffSet x u then 1 else 0))
+        + (1 - (if c₂ ∈ diffSet x u then 1 else 0)) := by
+    rw [hammingDist_eq_card_diffSet, (card_erase_erase_add (s := diffSet x v) hne).symm,
+      herase, hb₁, hb₂]
+  simp only [Finset.mem_inter, ball, Finset.mem_filter, Finset.mem_univ, true_and]
+  rw [hdu, hdv]
+  by_cases p : c₁ ∈ diffSet x u <;> by_cases q : c₂ ∈ diffSet x u <;> simp [p, q] <;> omega
+
+/-- `(internal, Appendix — counting step of `#lemma 14#`)` — the number of subsets
+`S ⊆ s` with `|S| + k ≤ t` is the truncated binomial sum `Σ_{i ≤ t−k} C(|s|,i)`;
+the cases `k = 1` and `k = 2` used below are the paper's `Σ_{i≤t−1}` and
+`Σ_{i≤t−2}`. -/
+theorem card_powerset_filter_add_le {α : Type*} [DecidableEq α] (s : Finset α) (k t : ℕ) :
+    (s.powerset.filter (fun S => S.card + k ≤ t)).card
+      = ∑ i ∈ Finset.range (t + 1 - k), s.card.choose i := by
+  classical
+  have hset : s.powerset.filter (fun S => S.card + k ≤ t)
+      = (Finset.range (t + 1 - k)).biUnion (fun i => s.powersetCard i) := by
+    ext S
+    simp only [Finset.mem_filter, Finset.mem_powerset, Finset.mem_biUnion, Finset.mem_range,
+      Finset.mem_powersetCard]
+    constructor
+    · rintro ⟨hsub, hcard⟩
+      refine ⟨S.card, ?_, hsub, rfl⟩
+      rw [Nat.lt_sub_iff_add_lt]
+      omega
+    · rintro ⟨i, hi, hsub, hcard⟩
+      refine ⟨hsub, ?_⟩
+      rw [← hcard, Nat.lt_sub_iff_add_lt] at hi
+      omega
+  have hdisj : Set.PairwiseDisjoint (fun i => i ∈ Finset.range (t + 1 - k))
+      (fun i => s.powersetCard i) := by
+    intro i _ j _ hij
+    change Disjoint (s.powersetCard i) (s.powersetCard j)
+    rw [Finset.disjoint_left]
+    intro S hi hj
+    rw [Finset.mem_powersetCard] at hi hj
+    exact hij (hi.2.symm.trans hj.2)
+  rw [hset, Finset.card_biUnion hdisj]
+  exact Finset.sum_congr rfl (fun i _ => Finset.card_powersetCard i s)
+
+/-- `(internal, Appendix — Pascal's rule, summed)`` — `Σ_{i≤t} C(n,i) =
+Σ_{i≤t} C(n−1,i) + Σ_{i≤t−1} C(n−1,i)`: summing Pascal's rule
+`C(n,i) = C(n−1,i−1) + C(n−1,i)` along the top index. -/
+theorem sum_range_choose_succ (n t : ℕ) (hn : 1 ≤ n) :
+    (∑ i ∈ Finset.range (t + 1), n.choose i)
+      = (∑ i ∈ Finset.range (t + 1), (n - 1).choose i)
+        + (∑ i ∈ Finset.range t, (n - 1).choose i) := by
+  induction t with
+  | zero => simp
+  | succ t ih =>
+    have hpascal : n.choose (t + 1) = (n - 1).choose t + (n - 1).choose (t + 1) := by
+      have h := Nat.choose_succ_succ (n - 1) t
+      have hsucc : (n - 1).succ = n := by omega
+      rwa [hsucc] at h
+    rw [Finset.sum_range_succ (fun i => n.choose i) (t + 1), ih, hpascal]
+    rw [Finset.sum_range_succ (fun i => (n - 1).choose i) (t + 1),
+      Finset.sum_range_succ (fun i => (n - 1).choose i) t]
+    ring
+
+/-- `(internal, Appendix — the final simplification of `#lemma 14#`)` — the form of
+summed Pascal's rule used at the end of the paper's proof:
+`Σ_{i≤t−1} C(n−1,i) = Σ_{i≤t−1} C(n−2,i) + Σ_{i≤t−2} C(n−2,i)`. -/
+theorem sum_range_choose_pred {n t : ℕ} (hn : 2 ≤ n) :
+    (∑ i ∈ Finset.range t, (n - 1).choose i)
+      = (∑ i ∈ Finset.range t, (n - 2).choose i)
+        + (∑ i ∈ Finset.range (t - 1), (n - 2).choose i) := by
+  rcases Nat.eq_zero_or_pos t with ht | ht
+  · subst ht
+    simp
+  · obtain ⟨s, hs⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.pos_iff_ne_zero.mp ht)
+    subst hs
+    have hsub : (n - 1) - 1 = n - 2 := by omega
+    have h := sum_range_choose_succ (n - 1) s (by omega)
+    rw [hsub] at h
+    simpa using h
+
+/-- `(internal, Appendix — counting step of `#lemma 14#`)` — the number of
+*disagreement sets* `D ⊆ Fin n` that are compatible with membership of the
+corresponding word in both balls: with `a = |D \ {c₁,c₂}|` the extra cost is `1` when
+exactly one of `c₁`, `c₂` lies in `D` and `2` when both or neither do, so
+`D` is admissible iff `a + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t`.
+
+Splitting by the four possibilities for `c₁, c₂ ∈ D` counts two copies of
+`|S| + 1 ≤ t` and two copies of `|S| + 2 ≤ t` as `S` runs over the `i`-subsets of
+`{c₁,c₂}ᶜ` (there are `C(n−2,i)` of each), giving the paper's
+`2 Σ_{i≤t−1} C(n−2,i) + 2 Σ_{i≤t−2} C(n−2,i)`. -/
+theorem card_allowed_dist_two {n t : ℕ} {c₁ c₂ : Fin n} (hne : c₁ ≠ c₂) :
+    (Finset.univ.filter (fun D : Finset (Fin n) =>
+        ((D.erase c₁).erase c₂).card + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t)).card
+      = 2 * (∑ i ∈ Finset.range t, (n - 2).choose i)
+        + 2 * (∑ i ∈ Finset.range (t - 1), (n - 2).choose i) := by
+  classical
+  set TC : Finset (Fin n) := ({c₁, c₂} : Finset (Fin n))ᶜ with hTC
+  have hc₁TC : c₁ ∉ TC := by rw [hTC]; simp
+  have hc₂TC : c₂ ∉ TC := by rw [hTC]; simp
+  have hsubTC : ∀ D : Finset (Fin n), c₁ ∉ D → c₂ ∉ D → D ⊆ TC := by
+    intro D h1 h2 x hx
+    rw [hTC, Finset.mem_compl]
+    simp only [Finset.mem_insert, Finset.mem_singleton, not_or]
+    exact ⟨fun hh => h1 (hh ▸ hx), fun hh => h2 (hh ▸ hx)⟩
+  set F1 : Finset (Finset (Fin n)) := TC.powerset.filter (fun S => S.card + 1 ≤ t) with hF1
+  set F2 : Finset (Finset (Fin n)) := TC.powerset.filter (fun S => S.card + 2 ≤ t) with hF2
+  have hmemF1 : ∀ S, S ∈ F1 ↔ S ⊆ TC ∧ S.card + 1 ≤ t := by
+    intro S; rw [hF1, Finset.mem_filter, Finset.mem_powerset]
+  have hmemF2 : ∀ S, S ∈ F2 ↔ S ⊆ TC ∧ S.card + 2 ≤ t := by
+    intro S; rw [hF2, Finset.mem_filter, Finset.mem_powerset]
+  have hc1 : ∀ S, S ⊆ TC → c₁ ∉ S := fun S hS h => hc₁TC (hS h)
+  have hc2 : ∀ S, S ⊆ TC → c₂ ∉ S := fun S hS h => hc₂TC (hS h)
+  set X1 : Finset (Finset (Fin n)) := F1.image (fun S => insert c₁ S) with hX1
+  set X2 : Finset (Finset (Fin n)) := F1.image (fun S => insert c₂ S) with hX2
+  set X3 : Finset (Finset (Fin n)) := F2.image (fun S => S) with hX3
+  set X4 : Finset (Finset (Fin n)) := F2.image (fun S => insert c₁ (insert c₂ S)) with hX4
+  have hX1mem : ∀ D : Finset (Fin n), D ∈ X1 ↔ c₁ ∈ D ∧ c₂ ∉ D ∧
+      (((D.erase c₁).erase c₂).card + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t) := by
+    intro D
+    rw [hX1, Finset.mem_image]
+    constructor
+    · rintro ⟨S, hS, rfl⟩
+      rw [hmemF1] at hS
+      obtain ⟨hSTC, hScard⟩ := hS
+      have hS1 := hc1 S hSTC
+      have hS2 := hc2 S hSTC
+      have hins : ((insert c₁ S).erase c₁).erase c₂ = S := by
+        rw [Finset.erase_insert hS1, Finset.erase_eq_of_notMem hS2]
+      have hnotin : c₂ ∉ insert c₁ S := by
+        simp only [Finset.mem_insert, not_or]
+        exact ⟨hne.symm, hS2⟩
+      refine ⟨Finset.mem_insert_self _ _, hnotin, ?_⟩
+      have hiff : ¬ (c₁ ∈ insert c₁ S ↔ c₂ ∈ insert c₁ S) := by simp [hnotin]
+      rw [hins, ite_eq_right hiff]
+      exact hScard
+    · rintro ⟨h1, h2, hcond⟩
+      have hiff : ¬ (c₁ ∈ D ↔ c₂ ∈ D) := by simp [h1, h2]
+      have hcond' : ((D.erase c₁).erase c₂).card + 1 ≤ t := by
+        have := hcond
+        rwa [ite_eq_right hiff] at this
+      have herase : (D.erase c₁).erase c₂ = D.erase c₁ :=
+        Finset.erase_eq_of_notMem (fun h => h2 (Finset.mem_of_mem_erase h))
+      refine ⟨D.erase c₁, ?_, ?_⟩
+      · rw [hmemF1]
+        exact ⟨hsubTC _ (Finset.notMem_erase _ _)
+          (fun h => h2 (Finset.mem_of_mem_erase h)), by rw [← herase]; exact hcond'⟩
+      · exact Finset.insert_erase h1
+  have hX2mem : ∀ D : Finset (Fin n), D ∈ X2 ↔ c₂ ∈ D ∧ c₁ ∉ D ∧
+      (((D.erase c₁).erase c₂).card + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t) := by
+    intro D
+    rw [hX2, Finset.mem_image]
+    constructor
+    · rintro ⟨S, hS, rfl⟩
+      rw [hmemF1] at hS
+      obtain ⟨hSTC, hScard⟩ := hS
+      have hS1 := hc1 S hSTC
+      have hS2 := hc2 S hSTC
+      have hc1ins : c₁ ∉ insert c₂ S := by
+        simp only [Finset.mem_insert, not_or]
+        exact ⟨hne, hS1⟩
+      have hins : ((insert c₂ S).erase c₁).erase c₂ = S := by
+        rw [Finset.erase_eq_of_notMem hc1ins, Finset.erase_insert hS2]
+      refine ⟨Finset.mem_insert_self _ _, hc1ins, ?_⟩
+      have hiff : ¬ (c₁ ∈ insert c₂ S ↔ c₂ ∈ insert c₂ S) := by simp [hc1ins]
+      rw [hins, ite_eq_right hiff]
+      exact hScard
+    · rintro ⟨h1, h2, hcond⟩
+      have hiff : ¬ (c₁ ∈ D ↔ c₂ ∈ D) := by simp [h1, h2]
+      have hcond' : ((D.erase c₁).erase c₂).card + 1 ≤ t := by
+        have := hcond
+        rwa [ite_eq_right hiff] at this
+      have herase : (D.erase c₁).erase c₂ = D.erase c₂ := by
+        rw [Finset.erase_eq_of_notMem h2]
+      refine ⟨D.erase c₂, ?_, ?_⟩
+      · rw [hmemF1]
+        exact ⟨hsubTC _ (fun h => h2 (Finset.mem_of_mem_erase h))
+          (Finset.notMem_erase _ _), by rw [← herase]; exact hcond'⟩
+      · exact Finset.insert_erase h1
+  have hX3mem : ∀ D : Finset (Fin n), D ∈ X3 ↔ c₁ ∉ D ∧ c₂ ∉ D ∧
+      (((D.erase c₁).erase c₂).card + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t) := by
+    intro D
+    rw [hX3, Finset.mem_image]
+    constructor
+    · rintro ⟨S, hS, rfl⟩
+      rw [hmemF2] at hS
+      obtain ⟨hSTC, hScard⟩ := hS
+      have hS1 := hc1 S hSTC
+      have hS2 := hc2 S hSTC
+      have hins : (S.erase c₁).erase c₂ = S := by
+        rw [Finset.erase_eq_of_notMem hS1, Finset.erase_eq_of_notMem hS2]
+      have hiff : (c₁ ∈ S ↔ c₂ ∈ S) := by simp [hS1, hS2]
+      refine ⟨hS1, hS2, ?_⟩
+      rw [hins, ite_eq_left hiff]
+      exact hScard
+    · rintro ⟨h1, h2, hcond⟩
+      have hiff : (c₁ ∈ D ↔ c₂ ∈ D) := by simp [h1, h2]
+      have hcond' : ((D.erase c₁).erase c₂).card + 2 ≤ t := by
+        have := hcond
+        rwa [ite_eq_left hiff] at this
+      have herase : (D.erase c₁).erase c₂ = D := by
+        rw [Finset.erase_eq_of_notMem h1, Finset.erase_eq_of_notMem h2]
+      refine ⟨D, ?_, rfl⟩
+      rw [hmemF2]
+      exact ⟨hsubTC D h1 h2, by rw [← herase]; exact hcond'⟩
+  have hX4mem : ∀ D : Finset (Fin n), D ∈ X4 ↔ c₁ ∈ D ∧ c₂ ∈ D ∧
+      (((D.erase c₁).erase c₂).card + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t) := by
+    intro D
+    rw [hX4, Finset.mem_image]
+    constructor
+    · rintro ⟨S, hS, rfl⟩
+      rw [hmemF2] at hS
+      obtain ⟨hSTC, hScard⟩ := hS
+      have hS1 := hc1 S hSTC
+      have hS2 := hc2 S hSTC
+      have hc1ins : c₁ ∉ insert c₂ S := by
+        simp only [Finset.mem_insert, not_or]
+        exact ⟨hne, hS1⟩
+      have hins : ((insert c₁ (insert c₂ S)).erase c₁).erase c₂ = S := by
+        rw [Finset.erase_insert hc1ins, Finset.erase_insert hS2]
+      have hiff : (c₁ ∈ insert c₁ (insert c₂ S) ↔ c₂ ∈ insert c₁ (insert c₂ S)) := by simp
+      refine ⟨Finset.mem_insert_self _ _,
+        Finset.mem_insert_of_mem (Finset.mem_insert_self _ _), ?_⟩
+      rw [hins, ite_eq_left hiff]
+      exact hScard
+    · rintro ⟨h1, h2, hcond⟩
+      have hiff : (c₁ ∈ D ↔ c₂ ∈ D) := by simp [h1, h2]
+      have hcond' : ((D.erase c₁).erase c₂).card + 2 ≤ t := by
+        have := hcond
+        rwa [ite_eq_left hiff] at this
+      have hrec : insert c₁ (insert c₂ ((D.erase c₁).erase c₂)) = D := by
+        ext x
+        simp only [Finset.mem_insert, Finset.mem_erase]
+        constructor
+        · rintro (rfl | rfl | ⟨hne2, hne1, hx⟩)
+          · exact h1
+          · exact h2
+          · exact hx
+        · intro hx
+          rcases eq_or_ne x c₁ with hh | hh
+          · exact Or.inl hh
+          · rcases eq_or_ne x c₂ with hh' | hh'
+            · exact Or.inr (Or.inl hh')
+            · exact Or.inr (Or.inr ⟨hh', hh, hx⟩)
+      refine ⟨(D.erase c₁).erase c₂, ?_, hrec⟩
+      rw [hmemF2]
+      refine ⟨hsubTC _ (fun h => (Finset.mem_erase.mp (Finset.mem_erase.mp h).2).1 rfl)
+        (fun h => (Finset.mem_erase.mp h).1 rfl), hcond'⟩
+  have hAeq : (Finset.univ.filter (fun D : Finset (Fin n) =>
+        ((D.erase c₁).erase c₂).card + (if c₁ ∈ D ↔ c₂ ∈ D then 2 else 1) ≤ t))
+      = (X1 ∪ X2) ∪ (X3 ∪ X4) := by
+    ext D
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union,
+      hX1mem D, hX2mem D, hX3mem D, hX4mem D]
+    by_cases h1 : c₁ ∈ D <;> by_cases h2 : c₂ ∈ D <;> simp [h1, h2]
+  have hcard1 : X1.card = F1.card := by
+    rw [hX1]
+    refine Finset.card_image_of_injOn ?_
+    intro S hS S' hS' heq
+    have hS1 := (hmemF1 S).mp (by rw [Finset.mem_coe] at hS; exact hS)
+    have hS1' := (hmemF1 S').mp (by rw [Finset.mem_coe] at hS'; exact hS')
+    have heq' : insert c₁ S = insert c₁ S' := heq
+    have h := congrArg (fun T => T.erase c₁) heq'
+    rwa [Finset.erase_insert (hc1 S hS1.1), Finset.erase_insert (hc1 S' hS1'.1)] at h
+  have hcard2 : X2.card = F1.card := by
+    rw [hX2]
+    refine Finset.card_image_of_injOn ?_
+    intro S hS S' hS' heq
+    have hS1 := (hmemF1 S).mp (by rw [Finset.mem_coe] at hS; exact hS)
+    have hS1' := (hmemF1 S').mp (by rw [Finset.mem_coe] at hS'; exact hS')
+    have heq' : insert c₂ S = insert c₂ S' := heq
+    have h := congrArg (fun T => T.erase c₂) heq'
+    rwa [Finset.erase_insert (hc2 S hS1.1), Finset.erase_insert (hc2 S' hS1'.1)] at h
+  have hcard3 : X3.card = F2.card := by
+    rw [hX3]
+    simp
+  have hcard4 : X4.card = F2.card := by
+    rw [hX4]
+    refine Finset.card_image_of_injOn ?_
+    intro S hS S' hS' heq
+    have hS2 := (hmemF2 S).mp (by rw [Finset.mem_coe] at hS; exact hS)
+    have hS2' := (hmemF2 S').mp (by rw [Finset.mem_coe] at hS'; exact hS')
+    have hc1S := hc1 S hS2.1
+    have hc2S := hc2 S hS2.1
+    have hc1S' := hc1 S' hS2'.1
+    have hc2S' := hc2 S' hS2'.1
+    have heq' : insert c₁ (insert c₂ S) = insert c₁ (insert c₂ S') := heq
+    have e1 : insert c₂ S = insert c₂ S' := by
+      have h := congrArg (fun T => T.erase c₁) heq'
+      have hc1ins : c₁ ∉ insert c₂ S := by
+        simp only [Finset.mem_insert, not_or]
+        exact ⟨hne, hc1S⟩
+      have hc1ins' : c₁ ∉ insert c₂ S' := by
+        simp only [Finset.mem_insert, not_or]
+        exact ⟨hne, hc1S'⟩
+      rwa [Finset.erase_insert hc1ins, Finset.erase_insert hc1ins'] at h
+    have h := congrArg (fun T => T.erase c₂) e1
+    rwa [Finset.erase_insert hc2S, Finset.erase_insert hc2S'] at h
+  have hdisj12 : Disjoint X1 X2 := by
+    rw [Finset.disjoint_left]
+    intro D h1 h2
+    rw [hX1mem D] at h1
+    rw [hX2mem D] at h2
+    exact h1.2.1 h2.1
+  have hdisj34 : Disjoint X3 X4 := by
+    rw [Finset.disjoint_left]
+    intro D h3 h4
+    rw [hX3mem D] at h3
+    rw [hX4mem D] at h4
+    exact h3.1 h4.1
+  have hdisj : Disjoint (X1 ∪ X2) (X3 ∪ X4) := by
+    rw [Finset.disjoint_left]
+    intro D hD hD'
+    rw [Finset.mem_union] at hD hD'
+    rcases hD with h1 | h2 <;> rcases hD' with h3 | h4
+    · rw [hX1mem D] at h1; rw [hX3mem D] at h3; exact h3.1 h1.1
+    · rw [hX1mem D] at h1; rw [hX4mem D] at h4; exact h1.2.1 h4.2.1
+    · rw [hX2mem D] at h2; rw [hX3mem D] at h3; exact h3.2.1 h2.1
+    · rw [hX2mem D] at h2; rw [hX4mem D] at h4; exact h2.2.1 h4.1
+  have hF1card : F1.card = ∑ i ∈ Finset.range t, (n - 2).choose i := by
+    rw [hF1, card_powerset_filter_add_le TC 1 t, Nat.add_sub_cancel]
+    have hTCcard : TC.card = n - 2 := by
+      rw [hTC, Finset.card_compl, Fintype.card_fin, Finset.card_pair hne]
+    rw [hTCcard]
+  have hF2card : F2.card = ∑ i ∈ Finset.range (t - 1), (n - 2).choose i := by
+    rw [hF2, card_powerset_filter_add_le TC 2 t]
+    have hsub : t + 1 - 2 = t - 1 := by omega
+    have hTCcard : TC.card = n - 2 := by
+      rw [hTC, Finset.card_compl, Fintype.card_fin, Finset.card_pair hne]
+    rw [hsub, hTCcard]
+  rw [hAeq, Finset.card_union_of_disjoint hdisj, Finset.card_union_of_disjoint hdisj12,
+    Finset.card_union_of_disjoint hdisj34, hcard1, hcard2, hcard3, hcard4, hF1card, hF2card]
+  ring
+
 end FCC
