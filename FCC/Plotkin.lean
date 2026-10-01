@@ -477,6 +477,85 @@ theorem sum_lt_eq_sum_lt_i (g : ι → ι → ℕ) :
   exact Finset.sum_congr rfl fun i _ => (Finset.sum_filter (s := Finset.univ)
     (f := fun j => g i j) (p := fun j => i < j)).symm
 
+omit [LinearOrder ι] in
+/-- `(internal, §VIII-A — `#lemma 13#`)` — the row-sum form and the product-filter
+form of the sum over ordered pairs of distinct indices agree. -/
+theorem sum_erase_eq_sum_filter_ne (g : ι → ι → ℕ) :
+    (∑ i, ∑ j ∈ (Finset.univ : Finset ι).erase i, g i j)
+      = ∑ q ∈ (Finset.univ : Finset (ι × ι)).filter (fun q => q.1 ≠ q.2), g q.1 q.2 := by
+  rw [Finset.sum_filter, ← Finset.univ_product_univ, Finset.sum_product]
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [← Finset.sum_filter]
+  exact Finset.sum_congr (by ext j; simp [Finset.mem_erase, eq_comm]) fun j _ => rfl
+
+/-- `(internal, §VIII-A — `#lemma 13#`: the factor `2` of the paper's constant)` — for a
+symmetric weight `f`, twice the paper's sum over the unordered pairs `i < j` is the
+sum over all ordered pairs `i ≠ j`: the pairs `i ≠ j` split into `i < j` and `j < i`
+(`Finset.filter_or`), and swapping the two coordinates is a bijection from the second
+half onto the first that leaves `f` unchanged (`hsymm`). -/
+theorem two_mul_sum_lt_eq_sum_filter_ne (f : ι → ι → ℕ) (hsymm : ∀ a b, f a b = f b a) :
+    2 * (∑ q ∈ (Finset.univ : Finset (ι × ι)).filter (fun q => q.1 < q.2), f q.1 q.2)
+      = ∑ q ∈ (Finset.univ : Finset (ι × ι)).filter (fun q => q.1 ≠ q.2), f q.1 q.2 := by
+  have hsplit : (Finset.univ : Finset (ι × ι)).filter (fun q => q.1 ≠ q.2)
+      = (Finset.univ.filter fun q : ι × ι => q.1 < q.2)
+        ∪ (Finset.univ.filter fun q : ι × ι => q.2 < q.1) := by
+    rw [← Finset.filter_or]
+    congr 1
+    ext q
+    exact ⟨fun h => lt_or_gt_of_ne h, fun h => h.elim ne_of_lt fun h => ne_of_gt h⟩
+  have hdisj : Disjoint ((Finset.univ : Finset (ι × ι)).filter fun q => q.1 < q.2)
+      ((Finset.univ : Finset (ι × ι)).filter fun q => q.2 < q.1) := by
+    rw [Finset.disjoint_left]
+    intro q h1 h2
+    exact absurd (Finset.mem_filter.mp h2).2 (not_lt.mpr (Finset.mem_filter.mp h1).2.le)
+  have himg : (Finset.univ : Finset (ι × ι)).filter (fun q => q.2 < q.1)
+      = ((Finset.univ : Finset (ι × ι)).filter (fun q => q.1 < q.2)).image
+          (fun q => (q.2, q.1)) := by
+    ext q
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_image]
+    constructor
+    · intro h
+      exact ⟨(q.2, q.1), h, by simp⟩
+    · rintro ⟨p, hp, rfl⟩
+      simpa using hp
+  have hsymm_sum : (∑ q ∈ (Finset.univ : Finset (ι × ι)).filter (fun q => q.1 < q.2),
+        f q.2 q.1)
+      = ∑ q ∈ (Finset.univ : Finset (ι × ι)).filter (fun q => q.1 < q.2), f q.1 q.2 :=
+    Finset.sum_congr rfl fun q _ => (hsymm q.1 q.2).symm
+  rw [hsplit, Finset.sum_union hdisj, himg, Finset.sum_image, hsymm_sum]
+  · ring
+  · intro q _ q' _ h
+    exact Prod.ext (congrArg Prod.snd h) (congrArg Prod.fst h)
+
 end UnorderedPairs
+
+/-- `(internal, §VIII-A — the upper bound of `#lemma 13#`)` — for *any* family
+`p : ι → Word F n` of `M = Fintype.card ι` words,
+`q · 2 · Σ_{i<j} d(p_i,p_j) ≤ n · (M²(q−1) − a(q−a))`, `a = M % q`: the ordered
+double count `total_pair_eq_sum_coord` writes the pair distance as a sum over the
+coordinates, and each coordinate is bounded by the sharp per-coordinate estimate
+`card_ne_pairs_mul_le_sharp`; the factor `2` and the ordered/unordered bridge are
+`two_mul_sum_lt_eq_sum_filter_ne`. -/
+theorem plotkin_total_le_sharp {ι : Type*} [Fintype ι] [DecidableEq ι] [LinearOrder ι]
+    {F : Type*} [Fintype F] [DecidableEq F] {n : ℕ} (p : ι → Word F n) :
+    Fintype.card F * (2 * (∑ q ∈ (Finset.univ : Finset (ι × ι)).filter (fun q => q.1 < q.2),
+        hammingDist (p q.1) (p q.2)))
+      ≤ n * ((Fintype.card ι) ^ 2 * (Fintype.card F - 1) -
+          (Fintype.card ι) % Fintype.card F *
+            (Fintype.card F - (Fintype.card ι) % Fintype.card F)) := by
+  rw [two_mul_sum_lt_eq_sum_filter_ne (fun i j => hammingDist (p i) (p j))
+      (fun a b => hammingDist_comm (p a) (p b)),
+    ← sum_erase_eq_sum_filter_ne (fun i j => hammingDist (p i) (p j)),
+    total_pair_eq_sum_coord p, Finset.mul_sum]
+  calc ∑ c : Fin n, Fintype.card F * ((Finset.univ : Finset (ι × ι)).filter
+        (fun q => (p q.1) c ≠ (p q.2) c)).card
+      ≤ ∑ _c : Fin n, ((Fintype.card ι) ^ 2 * (Fintype.card F - 1) -
+          (Fintype.card ι) % Fintype.card F *
+            (Fintype.card F - (Fintype.card ι) % Fintype.card F)) :=
+        Finset.sum_le_sum fun c _ => card_ne_pairs_mul_le_sharp (fun i => (p i) c)
+    _ = n * ((Fintype.card ι) ^ 2 * (Fintype.card F - 1) -
+          (Fintype.card ι) % Fintype.card F *
+            (Fintype.card F - (Fintype.card ι) % Fintype.card F)) := by
+        rw [Finset.sum_const, smul_eq_mul, Finset.card_univ, Fintype.card_fin]
 
 end FCC
