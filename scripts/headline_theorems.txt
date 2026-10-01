@@ -69,6 +69,9 @@ hammingWeight_redundancy_le_optimal
 hamming_bound_fcc_sphere
 # §VIII-B (the union-of-balls Hamming bound):
 hamming_bound_fcc
+# §VIII-C (the two-radius Hamming bound and its sphere corollary):
+hamming_bound_fcc_data
+hamming_bound_fcc_data_sphere
 # Appendix (ball-union counts):
 card_ball_union_dist_one
 # Appendix (two balls at distance two):

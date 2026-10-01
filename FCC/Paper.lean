@@ -3626,6 +3626,7 @@ theorem hamming_bound_fcc {k r : ℕ} (f : Word F k → α) (t : ℕ)
     _ ≤ ∑ a ∈ Finset.univ.image f, (U a).card := hcomb
     _ ≤ Fintype.card F ^ (k + r) := hsum
 
+omit [Zero F] in
 /-- `#theorem 16#` (§VIII-C) — the same statement for an `(f : d_d, d_f)`-FCC:
 "let `ℓ = min_{i∈[E]} |f⁻¹(fᵢ)|` and `v₁, v₂, …, v_ℓ` be distinct vectors in
 `F_q^n` with `d(vᵢ,vⱼ) ≥ d_d`, for which `|∪_{j≤ℓ} B(v_j,t_f)|` is minimum.
@@ -3641,7 +3642,87 @@ theorem hamming_bound_fcc_data {k r : ℕ} (f : Word F k → α) (dd df tf : ℕ
     (Finset.univ.image f).card *
         minUnionCardDist (F := F) (minPreimageCard f) dd (k + r) tf ≤
       Fintype.card F ^ (k + r) := by
-  sorry
+  classical
+  set ℓ := minPreimageCard f with hℓ
+  have hCinj : Function.Injective C := by
+    intro u v huv
+    funext i
+    calc u i = C u (Fin.castAdd r i) := (hC.1 u i).symm
+      _ = C v (Fin.castAdd r i) := by rw [huv]
+      _ = v i := hC.1 v i
+  set U : α → Finset (Word F (k + r)) := fun a =>
+    unionBalls ((Finset.univ.filter (fun u : Word F k => f u = a)).image C) tf with hU
+  have hUmem : ∀ a x, x ∈ U a ↔ ∃ u : Word F k, f u = a ∧ x ∈ ball (C u) tf := by
+    intro a x
+    simp only [hU, unionBalls, Finset.mem_biUnion, Finset.mem_image]
+    constructor
+    · rintro ⟨w, ⟨u, hu, rfl⟩, hxw⟩
+      exact ⟨u, by simpa using hu, hxw⟩
+    · rintro ⟨u, hu, hx⟩
+      exact ⟨C u, ⟨u, by simpa using hu, rfl⟩, hx⟩
+  have hpre : ∀ a ∈ Finset.univ.image f,
+      ℓ ≤ (Finset.univ.filter (fun u : Word F k => f u = a)).card := by
+    intro a ha
+    have hmem : (Finset.univ.filter (fun u : Word F k => f u = a)).card ∈
+        {c : ℕ | ∃ b : α, (Finset.univ.filter (fun u : Word F k => f u = b)).card = c} :=
+      ⟨a, rfl⟩
+    have hthis : minPreimageCard f ≤
+        (Finset.univ.filter (fun u : Word F k => f u = a)).card := Nat.sInf_le hmem
+    rwa [← hℓ] at hthis
+  -- the codewords of one preimage are pairwise at distance `≥ dd`, so their
+  -- radius-`tf` unions are admissible for `minUnionCardDist`
+  have hlow : ∀ a ∈ Finset.univ.image f,
+      minUnionCardDist (F := F) ℓ dd (k + r) tf ≤ (U a).card := by
+    intro a ha
+    obtain ⟨s, hsS, hscard⟩ := Finset.exists_subset_card_eq (hpre a ha)
+    have hscard' : (s.image C).card = ℓ := by
+      rw [Finset.card_image_of_injective _ hCinj, hscard]
+    have hpairs : ∀ x ∈ s.image C, ∀ y ∈ s.image C, x ≠ y → dd ≤ hammingDist x y := by
+      intro x hx y hy hxy
+      obtain ⟨u, -, rfl⟩ := Finset.mem_image.mp hx
+      obtain ⟨v, -, rfl⟩ := Finset.mem_image.mp hy
+      exact hC.2.1 u v (fun huv => hxy (by rw [huv]))
+    refine le_trans (Nat.sInf_le ⟨s.image C, hscard', hpairs, rfl⟩) (Finset.card_le_card ?_)
+    intro x hx
+    rw [hUmem a x]
+    rw [unionBalls, Finset.mem_biUnion] at hx
+    obtain ⟨w, hw, hxw⟩ := hx
+    obtain ⟨u, hu, rfl⟩ := Finset.mem_image.mp hw
+    exact ⟨u, by simpa using hsS hu, hxw⟩
+  have hdisj : ∀ a ∈ Finset.univ.image f, ∀ b ∈ Finset.univ.image f,
+      a ≠ b → Disjoint (U a) (U b) := by
+    intro a ha b hb hab
+    rw [Finset.disjoint_left]
+    intro x hx hx'
+    obtain ⟨u, hu, hxu⟩ := (hUmem a x).mp hx
+    obtain ⟨v, hv, hxv⟩ := (hUmem b x).mp hx'
+    have hne : f u ≠ f v := by rw [hu, hv]; exact hab
+    have h2t : 2 * tf + 1 ≤ hammingDist (C u) (C v) := le_trans hf (hC.2.2 u v hne)
+    have h1 : hammingDist x (C u) ≤ tf := by simpa [ball] using hxu
+    have h2 : hammingDist x (C v) ≤ tf := by simpa [ball] using hxv
+    have htri := hammingDist_triangle (C u) x (C v)
+    rw [hammingDist_comm (C u) x] at htri
+    omega
+  have hsum : ∑ a ∈ Finset.univ.image f, (U a).card ≤ Fintype.card F ^ (k + r) := by
+    have hpd : Set.PairwiseDisjoint (fun a => a ∈ Finset.univ.image f) U :=
+      fun a ha b hb hab => hdisj a ha b hb hab
+    rw [← Finset.card_biUnion hpd]
+    calc ((Finset.univ.image f).biUnion U).card
+        ≤ (Finset.univ : Finset (Word F (k + r))).card :=
+          Finset.card_le_card (Finset.subset_univ _)
+      _ = Fintype.card F ^ (k + r) := by rw [Finset.card_univ]; exact card_word (k + r)
+  have hcomb : (Finset.univ.image f).card * minUnionCardDist (F := F) ℓ dd (k + r) tf
+      ≤ ∑ a ∈ Finset.univ.image f, (U a).card := by
+    have hconst : ∑ a ∈ Finset.univ.image f, minUnionCardDist (F := F) ℓ dd (k + r) tf
+        = (Finset.univ.image f).card * minUnionCardDist (F := F) ℓ dd (k + r) tf := by
+      rw [Finset.sum_const, smul_eq_mul]
+    rw [← hconst]
+    exact Finset.sum_le_sum (fun a ha => hlow a ha)
+  calc (Finset.univ.image f).card *
+        minUnionCardDist (F := F) (minPreimageCard f) dd (k + r) tf
+      = (Finset.univ.image f).card * minUnionCardDist (F := F) ℓ dd (k + r) tf := by rw [← hℓ]
+    _ ≤ ∑ a ∈ Finset.univ.image f, (U a).card := hcomb
+    _ ≤ Fintype.card F ^ (k + r) := hsum
 
 /-- `#corollary 14#` (§VIII-C) — "consider a function `f : F_q^k → Im(f)` with
 `Im(f) = {f₁,…,f_E}`, and `ℓ = min_{i∈[E]} |f⁻¹(fᵢ)|`.  Then there exists an
@@ -3657,7 +3738,87 @@ theorem hamming_bound_fcc_data_sphere {k r : ℕ} (f : Word F k → α) (dd df t
     (hd : 2 * td + 1 ≤ dd) (hf : 2 * td + 1 ≤ df) :
     (Finset.univ.image f).card * minPreimageCard f *
         (ball (0 : Word F (k + r)) td).card ≤ Fintype.card F ^ (k + r) := by
-  sorry
+  classical
+  set U : α → Finset (Word F (k + r)) := fun a =>
+    (Finset.univ.filter (fun u : Word F k => f u = a)).biUnion (fun u => ball (C u) td) with hU
+  have hUmem : ∀ a x, x ∈ U a ↔ ∃ u : Word F k, f u = a ∧ x ∈ ball (C u) td := by
+    intro a x
+    simp only [hU, Finset.mem_biUnion, Finset.mem_filter, Finset.mem_univ, true_and]
+  have hpre : ∀ a ∈ Finset.univ.image f,
+      minPreimageCard f ≤ (Finset.univ.filter (fun u : Word F k => f u = a)).card := by
+    intro a ha
+    have hmem : (Finset.univ.filter (fun u : Word F k => f u = a)).card ∈
+        {c : ℕ | ∃ b : α, (Finset.univ.filter (fun u : Word F k => f u = b)).card = c} :=
+      ⟨a, rfl⟩
+    exact Nat.sInf_le hmem
+  -- the balls of radius `td` around codewords of one preimage are pairwise disjoint
+  have hdisjBall : ∀ u v : Word F k, u ≠ v → Disjoint (ball (C u) td) (ball (C v) td) := by
+    intro u v huv
+    have hdd : dd ≤ hammingDist (C u) (C v) := hC.2.1 u v huv
+    rw [Finset.disjoint_left]
+    intro x hx hx'
+    have h1 : hammingDist x (C u) ≤ td := by simpa [ball] using hx
+    have h2 : hammingDist x (C v) ≤ td := by simpa [ball] using hx'
+    have htri := hammingDist_triangle (C u) x (C v)
+    rw [hammingDist_comm (C u) x] at htri
+    omega
+  -- hence `|U a| = |f⁻¹(a)| · |B(0,td)|`
+  have hcardU : ∀ a ∈ Finset.univ.image f,
+      (U a).card = (Finset.univ.filter (fun u : Word F k => f u = a)).card *
+        (ball (0 : Word F (k + r)) td).card := by
+    intro a ha
+    rw [hU]
+    have hpd : Set.PairwiseDisjoint (fun u => u ∈ Finset.univ.filter (fun u : Word F k => f u = a))
+        (fun u => ball (C u) td) := by
+      intro u _ v _ huv
+      exact hdisjBall u v huv
+    rw [Finset.card_biUnion hpd]
+    have hterm : ∀ u ∈ Finset.univ.filter (fun u : Word F k => f u = a),
+        (ball (C u) td).card = (ball (0 : Word F (k + r)) td).card := by
+      intro u _
+      rw [card_ball, card_ball]
+    rw [Finset.sum_congr rfl hterm, Finset.sum_const, smul_eq_mul]
+  have hlow : ∀ a ∈ Finset.univ.image f,
+      minPreimageCard f * (ball (0 : Word F (k + r)) td).card ≤ (U a).card := by
+    intro a ha
+    rw [hcardU a ha]
+    exact Nat.mul_le_mul_right _ (hpre a ha)
+  -- the unions of different function values are disjoint
+  have hdisj : ∀ a ∈ Finset.univ.image f, ∀ b ∈ Finset.univ.image f,
+      a ≠ b → Disjoint (U a) (U b) := by
+    intro a ha b hb hab
+    rw [Finset.disjoint_left]
+    intro x hx hx'
+    obtain ⟨u, hu, hxu⟩ := (hUmem a x).mp hx
+    obtain ⟨v, hv, hxv⟩ := (hUmem b x).mp hx'
+    have hne : f u ≠ f v := by rw [hu, hv]; exact hab
+    have h2t : 2 * td + 1 ≤ hammingDist (C u) (C v) := le_trans hf (hC.2.2 u v hne)
+    have h1 : hammingDist x (C u) ≤ td := by simpa [ball] using hxu
+    have h2 : hammingDist x (C v) ≤ td := by simpa [ball] using hxv
+    have htri := hammingDist_triangle (C u) x (C v)
+    rw [hammingDist_comm (C u) x] at htri
+    omega
+  have hsum : ∑ a ∈ Finset.univ.image f, (U a).card ≤ Fintype.card F ^ (k + r) := by
+    have hpd : Set.PairwiseDisjoint (fun a => a ∈ Finset.univ.image f) U :=
+      fun a ha b hb hab => hdisj a ha b hb hab
+    rw [← Finset.card_biUnion hpd]
+    calc ((Finset.univ.image f).biUnion U).card
+        ≤ (Finset.univ : Finset (Word F (k + r))).card :=
+          Finset.card_le_card (Finset.subset_univ _)
+      _ = Fintype.card F ^ (k + r) := by rw [Finset.card_univ]; exact card_word (k + r)
+  calc (Finset.univ.image f).card * minPreimageCard f * (ball (0 : Word F (k + r)) td).card
+      = (Finset.univ.image f).card *
+          (minPreimageCard f * (ball (0 : Word F (k + r)) td).card) := by
+        rw [Nat.mul_assoc]
+    _ ≤ ∑ a ∈ Finset.univ.image f, (U a).card := by
+        have hconst : ∑ a ∈ Finset.univ.image f,
+              (minPreimageCard f * (ball (0 : Word F (k + r)) td).card)
+            = (Finset.univ.image f).card *
+                (minPreimageCard f * (ball (0 : Word F (k + r)) td).card) := by
+          rw [Finset.sum_const, smul_eq_mul]
+        rw [← hconst]
+        exact Finset.sum_le_sum (fun a ha => hlow a ha)
+    _ ≤ Fintype.card F ^ (k + r) := hsum
 
 end SectionVIIIStatements
 
