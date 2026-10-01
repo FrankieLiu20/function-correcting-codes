@@ -1180,3 +1180,68 @@ to see the real goal) was what finally unblocked the counting.
 green, `axioms_check.ps1` green with 45 audited results; commit `eba716d`.  17 `sorry`
 stubs remain.  Next: `#lemma 14#`, `#theorem 18#`, `#theorem 19#`.
 
+## 2026-10-01 — appendix: `#lemma 14#` proved (`card_ball_inter_dist_two`)
+
+`#lemma 14#`: over `F₂`, for `d(u₁,u₂) = 2`,
+`|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)`.
+
+**Statement check first** (the user's standing rule).  The statement was re-read
+against the PDF's Appendix and matches verbatim: the paper's Lemma 14 is exactly
+"Consider two vectors `u₁, u₂ ∈ F₂ⁿ` such that `d(u₁,u₂) = 2`.  Then
+`|B(u₁,t) ∩ B(u₂,t)| = 2 Σ_{i=0}^{t−1} C(n−1, i)`", and the paper's own proof (four
+cases on `x₁, x₂`, then `2#₁ + 2#₂` and Pascal) agrees with the plan recorded in
+`TODO.md`.  No deviation, so no new `ISSUES.md` entry.
+
+**Proof shape.**  The paper normalises to `u₁ = (0,…,0)`, `u₂ = (1,1,0,…,0)`; the
+formalisation keeps the normalisation out of the statement and instead separates
+the two differing coordinates, obtained from `diffSet u v` by
+`exists_diffSet_eq_pair` (`|D(u,v)| = d(u,v) = 2`, `Finset.card_eq_two`).
+
+* `mem_ball_inter_iff_dist_two`: outside `{c₁,c₂}` the two centres agree, so each
+  disagreement of `x` with `u` there contributes `1` to *both* distances; at `c₁`
+  and `c₂` the centres differ, so each of those coordinates contributes `1` to
+  exactly one of the two (this is `zmod2_ne_iff_eq`, `x ≠ a ↔ x = b` in `F₂`).
+  With `a = |D(x,u) \ {c₁,c₂}|` the two distances are therefore `a + k` and
+  `a + 2 − k`, `k ∈ {0,1,2}` being how many of `c₁`, `c₂` are disagreements, and
+  membership in both balls is `a + (if `x` is a disagreement at `c₁` and at `c₂`
+  alike then 2 else 1) ≤ t` — a four-way `by_cases` plus `omega`.
+* Over `F₂` there is exactly *one* word per prescribed disagreement set
+  (`card_sphere_fiber` at `q = 2`, i.e. `(2−1)^i = 1`), so the intersection has the
+  cardinality of the set of *admissible* disagreement sets `D ⊆ Fin n`.
+* `card_allowed_dist_two` counts those: with `S = D \ {c₁,c₂} ⊆ {c₁,c₂}ᶜ`, the four
+  possibilities for `c₁, c₂ ∈ D` contribute two copies of `|S| + 1 ≤ t` and two
+  copies of `|S| + 2 ≤ t`; splitting by `|S|` (`card_powerset_filter_add_le`) gives
+  `2Σ_{i<t}C(n−2,i) + 2Σ_{i<t−1}C(n−2,i)`, i.e. the paper's `2#₁ + 2#₂`.
+* `sum_range_choose_pred` (summed Pascal, itself built on `sum_range_choose_succ`)
+  rewrites this to `2Σ_{i<t}C(n−1,i)`.  `n ≥ 2` is derived from `d(u,v) = 2`, since
+  `{c₁,c₂} ⊆ Fin n`.
+
+New internal helpers, all in `FCC/Balls.lean`: `card_erase_erase_add`,
+`zmod2_ne_iff_eq`, `exists_diffSet_eq_pair`, `mem_ball_inter_iff_dist_two`,
+`card_powerset_filter_add_le`, `sum_range_choose_succ`, `sum_range_choose_pred`,
+`card_allowed_dist_two`.
+
+**Lean lessons** (all cost real time).
+1. `rw` matches a hypothesis's *unreduced* lambda form: the injectivity hypothesis
+   produced by `Finset.card_image_of_injOn` is
+   `(fun S => insert c₁ S) S = (fun S => insert c₁ S) S'`, which does **not** match
+   `insert c₁ S` in the goal, so it must be re-stated with an explicit type
+   (`have heq' : insert c₁ S = insert c₁ S' := heq`) before it can rewrite.
+2. Rewriting `S` back to `(insert c₁ S).erase c₁` is unreliable when `S` also
+   occurs inside a larger term (`insert c₂ S`); the robust pattern is
+   `have h := congrArg (fun T => T.erase c₁) heq` then
+   `rwa [Finset.erase_insert …, Finset.erase_insert …] at h`.
+3. The two-element facts about `ZMod 2` are best proved by `revert` + `decide`: the
+   type is finite, so the quantified proposition is decidable
+   (`zmod2_ne_iff_eq`).
+4. `Nat`-valued `if P then 1 else 0` does not reduce under `simp` in the shape the
+   counting needs, so the four membership patterns were handled with explicit
+   `Finset` images (`X1 … X4`) and `Finset.card_image_of_injOn` rather than by
+   simplifying the `if` inside the `filter`.
+
+**Verification.**  Standalone `lake build` green, then (separately)
+`consistency_check.ps1 -Strict` green (78 markers, 73 rows stated, 16 `sorry`) and
+`axioms_check.ps1` green with 46 audited results; commit `7dd58b3`.
+`card_ball_inter_dist_two` was added to `scripts/headline_theorems.txt` and
+`FCC/AxiomCheck.lean`.  Next: `#theorem 18#` (three balls at distances `1,1,2`),
+then `#theorem 19#`.

@@ -243,6 +243,37 @@ justified for linear codes, not for our arbitrary labelling map), and
 `#theorem 7#` was a proxy for the paper's two-sided bound on the scheme
 redundancy `r_s` and has since been reworked and proved (`ISSUES.md` §13(d)).
 
+## Phase 3.13 — the appendix ball-union counts (2026-10-01)
+
+`#theorem 17#` (`card_ball_union_dist_one`) and `#lemma 14#`
+(`card_ball_inter_dist_two`) are proved; `#theorem 18#` and `#theorem 19#` remain
+stated with `sorry`.
+
+Verified:
+
+| Check | Result |
+| --- | --- |
+| `lake build` | green (1818 jobs; 16 `sorry` warnings, all in phases 3.11–3.13) |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 16 `sorry`) |
+| `scripts/axioms_check.ps1` | green — 46 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+
+`#lemma 14#` is the paper's Appendix Lemma 14: over `F₂`, for `d(u₁,u₂) = 2`,
+`|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)`.  Statement re-read against the PDF
+verbatim (no deviation, no new `ISSUES.md` entry).  The paper normalises to
+`u₁ = 0`, `u₂ = (1,1,0,…,0)`; the formalisation instead extracts the two differing
+coordinates from `diffSet u v` (`exists_diffSet_eq_pair`), which avoids any
+relabelling of coordinates.
+
+Method: `mem_ball_inter_iff_dist_two` shows `x` is in both balls iff
+`|D(x,u) \ {c₁,c₂}| + (if `x` agrees with `u` at `c₁` and `c₂` alike then 2 else 1)
+≤ t`; over `F₂` every disagreement set is realised by exactly one word, so the
+count reduces to the number of admissible sets `D ⊆ Fin n`
+(`card_allowed_dist_two`), which is `2Σ_{i<t}C(n−2,i) + 2Σ_{i<t−1}C(n−2,i)`, and
+summed Pascal (`sum_range_choose_pred`) gives the printed
+`2Σ_{i<t}C(n−1,i)`.  The counting layer (`card_powerset_filter_add_le`,
+`sum_range_choose_succ/pred`) is generic and will be reused by
+`#theorem 18#`/`#theorem 19#`.
+
 ## Not formalized (and why)
 
 Nothing yet; this section is filled in as results are classified.

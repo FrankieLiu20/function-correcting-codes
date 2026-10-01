@@ -308,25 +308,44 @@ in the same commit that does the work.
       must be `change`d to the explicit-filter form before `rw
       [Finset.disjoint_left]`; `Finset.card_singleton` must be in the final `rw`
       chain (which then closes the goal, so no trailing `ring`).
-- [ ] 3.13 (part 2, next). `#lemma 14#` (`F₂`, `d(u₁,u₂) = 2`:
-      `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i<t}C(n−1,i)`), then `#theorem 18#` (three balls,
-      distances `1,1,2`) and `#theorem 19#` (`F₂`, distance `3`), by the same
-      coordinate-splitting and inclusion–exclusion; these unlock
-      `#theorem 15#`/`#theorem 16#`/`#corollary 14#`.
+- [x] 3.13 (part 2, **done** 2026-10-01). `#lemma 14#` (`card_ball_inter_dist_two`) —
+      `F₂`, `d(u₁,u₂) = 2`: `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i<t}C(n−1,i)`.  Statement
+      re-read against the PDF and matching verbatim (the paper's proof normalises to
+      `0` and `(1,1,0,…,0)`; the formalisation does not need the normalisation, since
+      the two special coordinates are found by `exists_diffSet_eq_pair`).
 
-      **Plan worked out for `#lemma 14#`** (2026-10-01): write `{c₁,c₂}` for the two
-      differing coordinates and `a` for the number of *other* coordinates where `x`
-      disagrees with `u`, and `k = #{i ∈ {c₁,c₂} : x i ≠ u i} ∈ {0,1,2}`.  Then
-      `d(x,u) = a + k` and (over `F₂`) `d(x,v) = a + 2 − k`, so `x` lies in both
-      balls iff `a + max(k, 2−k) ≤ t`, i.e. `k = 1 ∧ a ≤ t−1` or `k ∈ {0,2} ∧ a ≤ t−2`.
-      Counting the `n−2` remaining coordinates gives
-      `2Σ_{i≤t−1}C(n−2,i) + 2Σ_{i≤t−2}C(n−2,i)`, which equals the printed
-      `2Σ_{i≤t−1}C(n−1,i)` by Pascal (`C(n−1,i) = C(n−2,i) + C(n−2,i−1)`, the same
-      identity as in `sum_range_choose_mul_pow_succ`).  The counting lemma to prove
-      first is the two-coordinate analogue of `card_filter_erase_le`:
-      `|{x | |D(x,u) \ {c₁,c₂}| ≤ s}| = Σ_{j≤2} (number of ways to choose the
-      pattern on `{c₁,c₂}` at "cost" j) · (sums over the rest)`.
-- [ ] 3.13 (old note, kept for the record). `#theorem 17#`'s counting layer: three pieces
+      Proof (the plan of part 2 was executed as written, one layer deeper): `a` is
+      `|D(x,u) \ {c₁,c₂}|` and the pair `(d(x,u), d(x,v))` is `(a+k, a+2−k)` with
+      `k = [c₁ ∈ D(x,u)] + [c₂ ∈ D(x,u)] ∈ {0,1,2}`; hence `x` is in both balls iff
+      `a + (if c₁ and c₂ both disagree or both agree then 2 else 1) ≤ t`
+      (`mem_ball_inter_iff_dist_two`).  Over `F₂` each disagreement set `D ⊆ Fin n`
+      is realised by *exactly one* word (`card_sphere_fiber` at `q = 2`), so the
+      intersection is counted by its admissible disagreement sets
+      (`card_allowed_dist_two`): splitting on `c₁, c₂ ∈ D` gives two copies of
+      `|S| + 1 ≤ t` and two of `|S| + 2 ≤ t` as `S` runs over the subsets of
+      `{c₁,c₂}ᶜ`, i.e. `2Σ_{i<t}C(n−2,i) + 2Σ_{i<t−1}C(n−2,i)` by
+      `card_powerset_filter_add_le`, and summed Pascal (`sum_range_choose_pred`)
+      turns this into the printed `2Σ_{i<t}C(n−1,i)`.  New internal helpers in
+      `FCC/Balls.lean`: `card_erase_erase_add`, `zmod2_ne_iff_eq`,
+      `exists_diffSet_eq_pair`, `mem_ball_inter_iff_dist_two`,
+      `card_powerset_filter_add_le`, `sum_range_choose_succ`, `sum_range_choose_pred`,
+      `card_allowed_dist_two`.
+
+      Three Lean lessons (each cost real time): `rw` matches the *beta-unreduced*
+      form of a hypothesis (`(fun S => insert c₁ S) S`), so an injectivity
+      hypothesis produced by `Finset.card_image_of_injOn` must be re-stated with an
+      explicit type before it can rewrite anything; the robust way to use an
+      equality of `insert`-sets is `congrArg (T ↦ T.erase c₁)` followed by
+      `Finset.erase_insert`; and `by decide` proves the two-element facts about
+      `ZMod 2` (`x ≠ a ↔ x = b` for `a ≠ b`), because the type is finite so the
+      quantified proposition is decidable.
+- [ ] 3.13 (part 3, next). `#theorem 18#` (three balls at pairwise distances
+      `1,1,2`) and `#theorem 19#` (`F₂`, distance `3`, `t ≥ 2`): the same split into
+      the special coordinates plus inclusion–exclusion over three balls, reusing
+      `card_ball_inter_dist_one`/`card_ball_inter_dist_two` and the case analysis
+      `mem_ball_inter_iff_dist_two` already provides.  These unlock
+      `#theorem 15#`/`#theorem 16#`/`#corollary 14#`.
+- [x] 3.13 (old note, superseded — finished 2026-10-01). `#theorem 17#`'s counting layer: three pieces
       are in `FCC/Balls.lean` (`exists_diffSet_eq_singleton`,
       `mem_ball_inter_iff_of_dist_one`, `card_fiber_erase`).  The next piece is
       `card_filter_erase_le`:
