@@ -1618,4 +1618,156 @@ theorem card_allowed_dist_two {n t : ℕ} {c₁ c₂ : Fin n} (hne : c₁ ≠ c�
     Finset.card_union_of_disjoint hdisj34, hcard1, hcard2, hcard3, hcard4, hF1card, hF2card]
   ring
 
+/-! ### Appendix — three balls at pairwise distances `1, 1, 2` (`#theorem 18#`)
+
+The paper proves `#theorem 18#` in two steps:
+
+1. the **triple** intersection of the three balls: writing `w` for the number of
+   disagreements of `x` with `u₁` outside the two special coordinates, the paper's
+   four cases give `|B(u₁,t) ∩ B(u₂,t) ∩ B(u₃,t)| = #₁ + 3#₂`, where
+   `#₁ = Σ_{i≤t−1}C(n−2,i)` (both special coordinates agree) and
+   `#₂ = Σ_{i≤t−2}C(n−2,i)` (the other three patterns), i.e.
+   `C(n−2,t−1) + 4Σ_{i≤t−2}C(n−2,i)`;
+2. **inclusion–exclusion** over the three balls, in which each *pairwise*
+   intersection is `2Σ_{i≤t−1}C(n−1,i)` — `#theorem 17#`'s intersection for the two
+   pairs at distance one and `#lemma 14#` for the pair at distance two.
+
+Over `F₂` a word and its disagreement set with `u₁` determine each other, so both
+steps are counting problems for *sets* `D ⊆ Fin n`, and the counting lemmas below
+are shared with `#theorem 19#`. -/
+
+/-- `(internal, Appendix — 3-set inclusion–exclusion in additive form, for
+`#theorem 18#`)` — `|A ∪ B ∪ C| + |A∩B| + |A∩C| + |B∩C| = |A| + |B| + |C| +
+|A∩B∩C|`.  This is the subtraction-free form of the paper's inclusion–exclusion,
+so no `ℕ`-truncation can arise. -/
+theorem card_union_three_add {α : Type*} [DecidableEq α] (A B C : Finset α) :
+    (A ∪ B ∪ C).card + (A ∩ B).card + (A ∩ C).card + (B ∩ C).card
+      = A.card + B.card + C.card + (A ∩ B ∩ C).card := by
+  classical
+  have e1 : (A ∪ B).card + (A ∩ B).card = A.card + B.card :=
+    Finset.card_union_add_card_inter A B
+  have e2 : ((A ∪ B) ∪ C).card + ((A ∪ B) ∩ C).card = (A ∪ B).card + C.card :=
+    Finset.card_union_add_card_inter (A ∪ B) C
+  have hUC : (A ∪ B) ∩ C = (A ∩ C) ∪ (B ∩ C) := by
+    ext x; simp only [Finset.mem_inter, Finset.mem_union]; tauto
+  have e3 : ((A ∩ C) ∪ (B ∩ C)).card + ((A ∩ C) ∩ (B ∩ C)).card
+      = (A ∩ C).card + (B ∩ C).card :=
+    Finset.card_union_add_card_inter (A ∩ C) (B ∩ C)
+  have hT : (A ∩ C) ∩ (B ∩ C) = A ∩ B ∩ C := by
+    ext x; simp only [Finset.mem_inter]; tauto
+  rw [hUC] at e2
+  rw [hT] at e3
+  omega
+
+/-- `(internal, Appendix — over `F₂`)` — the element of `F₂` other than `x` is
+`x + 1`. -/
+theorem zmod2_eq_add_one_of_ne {x y : ZMod 2} (h : y ≠ x) : y = x + 1 := by
+  revert x y
+  decide
+
+/-- `(internal, Appendix — over `F₂`)` — `x + 1 ≠ x`. -/
+theorem zmod2_add_one_ne (x : ZMod 2) : x + 1 ≠ x := by
+  revert x
+  decide
+
+/-- `(internal, Appendix — over `F₂`, for `#theorem 18#` and `#theorem 19#`)` —
+every prescribed disagreement set is realised by a word (`x j = u j + 1` exactly on
+`D`): over `F₂` the map `x ↦ D(x,u)` is onto. -/
+theorem diffSet_surjective {n : ℕ} (u : Word (ZMod 2) n) :
+    Function.Surjective fun x : Word (ZMod 2) n => diffSet x u := by
+  intro D
+  refine ⟨fun j => if j ∈ D then u j + 1 else u j, ?_⟩
+  ext j
+  simp only [diffSet, Finset.mem_filter, Finset.mem_univ, true_and]
+  by_cases h : j ∈ D
+  · rw [ite_eq_left h]; exact iff_of_true (zmod2_add_one_ne (u j)) h
+  · rw [ite_eq_right h]; exact iff_of_false (fun hh => hh rfl) h
+
+/-- `(internal, Appendix — over `F₂`, for `#theorem 18#` and `#theorem 19#`)` — over
+`F₂` the disagreement set with `u` determines the word: `x ↦ D(x,u)` is injective. -/
+theorem diffSet_injective {n : ℕ} (u : Word (ZMod 2) n) :
+    Function.Injective fun x : Word (ZMod 2) n => diffSet x u := by
+  intro x y hxy
+  have hxy' : diffSet x u = diffSet y u := hxy
+  funext j
+  by_cases hj : j ∈ diffSet x u
+  · have hx : x j ≠ u j := by simpa [diffSet] using hj
+    have hy : y j ≠ u j := by
+      have : j ∈ diffSet y u := by rw [← hxy']; exact hj
+      simpa [diffSet] using this
+    rw [zmod2_eq_add_one_of_ne hx, zmod2_eq_add_one_of_ne hy]
+  · have hx : x j = u j := by
+      by_contra hne
+      exact hj (by simp [diffSet, hne])
+    have hy : y j = u j := by
+      have hnj : j ∉ diffSet y u := by rw [← hxy']; exact hj
+      by_contra hne
+      exact hnj (by simp [diffSet, hne])
+    rw [hx, hy]
+
+/-- `(internal, Appendix — over `F₂`, for `#theorem 18#` and `#theorem 19#`)` —
+counting words by a property of their disagreement set with `u` is the same as
+counting the disagreement sets themselves (the previous two lemmas). -/
+theorem card_filter_diffSet {n : ℕ} (u : Word (ZMod 2) n) (p : Finset (Fin n) → Prop)
+    [DecidablePred p] :
+    (Finset.univ.filter fun x : Word (ZMod 2) n => p (diffSet x u)).card
+      = (Finset.univ.filter p).card := by
+  classical
+  refine Finset.card_bij (fun x _ => diffSet x u) ?_ ?_ ?_
+  · intro x hx; simpa using hx
+  · intro x₁ _ x₂ _ h; exact diffSet_injective u h
+  · intro D hD
+    obtain ⟨x, rfl⟩ := diffSet_surjective u D
+    exact ⟨x, by simpa using hD, rfl⟩
+
+/-- `(internal, Appendix — for `#theorem 18#`)` — erasing two coordinates is
+removing them: `(D.erase c₁).erase c₂ = D \ {c₁, c₂}`. -/
+theorem erase_erase_eq_sdiff_pair {α : Type*} [DecidableEq α] (D : Finset α) (a b : α) :
+    (D.erase a).erase b = D \ {a, b} := by
+  ext x
+  simp only [Finset.mem_erase, Finset.mem_sdiff, Finset.mem_insert, Finset.mem_singleton]
+  tauto
+
+/-- `(internal, Appendix — the fibre split used by `#theorem 18#`)` — the subsets
+`D` whose intersection with `T` is a fixed `P ⊆ T`.  They are in bijection with the
+subsets `S ⊆ Tᶜ` (`S ↦ S ∪ P`, inverse `D ↦ D \ T`), the bijection preserving
+`|D \ T|`; hence the two families below have the same cardinality. -/
+theorem card_filter_inter_eq_card {α : Type*} [Fintype α] [DecidableEq α]
+    (T P : Finset α) (hP : P ⊆ T) (s t : ℕ) :
+    (Finset.univ.filter (fun D : Finset α => D ∩ T = P ∧ (D \ T).card + s ≤ t)).card
+      = ((Tᶜ).powerset.filter (fun S => S.card + s ≤ t)).card := by
+  classical
+  have hST : ∀ S ⊆ Tᶜ, S ∩ T = ∅ := by
+    intro S hS
+    ext x
+    simp only [Finset.mem_inter, Finset.notMem_empty, iff_false, not_and]
+    intro hx hxT
+    exact (Finset.mem_compl.mp (hS hx)) hxT
+  have hdisjST : ∀ S ⊆ Tᶜ, Disjoint S T := fun S hS =>
+    Finset.disjoint_left.mpr fun x hx hxT => (Finset.mem_compl.mp (hS hx)) hxT
+  have hSP : ∀ S ⊆ Tᶜ, (S ∪ P) ∩ T = P := by
+    intro S hS
+    rw [Finset.union_inter_distrib_right, hST S hS, Finset.inter_eq_left.mpr hP,
+      Finset.empty_union]
+  have hdiff : ∀ S ⊆ Tᶜ, (S ∪ P) \ T = S := by
+    intro S hS
+    rw [Finset.union_sdiff_distrib, Finset.sdiff_eq_self_iff_disjoint.mpr (hdisjST S hS),
+      Finset.sdiff_eq_empty_iff_subset.mpr hP, Finset.union_empty]
+  refine Finset.card_bij' (fun D _ => D \ T) (fun S _ => S ∪ P) ?_ ?_ ?_ ?_
+  · intro D hD
+    have hD' : D ∩ T = P ∧ (D \ T).card + s ≤ t := by simpa using hD
+    simp only [Finset.mem_coe, Finset.mem_filter, Finset.mem_univ, true_and,
+      Finset.mem_powerset]
+    exact ⟨fun x hx => by rw [Finset.mem_compl]; exact (Finset.mem_sdiff.mp hx).2, hD'.2⟩
+  · intro S hS
+    have hS' : S ⊆ Tᶜ ∧ S.card + s ≤ t := by simpa using hS
+    simp only [Finset.mem_coe, Finset.mem_filter, Finset.mem_univ, true_and]
+    exact ⟨hSP S hS'.1, by rw [hdiff S hS'.1]; exact hS'.2⟩
+  · intro D hD
+    have hD' : D ∩ T = P ∧ (D \ T).card + s ≤ t := by simpa using hD
+    rw [← hD'.1, Finset.sdiff_union_inter]
+  · intro S hS
+    have hS' : S ⊆ Tᶜ ∧ S.card + s ≤ t := by simpa using hS
+    exact hdiff S hS'.1
+
 end FCC

@@ -497,3 +497,28 @@ internal residue lemma `mod_ne_of_sub_lt`, from `Nat.ModEq.dvd'`), so
 `d(u,v) ≥ wt(u) − wt(v) ≥ 2t_f+1` (`wt_le_wt_add_hammingDist`) and systematicity
 folds the first step in.  The second bound is the first one applied to a systematic
 encoder of the optimal length `N(q^k, 2t_d+1)` (bundled in `hcode`, as in §18).
+
+## 22. `#theorem 18#`: the binomial `C(n−2,t−1)` needs `t ≥ 1` in Lean
+
+**Found and fixed 2026-10-01, before proving the theorem.**  The printed formula
+
+```text
+|B(u₁,t) ∪ B(u₂,t) ∪ B(u₃,t)| = 3 Σ_{i≤t} C(n,i) − 6 Σ_{i≤t−1} C(n−1,i)
+                                  + C(n−2,t−1) + 4 Σ_{i≤t−2} C(n−2,i)
+```
+
+is stated for all `t ≥ 0` in the paper, where `C(n−2,t−1)` with `t = 0` means
+`C(n−2,−1) = 0` (and the formula then reads `3 = 3`, the union of three distinct
+singleton balls).  In `ℕ`, however, `t - 1` truncates to `0`, so the same expression
+reads `C(n−2,0) = 1`.  At `n = 2`, `t = 0`, for the three distinct vectors
+`u₁ = 00`, `u₂ = 10`, `u₃ = 01`:
+
+* the left side is `|{u₁} ∪ {u₂} ∪ {u₃}| = 3`;
+* the right side is `3·C(2,0) − 6·0 + C(0, 0−1) + 4·0 = 3 + C(0,0) = 4`.
+
+So the transcription as printed is *false* at `t = 0`.  The statement now carries
+the hypothesis `1 ≤ t` (`card_ball_union_three` in `FCC/Paper.lean`), which makes
+every `t - 1`, `t - 2` exact and leaves the formula verbatim; this is the same
+convention the paper prints explicitly for the twin result `#theorem 19#`
+(`t ≥ 2` there).  The identity is provable for all `t ≥ 1` — the paper's proof
+(four cases for the triple intersection, then inclusion–exclusion) is unaffected.

@@ -3669,10 +3669,15 @@ theorem card_ball_inter_dist_two {n t : ℕ} (u v : Word (ZMod 2) n)
 /-- `#theorem 18#` (Appendix) — "consider three distinct vectors `u₁, u₂, u₃ ∈ F₂^n`
 with pairwise distances `1, 1, 2`.  Then
 `|B(u₁,t) ∪ B(u₂,t) ∪ B(u₃,t)| = 3 Σ_{i≤t} C(n,i) − 6 Σ_{i≤t−1} C(n−1,i)
-+ C(n−2,t−1) + 4 Σ_{i≤t−2} C(n−2,i)`". -/
++ C(n−2,t−1) + 4 Σ_{i≤t−2} C(n−2,i)`".
+
+The paper's `C(n−2,t−1)` is `0` at `t = 0` (there `Σ_{i≤t−2}` is empty and the
+identity reads `3 = 3`); Lean's truncated `ℕ`-subtraction would read `C(n−2,0) = 1`
+instead, so the statement carries `1 ≤ t` — the same convention as the paper's
+`t ≥ 2` in `#theorem 19#` (`ISSUES.md` §22). -/
 theorem card_ball_union_three {n t : ℕ} (u₁ u₂ u₃ : Word (ZMod 2) n)
     (h12 : hammingDist u₁ u₂ = 1) (h13 : hammingDist u₁ u₃ = 1)
-    (h23 : hammingDist u₂ u₃ = 2) :
+    (h23 : hammingDist u₂ u₃ = 2) (ht : 1 ≤ t) :
     (ball u₁ t ∪ ball u₂ t ∪ ball u₃ t).card =
       3 * (∑ i ∈ Finset.range (t + 1), n.choose i) -
         6 * (∑ i ∈ Finset.range t, (n - 1).choose i) + (n - 2).choose (t - 1) +
