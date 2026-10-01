@@ -415,6 +415,35 @@ in the same commit that does the work.
       from `total_pair_eq_sum_coord` + `card_ne_pairs_mul_le_sharp`), and the
       `ℚ`/`sInf` finish in `FCC/Paper.lean` (`plotkin_bound`).
 
+      **Landed 2026-10-02** (commit `1101cb8`): the factor-`2` bridge
+      (`two_mul_sum_lt_eq_sum_filter_ne`, plus `sum_erase_eq_sum_filter_ne` to move
+      between the row-sum and product-filter forms of the ordered-pair sum) and
+      `plotkin_total_le_sharp`: `q · 2 · Σ_{i<j} d(p_i,p_j) ≤ n · (M²(q−1) − a(q−a))`
+      for *any* family of words `p : ι → Word F n`.  The bridge works by *set
+      algebra* on finsets (which is what finally worked): the pairs `i ≠ j` split
+      into `i < j` and `j < i` (`Finset.filter_or`), and swapping the two
+      coordinates is `Finset.sum_image` along `(a,b) ↦ (b,a)` — no `ite`, hence no
+      `split_ifs`/`ite_eq_*` pitfalls.
+
+      **Only the `ℚ`/`sInf` finish in `FCC/Paper.lean` (`plotkin_bound`) is left.**
+      Two observations from thinking it through, which the next attempt should use:
+
+      * **Avoid the truncated subtraction.**  The clean ℕ form of the sharp
+        per-coordinate estimate is `q·(M² − Σn_ε²) + a(q−a) ≤ q·M²` … written in
+        the form that needs no `ℕ`-subtraction on the right,
+        `q·#(differing pairs) + a(q−a) ≤ M²(q−1) + a(q−a)`-style; then casting to
+        `ℚ` never meets `Nat.cast_sub`.  (Equivalently: reprove the per-coordinate
+        brick as `q*#ne + a*(q−a) ≤ M²*(q−1)`, a pure addition inequality.)
+      * The statement's denominator `A_ℚ := M²(q−1) − a(q−a)` (a `ℚ` subtraction)
+        is `≥ 0` and vanishes only when `M ≤ 1` or `q = 1`, cases in which also
+        `Σ_{i<j} d = 0`; so the two cases `A_ℚ = 0` and `A_ℚ > 0` are enough, and in
+        the second the `ℕ`-truncation is exact (`Nat.cast_sub` applies).
+      * For the `sInf`: use the repo's `Nat.sInf_def hne` + `Nat.find_spec hne`
+        idiom (there is **no** `Nat.le_sInf`, see the comment above `N_eq_of`), with
+        nonemptiness `hne : ∃ n, IsDCode D n` from `exists_isDCode_const` applied to
+        the constant matrix `Σ_{i,j} D i j` (needs `2 ≤ q`, i.e. the `A_ℚ > 0`
+        case).
+
       **Attempted 2026-10-01 and rolled back** (repo left green at `7275bb5`):
       the `ite` route above was implemented once and hit these walls, which the
       next attempt should go around rather than rediscover:
