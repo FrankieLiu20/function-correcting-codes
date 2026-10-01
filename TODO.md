@@ -3,6 +3,19 @@
 Near-term, in the order the project works through `PLAN.md` §4.  Tick items off
 in the same commit that does the work.
 
+## Open question (deliberately deferred to the end, 2026-10-01)
+
+- [ ] **Do the externally quoted results have to be *proved* as well?**
+      `#lemma 1#` ([10]), `#lemma 4#` ([14]), `#lemma 12#` ([1]), `#corollary 3#`
+      ([14]), `#corollary 5#` ([1, App.]) — and the quoted parts of `#lemma 11#` —
+      are results of other papers.  Per `AGENTS.md` rule 6 they currently enter the
+      statements as **explicit hypotheses** (`hbound`, `hcol`, …), never as `axiom`s.
+      Whether the final deliverable should additionally *prove* them (by formalizing
+      the quoted statements of [1], [10], [14]) or keep them as hypotheses is left
+      open on purpose: the user wants to settle this **at the very end**, after every
+      provable item of the paper is done.  The whole final-state question ("should
+      `FCC/Paper.lean` end with zero `sorry`?") is to be revisited then too.
+
 ## Phase 0 — done
 
 - [x] Create the repository, the toolchain pin and the CI workflow.
