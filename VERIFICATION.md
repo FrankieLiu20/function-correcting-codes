@@ -582,17 +582,21 @@ papers and will be used as explicit hypotheses rather than assumed as axioms.
 
 ## Statement-level caveats
 
-* **§VII-B, the dimension half of `#lemma 10#`/`#theorem 13#` is not
-  formalized yet.**  Both printed claims say that the concatenated code
+* **§VII-B, the dimension half of `#lemma 10#`/`#theorem 13#` (closed 2026-10-02).**
+  Both printed claims say that the concatenated code
   `C_cat = {(C(u), D(f(u)))}` is a linear code *of dimension `k`* (and, for
   `#theorem 13#`, of total redundancy `(n−k)+r'`).  The declarations
   `image_linear_concat` (linearity of the encoding map) and `isLinearFCC_concat`
   (the two distance guarantees) cover the rest; the dimension statement needs the
   encoders `C`, `D` to be *injective* linear maps (as the paper's
   "linear codes of dimensions `k` and `ℓ`" provides), i.e. a statement
-  `finrank F (LinearMap.range ...) = k` with `Cf` injective.  Tracked in
-  `TODO.md` 3.10; the labels are `stated`/`proved` for what is there, so the
-  consistency checker cannot see this gap — hence this note.
+  `finrank F (LinearMap.range ...) = k` with `Cf` injective.  That statement is now
+  `finrank_range_concat` (`FCC/Paper.lean`, with the linear map `concatEnc`): the
+  encoding's first `r` coordinates recover `C u`, so it is injective and its range has
+  dimension `k`.  `#theorem 13#` itself still keeps the *plain-function* form of `C`,
+  `D` (that is what its distance hypotheses and proof use), so the dimension claim lives
+  in this companion lemma rather than as a conjunct of the paper's item — recorded here
+  because the consistency checker sees only labels.
 
 `#theorem 2#` is stated with one side condition that the paper assumes rather
 than prints — `d_d ≤ d_f` (from `#definition 6#`, and used by the proof) — see

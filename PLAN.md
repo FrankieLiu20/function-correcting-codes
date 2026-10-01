@@ -121,8 +121,8 @@ The convention — and what the checker does with it — is in `Notation.md` §1
 | `#lemma 9#` | VII | in a linear `(f:d_d,d_f)`-FCC of a linear `f`: `wt v ≥ d_f` for all `v ∈ C \ D_f` (stated with the `d(C/D_f) ≥ d_f` form of `#definition 18#`) | `wt_ge_of_not_mem_kernel` | proved |
 | `#definition 17#` | VII | coset code `C/D` and its minimum distance `d(C/D)` | `CosetCode`, `cosetCodeMinDist` | stated |
 | `#definition 18#` | VII | equivalent definition: `d(C) ≥ d_d` and `d(C/D_f) ≥ d_f` | `IsLinearFCCKernel` | stated |
-| `#lemma 10#` | VII | `C_cat = {(C(u), D(f(u)))}` is a linear code of dimension `k` for linear `C`, `D`, `f` (formalized as: the encoding `u ↦ (C(u),D(f(u)))` is linear `IsLinearMap`; the *dimension* claim is deferred — `TODO.md` 3.10) | `image_linear_concat` | proved (linearity) |
-| `#theorem 13#` | VII | correctness: `C_cat` is a linear `(f:d_d,d_f)`-FCC of dimension `k`, total redundancy `(n−k)+r'` (formalized as the two distance guarantees; linearity is `#lemma 10#`, the dimension/redundancy bookkeeping is deferred — `TODO.md` 3.10) | `isLinearFCC_concat` | proved (distances) |
+| `#lemma 10#` | VII | `C_cat = {(C(u), D(f(u)))}` is a linear code of dimension `k` for linear `C`, `D`, `f`: the encoding `u ↦ (C(u),D(f(u)))` is linear (`image_linear_concat`) and, for *injective* `C` (the paper's "codes of dimension `k`"), spans a `k`-dimensional space (`concatEnc` + `finrank_range_concat`) | `image_linear_concat` | proved (linearity + dimension) |
+| `#theorem 13#` | VII | correctness: `C_cat` is a linear `(f:d_d,d_f)`-FCC of dimension `k`, total redundancy `(n−k)+r'`: linearity is `#lemma 10#`'s, the dimension likewise (`finrank_range_concat`), and the two distance guarantees are `isLinearFCC_concat` (which keeps `C`, `D` as plain functions, as its proof uses); the redundancy `(n−k)+r'` is the length `r + r'` of the concatenation minus the dimension | `isLinearFCC_concat` | proved |
 
 #### §VIII Classical bounds extended to FCCs + Appendix
 

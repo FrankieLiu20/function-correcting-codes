@@ -3387,6 +3387,37 @@ of a word of length `m` with one of length `n`, i.e. the paper's pair
 def catWord {m n : ℕ} (x : Word F m) (y : Word F n) : Word F (m + n) :=
   Fin.append x y
 
+/-- `(internal, §VII — the linear map underlying `#lemma 10#`'s concatenation)` — the
+encoding `u ↦ (C(u), D(f(u)))` of `#lemma 10#` as a linear map (`catWord` spells out the
+pair). -/
+def concatEnc {k ℓ r r' : ℕ} (f : Word F k →ₗ[F] Word F ℓ) (Cf : Word F k →ₗ[F] Word F r)
+    (Df : Word F ℓ →ₗ[F] Word F r') : Word F k →ₗ[F] Word F (r + r') :=
+  { toFun := fun u => catWord (Cf u) (Df (f u))
+    map_add' := by intro a b; simp only [map_add, catWord, append_add]
+    map_smul' := by intro c a; simp only [map_smul, catWord, append_smul, RingHom.id_apply] }
+
+omit [Fintype F] [DecidableEq F] in
+/-- `(internal, §VII — the dimension half of `#lemma 10#`/`#theorem 13#`)` — the
+concatenated encoding of linear maps with `C` *injective* (the paper's standing "linear
+codes of dimensions `k` and `ℓ`") spans a space of dimension `k`: its first `r`
+coordinates recover `C u`, so it is injective, and the range of an injective map from
+`F_q^k` has dimension `k`.  This is the "linear code of dimension `k`" half of
+`#lemma 10#`/`#theorem 13#`, which those two statements (linearity of the encoding and
+the distance guarantees) do not by themselves carry — see `VERIFICATION.md`,
+"Statement-level caveats". -/
+theorem finrank_range_concat {k ℓ r r' : ℕ} (f : Word F k →ₗ[F] Word F ℓ)
+    (Cf : Word F k →ₗ[F] Word F r) (Df : Word F ℓ →ₗ[F] Word F r')
+    (hCf : Function.Injective Cf) :
+    Module.finrank F (LinearMap.range (concatEnc f Cf Df)) = k := by
+  classical
+  have hinj : Function.Injective (concatEnc f Cf Df) := by
+    intro u v huv
+    refine hCf (funext fun i => ?_)
+    have h := congrFun huv (Fin.castAdd r' i)
+    simpa [concatEnc, catWord, Fin.append_left] using h
+  exact (LinearMap.finrank_range_of_inj (f := concatEnc f Cf Df) hinj).trans
+    (Module.finrank_fin_fun F)
+
 omit [Fintype F] [DecidableEq F] in
 /-- `#lemma 10#` (§VII) — "let `f : F_q^k → F_q^ℓ` be a linear function.  Further,
 let `C ⊆ F_q^n` and `D ⊆ F_q^{r'}` be linear codes of dimensions `k` and `ℓ`,

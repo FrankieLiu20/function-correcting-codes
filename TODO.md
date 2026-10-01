@@ -333,7 +333,7 @@ in the same commit that does the work.
         `C ≃ₗ F_q^k`; pulling `ker f` back along an equivalence preserves the
         dimension (`Submodule.map_comap_eq_self` + `LinearEquiv.finrank_map_eq`).
 
-      **Still to do in 3.10**: the *dimension* half of `#lemma 10#`/`#theorem 13#`
+      **Done 2026-10-02** — the *dimension* half of `#lemma 10#`/`#theorem 13#`
       ("a linear code of
       dimension `k` and total redundancy `(n−k)+r'`"), which needs the encoders
       `C`, `D` as *injective* linear maps (the Lean statements currently take them
