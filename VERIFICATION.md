@@ -245,17 +245,17 @@ redundancy `r_s` and has since been reworked and proved (`ISSUES.md` §13(d)).
 
 ## Phase 3.13 — the appendix ball-union counts (2026-10-01)
 
-`#theorem 17#` (`card_ball_union_dist_one`) and `#lemma 14#`
-(`card_ball_inter_dist_two`) are proved; `#theorem 18#` and `#theorem 19#` remain
-stated with `sorry`.
+`#theorem 17#` (`card_ball_union_dist_one`), `#lemma 14#`
+(`card_ball_inter_dist_two`) and `#theorem 18#` (`card_ball_union_three`) are
+proved; `#theorem 19#` remains stated with `sorry`.
 
 Verified:
 
 | Check | Result |
 | --- | --- |
 | `lake build` | green (1818 jobs; 16 `sorry` warnings, all in phases 3.11–3.13) |
-| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 16 `sorry`) |
-| `scripts/axioms_check.ps1` | green — 46 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 15 `sorry`) |
+| `scripts/axioms_check.ps1` | green — 47 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
 
 `#lemma 14#` is the paper's Appendix Lemma 14: over `F₂`, for `d(u₁,u₂) = 2`,
 `|B(u₁,t) ∩ B(u₂,t)| = 2Σ_{i≤t−1}C(n−1,i)`.  Statement re-read against the PDF
@@ -288,6 +288,26 @@ inclusion–exclusion), `diffSet_surjective`/`diffSet_injective` +
 other), `zmod2_eq_add_one_of_ne`, `zmod2_add_one_ne`,
 `erase_erase_eq_sdiff_pair`, and `card_filter_inter_eq_card`.  Proving
 `#theorem 18#` (and then `#theorem 19#`) from this machinery is the next step.
+
+`#theorem 18#` itself then took the paper's two steps; it is now proved.
+
+* **Triple intersection** (`card_ball_inter_three`, in the same file as
+  `#theorem 18#`): `|B(u₁,t) ∩ B(u₂,t) ∩ B(u₃,t)| = #₁ + 3#₂` with
+  `#₁ = Σ_{i<t−1}C(n−2,i)` and `#₂ = Σ_{i<t−2}C(n−2,i)` (the paper's four cases).
+  The characterisation `mem_ball_inter_three_iff` is the two-coordinate model with
+  `c₁ ∈ D ↔ c₂ ∈ D` replaced by `c₁ ∈ D ∨ c₂ ∈ D`, and the count
+  (`card_allowed_pair_three`) splits the admissible sets `D` by `D ∩ {c₁,c₂} = ∅`
+  (the filter *is* a powerset filter, card `Σ_{i<t}C(n−2,i)`) versus the three
+  non-empty patterns (fibres with card `Σ_{i<t−1}C(n−2,i)`, `card_filter_inter_eq_card`,
+  the index set `T.powerset.filter (· ≠ ∅)` having card `3`).
+* **Inclusion–exclusion**: `card_union_three_add` with `card_ball` (each ball
+  `Σ_{i<t+1}C(n,i)` over `F₂`), the two distance-one intersections and the
+  distance-two one (each `2Σ_{i<t}C(n−1,i)`), and then `omega` on the additive
+  identities `Σ_{i≤t}C(n,i) = Σ_{i≤t}C(n−1,i) + Σ_{i≤t−1}C(n−1,i)`
+  (`sum_range_choose_succ`), `C(n−1,t) = C(n−2,t−1) + C(n−2,t)`
+  (`Nat.choose_succ_succ`) and `Σ_{i<t}C(n−2,i) = Σ_{i<t−1}C(n−2,i) + C(n−2,t−1)`.
+* `c₁ ≠ c₂` is derived from `d(u₂,u₃) = 2`: over `F₂` two words that differ from
+  `u₁` in the *same* single coordinate coincide.
 
 ## Not formalized (and why)
 

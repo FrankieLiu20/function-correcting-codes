@@ -339,7 +339,8 @@ in the same commit that does the work.
       `Finset.erase_insert`; and `by decide` proves the two-element facts about
       `ZMod 2` (`x ≠ a ↔ x = b` for `a ≠ b`), because the type is finite so the
       quantified proposition is decidable.
-- [ ] 3.13 (part 3, in progress 2026-10-01). `#theorem 18#` (three balls at pairwise
+- [x] 3.13 (part 3, **done** 2026-10-01; the plan below was carried out as written).
+      `#theorem 18#` (three balls at pairwise
       distances `1,1,2`) and `#theorem 19#` (`F₂`, distance `3`, `t ≥ 2`).
       **Statement fix first**: the printed `#theorem 18#` is false at `t = 0` in
       Lean's `ℕ` (`C(n−2,t−1)` becomes `C(n−2,0) = 1` instead of the paper's
@@ -376,6 +377,25 @@ in the same commit that does the work.
       `#₁` for six of them, `#₂` for `000`/`111`) and the pairwise intersection
       replaced by `card_ball_inter_dist_three`.  These unlock
       `#theorem 15#`/`#theorem 16#`/`#corollary 14#`.
+- [ ] 3.13 (part 4, next). `#theorem 19#` (`card_ball_union_dist_three`): two balls at
+      distance `3`, `t ≥ 2` (the hypothesis is the paper's own, so `t − 2` is
+      exact).  The paper computes the *intersection* first: with three special
+      coordinates its table gives `6#₁ + 2#₂`, where `#₁ = Σ_{i<t−1}C(n−3,i)` covers
+      the six patterns with one or two of the special coordinates in `D` and
+      `#₂ = Σ_{i<t−2}C(n−3,i)` covers `000` and `111`, i.e.
+      `8Σ_{i<t−2}C(n−3,i) + 6C(n−3,t−2)`; then the union is
+      `|B(u,t)| + |B(v,t)| − |B(u,t) ∩ B(v,t)|` with `card_ball`.  What is needed
+      is the three-coordinate analogue of the counting pair
+      `card_filter_inter_eq_card`/`card_allowed_pair_three`: partition the
+      admissible sets by `D ∩ T` with `T = {c₁,c₂,c₃}`.  The paper's table costs
+      `3` when `D ∩ T` is `∅` or `T` (the patterns `000`, `111`) and `2` on the
+      other six patterns, so the intersection is
+      `2Σ_{i<t−2}C(n−3,i) + 6Σ_{i<t−1}C(n−3,i)` — the six cost-`2` patterns are
+      counted by `#(T.powerset.filter (· ≠ ∅)) − 1 = 7 − 1`, with the fibres of
+      `S ↦ S ∪ P` from `card_filter_inter_eq_card`, and the union is the two-set
+      identity `|A| + |B| − |A∩B|` with `card_ball`.  Everything else
+      (`diffSet_surjective`/`injective`, `card_filter_diffSet`, the `zmod2_*`
+      facts) is already in place.
 - [x] 3.13 (old note, superseded — finished 2026-10-01). `#theorem 17#`'s counting layer: three pieces
       are in `FCC/Balls.lean` (`exists_diffSet_eq_singleton`,
       `mem_ball_inter_iff_of_dist_one`, `card_fiber_erase`).  The next piece is

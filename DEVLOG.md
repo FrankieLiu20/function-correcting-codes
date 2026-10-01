@@ -1304,3 +1304,61 @@ the two distance-one intersections (`#theorem 17#`) and the distance-two one
 **Verification.**  Standalone `lake build` green, then (separately)
 `consistency_check.ps1 -Strict` green (16 `sorry`) and `axioms_check.ps1` green
 (46 audited results); commit `5cf9305`.  No headline result changed.
+
+## 2026-10-01 — appendix: `#theorem 18#` proved (`card_ball_union_three`)
+
+`#theorem 18#`: for three distinct binary words with pairwise distances `1, 1, 2`
+and `1 ≤ t`,
+
+```text
+|B(u₁,t) ∪ B(u₂,t) ∪ B(u₃,t)| = 3 Σ_{i≤t} C(n,i) − 6 Σ_{i≤t−1} C(n−1,i)
+                                  + C(n−2,t−1) + 4 Σ_{i≤t−2} C(n−2,i).
+```
+
+The proof follows the paper exactly (its proof was read again before starting):
+
+1. **triple intersection.**  `mem_ball_inter_three_iff` proves that, with
+   `a = |D(x,u) \ {c₁,c₂}|` and `bᵢ = [cᵢ ∈ D(x,u)]`,
+   `d(x,u) = a + b₁ + b₂`, `d(x,v) = a + (1−b₁) + b₂` and
+   `d(x,w) = a + b₁ + (1−b₂)` — so "all three `≤ t`" is `a + 2 ≤ t` unless `x`
+   agrees with `u` at *both* special coordinates, where it is `a + 1 ≤ t` (the
+   paper's four cases).  Since over `F₂` the disagreement set determines the word
+   (`card_filter_diffSet`), the count is `card_allowed_pair_three`: the pattern
+   "`c₁, c₂ ∉ D`" is *literally* a powerset filter (card `Σ_{i<t}C(n−2,i)`), and
+   the other three patterns are fibres of `D ↦ D ∩ T` with card
+   `Σ_{i<t−1}C(n−2,i)` each (`card_filter_inter_eq_card`; the index set
+   `T.powerset.filter (· ≠ ∅)` has card `3`).  Packaged as `card_ball_inter_three`:
+   `#₁ + 3#₂`, equal to the printed `C(n−2,t−1) + 4Σ_{i<t−2}C(n−2,i)` for `t ≥ 1`.
+2. **inclusion–exclusion.**  `card_union_three_add` (the subtraction-free 3-set
+   identity added at the start of this session) with `card_ball` (each ball
+   `Σ_{i<t+1}C(n,i)` over `F₂`), `card_ball_inter_dist_one` for the two pairs at
+   distance one and `card_ball_inter_dist_two` for the pair at distance two (each
+   `2Σ_{i<t}C(n−1,i)`).
+
+The final arithmetic is pure `omega` given the additive identities
+`Σ_{i≤t}C(n,i) = Σ_{i≤t}C(n−1,i) + Σ_{i≤t−1}C(n−1,i)` (`sum_range_choose_succ`,
+which is why the paper's `3Σ − 6Σ` must be `3C(n−1,t)` exactly),
+`C(n−1,t) = C(n−2,t−1) + C(n−2,t)` (`Nat.choose_succ_succ`, with `t ≥ 1` so that
+`(t−1).succ = t`) and `Σ_{i<t}C(n−2,i) = Σ_{i<t−1}C(n−2,i) + C(n−2,t−1)`
+(`Finset.sum_range_succ`).  The hypothesis `1 ≤ t` is the one from
+`ISSUES.md` §22 (the printed `C(n−2,t−1)` truncates at `t = 0`).
+
+`c₁ ≠ c₂` is a small `F₂` argument: if both `u₂` and `u₃` differed from `u₁` in
+the *same* single coordinate `c`, then at `c` they would both be the unique
+element of `F₂` other than `u₁ c`, and elsewhere they both agree with `u₁`, so
+`d(u₂,u₃) = 0 ≠ 2`.
+
+**Lean notes.**  `rw` could not instantiate the predicate of `card_filter_diffSet`
+by higher-order unification, so the lemma is applied to a named function first
+(`have hkey := card_filter_diffSet u (fun D => …)`, then `rw [hset, hkey, …]`).
+`Nat.choose_succ_succ` is stated with `Nat.succ`, so the `+1` form of `t − 1 + 1`
+does not match: state `(t − 1).succ = t` instead.  The `Finset` union in
+`card_union_three_add` is left-associated, which is exactly the association of the
+paper's `A ∪ B ∪ C`.
+
+**Verification.**  Standalone `lake build` green, then (separately)
+`consistency_check.ps1 -Strict` green (15 `sorry`) and `axioms_check.ps1` green
+(47 audited results, only `propext`, `Classical.choice`, `Quot.sound`); commit
+`eedded1`.  `card_ball_union_three` was added to `scripts/headline_theorems.txt`
+and `FCC/AxiomCheck.lean`.  Next: `#theorem 19#` (two balls at distance three,
+`t ≥ 2`), the last of the four appendix counts.
