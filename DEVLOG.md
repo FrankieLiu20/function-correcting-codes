@@ -1517,3 +1517,13 @@ Still to do for the pair: the per-coordinate pair count
 (`M² − Σ_ε n_ε²`, the `Fin M × Fin M` fibre square), the two-sided counting of
 `Σ_{x≠y} d(x,y)` and the `sInf`/attainment arguments.  `lake build`,
 `consistency_check -Strict` (9 `sorry`) and `axioms_check` (53) all green.
+
+**Same day, second half.**  `card_ne_pairs_mul_le` is now also in: for `M` symbols
+over a `q`-ary alphabet, `q · #{(i,j) : i ≠ j symbols differ} ≤ M²(q−1)`.  The
+proof splits by the equal pairs (the disjoint union over `ε` of the fibre squares,
+card `Σ_ε n_ε²` via `card_biUnion`/`card_product`), uses
+`card_filter_add_card_filter_not` for `#ne + #eq = M²`, and closes with
+`Nat.sub_le_sub_left` against `sum_sq_le_card_mul_sum_sq`.  What remains for
+`#theorem 14#` is only the two-sided count of `Σ_{x≠y} d(x,y)` (over messages, per
+coordinate) plus the `sInf`/attainment bookkeeping; `#lemma 13#` needs the sharp
+balanced-distribution constant on top.

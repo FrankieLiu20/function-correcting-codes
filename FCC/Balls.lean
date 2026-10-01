@@ -2402,5 +2402,69 @@ theorem sum_sq_le_card_mul_sum_sq {F : Type*} [Fintype F] (n : F → ℕ) :
       _ = 2 * (Fintype.card F * ∑ ε, n ε ^ 2) := hD
   exact Nat.le_of_mul_le_mul_left (by simpa [pow_two] using key) (by norm_num : 0 < 2)
 
+/-- `(internal, §VIII-A — the per-coordinate estimate of `#theorem 14#`)` — among `M`
+positions carrying symbols of a `q`-ary alphabet, the number of ordered pairs of
+positions with *different* symbols is at most `M²(q−1)/q`.  With `n_ε` the number of
+positions carrying `ε`, the count is `M² − Σ_ε n_ε²` (the equal pairs form the
+disjoint union of the squares of the fibres) and `q·Σ_ε n_ε² ≥ M²`
+(`sum_sq_le_card_mul_sum_sq`). -/
+theorem card_ne_pairs_mul_le {F : Type*} [Fintype F] [DecidableEq F] {M : ℕ}
+    (x : Fin M → F) :
+    Fintype.card F * ((Finset.univ : Finset (Fin M × Fin M)).filter
+        (fun p => x p.1 ≠ x p.2)).card ≤ M ^ 2 * (Fintype.card F - 1) := by
+  classical
+  set n : F → ℕ := fun ε => (Finset.univ.filter (fun i : Fin M => x i = ε)).card with hn
+  have hset : (Finset.univ.filter (fun p : Fin M × Fin M => x p.1 = x p.2))
+      = Finset.univ.biUnion (fun ε : F =>
+          (Finset.univ.filter (fun i : Fin M => x i = ε)) ×ˢ
+            (Finset.univ.filter (fun j : Fin M => x j = ε))) := by
+    ext p
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_biUnion,
+      Finset.mem_product]
+    constructor
+    · intro h
+      exact ⟨x p.1, rfl, h.symm⟩
+    · rintro ⟨ε, h1, h2⟩
+      rw [h1, h2]
+  have hdisj : Set.PairwiseDisjoint (fun ε => ε ∈ (Finset.univ : Finset F))
+      (fun ε => (Finset.univ.filter (fun i : Fin M => x i = ε)) ×ˢ
+        (Finset.univ.filter (fun j : Fin M => x j = ε))) := by
+    intro ε _ δ _ hne
+    change Disjoint _ _
+    rw [Finset.disjoint_left]
+    intro p hp hq
+    simp only [Finset.mem_product, Finset.mem_filter, Finset.mem_univ, true_and] at hp hq
+    exact hne (hp.1.symm.trans hq.1)
+  have hcardEq : (Finset.univ.filter (fun p : Fin M × Fin M => x p.1 = x p.2)).card
+      = ∑ ε, n ε ^ 2 := by
+    rw [hset, Finset.card_biUnion hdisj]
+    refine Finset.sum_congr rfl fun ε _ => ?_
+    rw [Finset.card_product, hn, pow_two]
+  have hpart : (Finset.univ.filter (fun p : Fin M × Fin M => x p.1 ≠ x p.2)).card
+      + (Finset.univ.filter (fun p : Fin M × Fin M => x p.1 = x p.2)).card = M ^ 2 := by
+    have h := Finset.card_filter_add_card_filter_not (s := (Finset.univ : Finset (Fin M × Fin M)))
+      (p := fun p => x p.1 = x p.2)
+    simpa [Finset.card_univ, Fintype.card_prod, Fintype.card_fin, pow_two, mul_comm, add_comm] using h
+  have hM : M = ∑ ε, n ε := by
+    have h := Finset.card_eq_sum_card_fiberwise (s := (Finset.univ : Finset (Fin M)))
+      (t := (Finset.univ : Finset F)) (f := x) (fun i _ => Finset.mem_univ _)
+    simpa [Finset.card_univ, hn] using h
+  have hCS : M ^ 2 ≤ Fintype.card F * ∑ ε, n ε ^ 2 := by
+    rw [hM]
+    exact sum_sq_le_card_mul_sum_sq n
+  rcases Nat.eq_zero_or_pos (Fintype.card F) with hq0 | hqpos
+  · rw [hq0]; simp
+  · set T := M ^ 2 with hT
+    have h1 : T ≤ Fintype.card F * ∑ ε, n ε ^ 2 := hCS
+    have h2 : (Finset.univ.filter (fun p : Fin M × Fin M => x p.1 ≠ x p.2)).card
+        + ∑ ε, n ε ^ 2 = T := by rw [← hcardEq, hpart]
+    have h3 : T * (Fintype.card F - 1) = Fintype.card F * T - T := by
+      rw [Nat.mul_sub_left_distrib, mul_one, mul_comm T (Fintype.card F)]
+    rw [h3]
+    have hne_eq : (Finset.univ.filter (fun p : Fin M × Fin M => x p.1 ≠ x p.2)).card
+        = T - ∑ ε, n ε ^ 2 := by omega
+    rw [hne_eq, Nat.mul_sub_left_distrib]
+    exact Nat.sub_le_sub_left h1 (Fintype.card F * T)
+
 end FCC
 
