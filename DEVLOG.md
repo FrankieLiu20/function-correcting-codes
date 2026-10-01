@@ -1498,6 +1498,6 @@ message with the message part of `C u` — the same point as `ISSUES.md` §13(a)
 **Verification.**  Standalone `lake build` green (the consistency check caught a
 stray `Scratch.lean` at the package root before this — the guard works), then
 `consistency_check.ps1 -Strict` green (9 `sorry`) and `axioms_check.ps1` green
-(53 audited results).  Commit `be1f2f0`-ish (see the log).  Remaining `sorry`s:
+(53 audited results).  Commit `389f348`.  Remaining `sorry`s:
 `#lemma 11#` (two, external), `#lemma 13#`, `#theorem 14#`, and the five §VII
 bricks/`#theorem 13#`.
