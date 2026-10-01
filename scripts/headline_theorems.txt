@@ -73,3 +73,5 @@ card_ball_union_dist_one
 card_ball_inter_dist_two
 # Appendix (three balls at pairwise distances 1, 1, 2):
 card_ball_union_three
+# Appendix (two balls at distance three):
+card_ball_union_dist_three

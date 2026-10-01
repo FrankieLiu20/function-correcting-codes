@@ -2073,4 +2073,293 @@ theorem card_ball_inter_three {n t : ℕ} {u v w : Word (ZMod 2) n} {c₁ c₂ :
   have hsub : t + 1 - 2 = t - 1 := by omega
   rw [hsub, hTCcard]
 
+/-! ### Appendix — two balls at distance three (`#theorem 19#`)
+
+The paper's Theorem 19 normalises to `u₁ = 0`, `u₂ = (1,1,1,0,…,0)` and splits on
+`x₁, x₂, x₃`.  With `T = {c₁,c₂,c₃}` the three differing coordinates, a word `x` is
+described by `S = D(x,u) \ T` and the pattern `P = D(x,u) ∩ T`; then
+`d(x,u) = |S| + |P|` and `d(x,v) = |S| + (3 − |P|)`, so `x` lies in both balls iff
+`|S| + max(|P|, 3 − |P|) ≤ t` — the paper's table (`|P| = 0` and `|P| = 3` cost
+`3`, the other six patterns cost `2`).  Over `F₂` the disagreement set determines
+the word, so the count is a count of admissible sets. -/
+
+/-- `(internal, Appendix — the three special coordinates of `#theorem 19#`)` — over
+`F₂`, two words at Hamming distance three differ in exactly three coordinates
+`c₁, c₂, c₃`. -/
+theorem exists_diffSet_eq_triple {n : ℕ} {u v : Word (ZMod 2) n} (h : hammingDist u v = 3) :
+    ∃ c₁ c₂ c₃ : Fin n, c₁ ≠ c₂ ∧ c₁ ≠ c₃ ∧ c₂ ≠ c₃ ∧ diffSet u v = {c₁, c₂, c₃} := by
+  have hcard : (diffSet u v).card = 3 := by
+    rw [← hammingDist_eq_card_diffSet]
+    exact h
+  obtain ⟨c₁, c₂, c₃, h12, h13, h23, hset⟩ := Finset.card_eq_three.mp hcard
+  exact ⟨c₁, c₂, c₃, h12, h13, h23, hset⟩
+
+/-- `(internal, Appendix — the characterisation behind `#theorem 19#`)` — if `u` and
+`v` differ exactly in `c₁, c₂, c₃`, then `x` lies in both balls iff
+`|D(x,u) \ {c₁,c₂,c₃}| + max |D(x,u) ∩ {c₁,c₂,c₃}| (3 − |D(x,u) ∩ {c₁,c₂,c₃}|) ≤ t`
+(agreement in `k` of the three coordinates costs `max k (3−k)`, the paper's table). -/
+theorem mem_ball_inter_iff_dist_three {n t : ℕ} {u v x : Word (ZMod 2) n} {c₁ c₂ c₃ : Fin n}
+    (h : hammingDist u v = 3) (hc : diffSet u v = {c₁, c₂, c₃}) :
+    x ∈ ball u t ∩ ball v t ↔
+      (diffSet x u \ {c₁, c₂, c₃}).card +
+        max ((diffSet x u ∩ {c₁, c₂, c₃}).card) (3 - (diffSet x u ∩ {c₁, c₂, c₃}).card) ≤ t := by
+  classical
+  set T : Finset (Fin n) := {c₁, c₂, c₃} with hT
+  have hcardT : T.card = 3 := by
+    rw [← hc, ← hammingDist_eq_card_diffSet, h]
+  have hout : ∀ j : Fin n, j ∉ T → u j = v j := by
+    intro j hj
+    by_contra hne'
+    have hmem : j ∈ diffSet u v := by simp [diffSet, hne']
+    rw [hc] at hmem
+    exact hj hmem
+  have hswap : ∀ j ∈ T, (j ∈ diffSet x v ↔ j ∉ diffSet x u) := by
+    intro j hj
+    have huv : u j ≠ v j := by
+      have hmem : j ∈ diffSet u v := by rw [hc]; exact hj
+      simpa [diffSet] using hmem
+    simp only [diffSet, Finset.mem_filter, Finset.mem_univ, true_and]
+    rw [zmod2_ne_iff_eq (v j) (u j) (x j) huv.symm]
+    exact (not_not (a := x j = u j)).symm
+  have herase : diffSet x v \ T = diffSet x u \ T := by
+    ext j
+    rw [Finset.mem_sdiff, Finset.mem_sdiff]
+    constructor
+    · rintro ⟨hjv, hjT⟩
+      refine ⟨?_, hjT⟩
+      have hv : x j ≠ v j := by simpa [diffSet] using hjv
+      rw [← hout j hjT] at hv
+      exact Finset.mem_filter.mpr ⟨Finset.mem_univ j, hv⟩
+    · rintro ⟨hju, hjT⟩
+      refine ⟨?_, hjT⟩
+      have hu : x j ≠ u j := by simpa [diffSet] using hju
+      rw [hout j hjT] at hu
+      exact Finset.mem_filter.mpr ⟨Finset.mem_univ j, hu⟩
+  have hinter : diffSet x v ∩ T = T \ (diffSet x u ∩ T) := by
+    ext j
+    simp only [Finset.mem_inter, Finset.mem_sdiff]
+    constructor
+    · rintro ⟨hjv, hjT⟩
+      exact ⟨hjT, fun h => ((hswap j hjT).mp hjv) h.1⟩
+    · rintro ⟨hjT, hjnot⟩
+      exact ⟨(hswap j hjT).mpr (fun hju => hjnot ⟨hju, hjT⟩), hjT⟩
+  have hdu : hammingDist x u = (diffSet x u ∩ T).card + (diffSet x u \ T).card := by
+    rw [hammingDist_eq_card_diffSet]
+    exact (Finset.card_inter_add_card_sdiff (diffSet x u) T).symm
+  have hdv : hammingDist x v = (3 - (diffSet x u ∩ T).card) + (diffSet x u \ T).card := by
+    rw [hammingDist_eq_card_diffSet,
+      (Finset.card_inter_add_card_sdiff (diffSet x v) T).symm, hinter,
+      Finset.card_sdiff, Finset.inter_eq_left.mpr Finset.inter_subset_right, hcardT, herase]
+  simp only [Finset.mem_inter, ball, Finset.mem_filter, Finset.mem_univ, true_and]
+  rw [hdu, hdv]
+  omega
+
+/-- `(internal, Appendix — counting step of `#theorem 19#`)` — the admissible
+disagreement sets of the distance-three intersection: with `T = {c₁,c₂,c₃}`, the
+patterns `D ∩ T = ∅` and `D ∩ T = T` cost `3` while the other six patterns cost `2`,
+so the count is `2 · #{S ⊆ Tᶜ : |S| + 3 ≤ t} + 6 · #{S ⊆ Tᶜ : |S| + 2 ≤ t}` (the
+index `T.powerset.filter (· ≠ ∅ ∧ · ≠ T)` has six elements). -/
+theorem card_allowed_triple {n t : ℕ} {c₁ c₂ c₃ : Fin n}
+    (hcard3 : ({c₁, c₂, c₃} : Finset (Fin n)).card = 3) :
+    (Finset.univ.filter (fun D : Finset (Fin n) =>
+        (D \ ({c₁, c₂, c₃} : Finset (Fin n))).card +
+          max ((D ∩ ({c₁, c₂, c₃} : Finset (Fin n))).card)
+              (3 - (D ∩ ({c₁, c₂, c₃} : Finset (Fin n))).card) ≤ t)).card
+      = 2 * ((({c₁, c₂, c₃} : Finset (Fin n))ᶜ).powerset.filter (fun S => S.card + 3 ≤ t)).card
+        + 6 * ((({c₁, c₂, c₃} : Finset (Fin n))ᶜ).powerset.filter (fun S => S.card + 2 ≤ t)).card := by
+  classical
+  set T : Finset (Fin n) := {c₁, c₂, c₃} with hT
+  set TC : Finset (Fin n) := Tᶜ with hTC
+  have hcardT : T.card = 3 := hcard3
+  have hTne : T ≠ ∅ := by
+    intro h
+    have := hcardT
+    rw [h] at this
+    exact absurd this (by norm_num)
+  have hpart : (Finset.univ.filter (fun D : Finset (Fin n) =>
+        (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))
+      = (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = ∅ ∧
+            (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))
+        ∪ ((Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = T ∧
+              (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))
+            ∪ (T.powerset.filter (fun P => P ≠ ∅ ∧ P ≠ T)).biUnion (fun P =>
+                Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = P ∧
+                  (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))) := by
+    ext D
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union,
+      Finset.mem_biUnion, Finset.mem_powerset]
+    constructor
+    · intro hc
+      by_cases hemp : D ∩ T = ∅
+      · exact Or.inl ⟨hemp, hc⟩
+      · by_cases hfull : D ∩ T = T
+        · exact Or.inr (Or.inl ⟨hfull, hc⟩)
+        · exact Or.inr (Or.inr ⟨D ∩ T, ⟨Finset.inter_subset_right, hemp, hfull⟩, rfl, hc⟩)
+    · rintro (⟨hemp, hc⟩ | ⟨hfull, hc⟩ | ⟨P, ⟨hPT, hPne, hPneT⟩, hDP, hc⟩)
+      · exact hc
+      · exact hc
+      · exact hc
+  have hdisj1 : Disjoint (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = ∅ ∧
+        (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))
+      ((Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = T ∧
+            (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))
+        ∪ (T.powerset.filter (fun P => P ≠ ∅ ∧ P ≠ T)).biUnion (fun P =>
+              Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = P ∧
+                (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))) := by
+    rw [Finset.disjoint_left]
+    intro D h1 h2
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_union,
+      Finset.mem_biUnion, Finset.mem_powerset] at h1 h2
+    rcases h2 with h2 | ⟨P, ⟨hPT, hPne, hPneT⟩, hDP, hc⟩
+    · rw [h1.1] at h2
+      exact hTne h2.1.symm
+    · rw [← hDP, h1.1] at hPne
+      exact hPne rfl
+  have hdisj2 : Disjoint (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = T ∧
+        (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))
+      ((T.powerset.filter (fun P => P ≠ ∅ ∧ P ≠ T)).biUnion (fun P =>
+              Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = P ∧
+                (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))) := by
+    rw [Finset.disjoint_left]
+    intro D h1 h2
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_biUnion,
+      Finset.mem_powerset] at h1 h2
+    obtain ⟨P, ⟨hPT, hPne, hPneT⟩, hDP, hc⟩ := h2
+    rw [← hDP, h1.1] at hPneT
+    exact hPneT rfl
+  have hG0 : (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = ∅ ∧
+        (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t)).card
+      = (TC.powerset.filter (fun S => S.card + 3 ≤ t)).card := by
+    have hfilter : (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = ∅ ∧
+          (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))
+        = (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = ∅ ∧ (D \ T).card + 3 ≤ t)) := by
+      ext D
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+      constructor
+      · rintro ⟨hemp, hcond⟩
+        refine ⟨hemp, ?_⟩
+        rw [hemp, Finset.card_empty] at hcond
+        simpa using hcond
+      · rintro ⟨hemp, hcond⟩
+        refine ⟨hemp, ?_⟩
+        rw [hemp, Finset.card_empty]
+        simpa using hcond
+    rw [hfilter, card_filter_inter_eq_card T ∅ (Finset.empty_subset T) 3 t]
+  have hGT : (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = T ∧
+        (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t)).card
+      = (TC.powerset.filter (fun S => S.card + 3 ≤ t)).card := by
+    have hfilter : (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = T ∧
+          (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))
+        = (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = T ∧ (D \ T).card + 3 ≤ t)) := by
+      ext D
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+      constructor
+      · rintro ⟨hfull, hcond⟩
+        refine ⟨hfull, ?_⟩
+        rw [hfull, hcardT] at hcond
+        simpa using hcond
+      · rintro ⟨hfull, hcond⟩
+        refine ⟨hfull, ?_⟩
+        rw [hfull, hcardT]
+        simpa using hcond
+    rw [hfilter, card_filter_inter_eq_card T T (Finset.Subset.refl T) 3 t]
+  have hGmid : ((T.powerset.filter (fun P => P ≠ ∅ ∧ P ≠ T)).biUnion (fun P =>
+          Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = P ∧
+            (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))).card
+      = 6 * (TC.powerset.filter (fun S => S.card + 2 ≤ t)).card := by
+    have hdisj3 : Set.PairwiseDisjoint (fun P => P ∈ T.powerset.filter (fun P => P ≠ ∅ ∧ P ≠ T))
+        (fun P => Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = P ∧
+          (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t)) := by
+      intro P _ P' _ hne'
+      change Disjoint _ _
+      rw [Finset.disjoint_left]
+      intro D h1 h2
+      simp only [Finset.mem_filter, Finset.mem_univ, true_and] at h1 h2
+      exact hne' (h1.1.symm.trans h2.1)
+    rw [Finset.card_biUnion hdisj3]
+    have hfiber : ∀ P ∈ T.powerset.filter (fun P => P ≠ ∅ ∧ P ≠ T),
+        (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = P ∧
+          (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t)).card
+          = (TC.powerset.filter (fun S => S.card + 2 ≤ t)).card := by
+      intro P hP
+      have hPT : P ⊆ T := Finset.mem_powerset.mp (Finset.mem_filter.mp hP).1
+      have hPne : P ≠ ∅ := (Finset.mem_filter.mp hP).2.1
+      have hPneT : P ≠ T := (Finset.mem_filter.mp hP).2.2
+      have hcost : max P.card (3 - P.card) = 2 := by
+        have hle : P.card ≤ 3 := by
+          have h := Finset.card_le_card hPT
+          rwa [hcardT] at h
+        have hpos : 1 ≤ P.card := Finset.card_pos.mpr (Finset.nonempty_iff_ne_empty.mpr hPne)
+        have hne3 : P.card ≠ 3 := by
+          intro h3
+          exact hPneT (Finset.eq_of_subset_of_card_le hPT (by rw [hcardT]; omega))
+        have hk : P.card = 1 ∨ P.card = 2 := by omega
+        rcases hk with h | h <;> rw [h] <;> norm_num
+      have hcongr : (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = P ∧
+            (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t))
+          = (Finset.univ.filter (fun D : Finset (Fin n) => D ∩ T = P ∧ (D \ T).card + 2 ≤ t)) := by
+        ext D
+        simp only [Finset.mem_filter, Finset.mem_univ, true_and]
+        constructor
+        · rintro ⟨hDP, hcond⟩
+          refine ⟨hDP, ?_⟩
+          rw [hDP, hcost] at hcond
+          exact hcond
+        · rintro ⟨hDP, hcond⟩
+          refine ⟨hDP, ?_⟩
+          rw [hDP, hcost]
+          exact hcond
+      rw [hcongr]
+      exact card_filter_inter_eq_card T P hPT 2 t
+    rw [Finset.sum_congr rfl hfiber, Finset.sum_const, smul_eq_mul]
+    have hidx : (T.powerset.filter (fun P => P ≠ ∅ ∧ P ≠ T)).card = 6 := by
+      have hset : T.powerset.filter (fun P => P ≠ ∅ ∧ P ≠ T) = (T.powerset.erase ∅).erase T := by
+        ext P
+        simp only [Finset.mem_filter, Finset.mem_erase]
+        constructor
+        · rintro ⟨hP, hne0, hneT⟩
+          exact ⟨hneT, hne0, hP⟩
+        · rintro ⟨hneT, hne0, hP⟩
+          exact ⟨hP, hne0, hneT⟩
+      rw [hset,
+        Finset.card_erase_of_mem (Finset.mem_erase.mpr ⟨hTne, Finset.mem_powerset.mpr
+          (Finset.Subset.refl T)⟩),
+        Finset.card_erase_of_mem (Finset.mem_powerset.mpr (Finset.empty_subset T)),
+        Finset.card_powerset, hcardT]
+      norm_num
+    rw [hidx]
+  rw [hpart, Finset.card_union_of_disjoint hdisj1, Finset.card_union_of_disjoint hdisj2,
+    hG0, hGT, hGmid]
+  ring
+
+/-- `(internal, Appendix — the intersection step of `#theorem 19#`)` — for two binary
+words at distance three,
+`|B(u,t) ∩ B(v,t)| = 2Σ_{i<t−2}C(n−3,i) + 6Σ_{i<t−1}C(n−3,i)`, the paper's
+`2#₂ + 6#₁` (equal to `8Σ_{i<t−3}C(n−3,i) + 6C(n−3,t−2)` for `t ≥ 2`). -/
+theorem card_ball_inter_dist_three {n t : ℕ} {u v : Word (ZMod 2) n} {c₁ c₂ c₃ : Fin n}
+    (h : hammingDist u v = 3) (hc : diffSet u v = {c₁, c₂, c₃}) :
+    (ball u t ∩ ball v t).card
+      = 2 * (∑ i ∈ Finset.range (t - 2), (n - 3).choose i)
+        + 6 * (∑ i ∈ Finset.range (t - 1), (n - 3).choose i) := by
+  classical
+  set T : Finset (Fin n) := {c₁, c₂, c₃} with hT
+  set TC : Finset (Fin n) := Tᶜ with hTC
+  have hcard3 : T.card = 3 := by
+    rw [← hc, ← hammingDist_eq_card_diffSet, h]
+  have hTCcard : TC.card = n - 3 := by
+    rw [hTC, Finset.card_compl, Fintype.card_fin, hcard3]
+  have hset : ball u t ∩ ball v t = Finset.univ.filter (fun x : Word (ZMod 2) n =>
+      (diffSet x u \ T).card + max ((diffSet x u ∩ T).card) (3 - (diffSet x u ∩ T).card) ≤ t) := by
+    ext x
+    rw [mem_ball_inter_iff_dist_three h (by rw [← hT]; exact hc)]
+    simp [hT]
+  have hkey := card_filter_diffSet u (fun D : Finset (Fin n) =>
+      (D \ T).card + max ((D ∩ T).card) (3 - (D ∩ T).card) ≤ t)
+  rw [hset, hkey, card_allowed_triple hcard3,
+    card_powerset_filter_add_le TC 3 t, card_powerset_filter_add_le TC 2 t]
+  have h3 : t + 1 - 3 = t - 2 := by omega
+  have h2 : t + 1 - 2 = t - 1 := by omega
+  rw [h3, h2, hTCcard]
+
 end FCC
+

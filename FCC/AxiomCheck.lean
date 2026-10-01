@@ -75,5 +75,6 @@ namespace FCC
 #print axioms card_ball_union_dist_one
 #print axioms card_ball_inter_dist_two
 #print axioms card_ball_union_three
+#print axioms card_ball_union_dist_three
 
 end FCC

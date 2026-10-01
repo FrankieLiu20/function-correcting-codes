@@ -3787,7 +3787,24 @@ theorem card_ball_union_dist_three {n t : ℕ} (u v : Word (ZMod 2) n)
     (ball u t ∪ ball v t).card =
       2 * (∑ i ∈ Finset.range (t + 1), n.choose i) -
         8 * (∑ i ∈ Finset.range (t - 2), (n - 3).choose i) - 6 * ((n - 3).choose (t - 2)) := by
-  sorry
+  classical
+  obtain ⟨c₁, c₂, c₃, h₁₂, h₁₃, h₂₃, hc⟩ := exists_diffSet_eq_triple h
+  have hball : ∀ z : Word (ZMod 2) n, (ball z t).card = ∑ i ∈ Finset.range (t + 1), n.choose i := by
+    intro z
+    rw [card_ball, ZMod.card]
+    exact Finset.sum_congr rfl fun i _ => by simp
+  have hinter : (ball u t ∩ ball v t).card
+      = 2 * (∑ i ∈ Finset.range (t - 2), (n - 3).choose i)
+        + 6 * (∑ i ∈ Finset.range (t - 1), (n - 3).choose i) :=
+    card_ball_inter_dist_three h hc
+  have hIE := Finset.card_union_add_card_inter (ball u t) (ball v t)
+  rw [hball u, hball v, hinter] at hIE
+  have hsplit : (∑ i ∈ Finset.range (t - 1), (n - 3).choose i)
+      = (∑ i ∈ Finset.range (t - 2), (n - 3).choose i) + (n - 3).choose (t - 2) := by
+    have hh := Finset.sum_range_succ (fun i => (n - 3).choose i) (t - 2)
+    rwa [show (t - 2) + 1 = t - 1 from by omega] at hh
+  omega
+
 
 end AppendixStatements
 
@@ -3803,3 +3820,4 @@ TODO: `#theorem 18#`, `#theorem 19#`.
 -/
 
 end FCC
+
