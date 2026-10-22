@@ -509,7 +509,8 @@ Verified (separately, after the full build):
 
 Still open in §VIII-A: `#lemma 13#` (`plotkin_bound`), which needs the *sharp*
 constant `a⌈M/q⌉(M−⌈M/q⌉) + (q−a)⌊M/q⌋(M−⌊M/q⌋)` (`a = M mod q`) rather than the
-Cauchy–Schwarz estimate, and `#lemma 11#` (quoted from [1], external).
+Cauchy–Schwarz estimate, and `#lemma 11#` (quoted from [1]; it was proved later as its
+binary case `q = 2` — see *Phase 3.11 (part 3)* below).
 
 ## Phase 3.11 (part 2) — `#lemma 13#`, the sharp Plotkin bound (2026-10-02)
 
@@ -566,9 +567,33 @@ Verified (separately, after the full build):
 | `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; 2 `sorry`) |
 | `scripts/axioms_check.ps1` | green — 60 audited results, only `propext`, `Classical.choice`, `Quot.sound` |
 
-With that, every numbered result of the paper that is not an externally quoted row is
-proved; what remains are the two `#lemma 11#` rows (quoted from [1]) and the final
-assembly (examples, `TODO.md` phase 1b, tagged release).
+At that point every numbered result of the paper that is not an externally quoted row was
+proved; the two `#lemma 11#` rows were still quotations.  They are now proved as well —
+see *Phase 3.11 (part 3)* below.
+
+## Phase 3.11 (part 3) — `#lemma 11#` proved, **`sorry` count 0** (2026-10-02)
+
+The two rows of `#lemma 11#` (`plotkin_bound_binary`, `plotkin_bound_binary_odd`) are
+proved, not quoted: the paper's Remark 2 derives them from `#lemma 13#` by substituting
+`q = 2` (`a = M mod 2 ∈ {0,1}`), and the formal proofs instantiate `plotkin_bound`
+(`M % 2 = 0` from `Even M`, `M % 2 = 1` from `Odd M`).
+
+**Statement fix** (`ISSUES.md` §27): as transcribed in phase 2 the constant `4` was stated
+over an arbitrary alphabet.  That is the binary case `4 = 2q` with `q = 2`; without it the
+claim is false (over `F₃`, `M = 3`, `D ≡ 1` the odd-`M` claim reads `1.5 ≤ N(D)` while
+`N(D) = 1`).  Both statements now carry `hF : Fintype.card F = 2`.
+
+The paper prints `#lemma 11#` before `#lemma 13#` (it quotes it from [1]); since the
+formal proofs use `#lemma 13#`, the two declarations are placed just after
+`plotkin_bound` in `FCC/Paper.lean`, and `PLAN.md` §1.1 keeps the paper's order.
+
+Verified:
+
+| Check | Result |
+| --- | --- |
+| `lake build` | green (1879 jobs; **no `sorry` warnings, no other warnings**) |
+| `scripts/consistency_check.ps1 -Strict` | green (78 paper markers, all inventory rows; 73 rows stated; **0 `sorry`**) |
+| `scripts/axioms_check.ps1` | green — **62** audited results, only `propext`, `Classical.choice`, `Quot.sound` |
 
 ## Not formalized (and why)
 
