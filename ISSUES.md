@@ -611,3 +611,34 @@ independent result but the binary case of `#lemma 13#` — they are **proved** f
 Consequently they are declared *after* `#lemma 13#` in `FCC/Paper.lean` (the paper prints
 them before it, as a quotation); `PLAN.md` §1.1 keeps the paper's order, and
 `VERIFICATION.md` records this.
+
+## 28. `#definition 3#`: the codes of a `D`-code need not be *distinct* in Lean
+
+**Found 2026-10-22 while walking through `#definition 3#`** (the user will report this
+modelling point to their supervisor).  The paper defines `P = {p₁, p₂, …, p_M}`, a
+**set** of `M` (distinct) words together with an ordering.  The Lean definition is
+
+```lean
+def IsDCode {ι : Type*} (D : ι → ι → ℕ) (r : ℕ) : Prop :=
+  ∃ p : ι → Word F r, ∀ i j, i ≠ j → D i j ≤ hammingDist (p i) (p j)
+```
+
+which asks for an **indexed family** `p : ι → Word F r` but **not for `p` to be
+injective**.  When the entries `D i j` of a repeated pair are non-zero the repetition is
+impossible anyway (`d(p i, p i) = 0 < D i i` would be required), but when `D i j = 0` a
+family with `p i = p j` is admitted, i.e. a "D-code" with fewer than `|ι|` distinct
+words.  Consequently the Lean `N(D) := sInf {r | IsDCode D r}` may be **smaller** than the
+paper's `N(D)` for such matrices.
+
+**Why this is harmless for the paper's results.**  Every matrix used in the paper has
+zeros only where repetitions are meaningful (the diagonal, and pairs with
+`f(u_i) = f(u_j)` in the DRM/FDM), and every codeword family actually constructed in the
+paper comes from a **systematic** (hence injective) encoder.  Moreover the project's
+theorems are of two shapes: lower bounds `c ≤ N(D)` (which are *harder* for a smaller
+`N` and were proved as such) and upper bounds `N(D) ≤ c` (witnessed by explicit codes,
+so they hold for the paper's `N` as well).  Nothing proved here becomes false; this is a
+definitional *generalisation*, not a mistake.
+
+**Decision (2026-10-22).**  Keep the family form (it is what makes `N` usable for the FDM,
+which is indexed by the subtype `Set.range f`), and record the gap here so that a reader
+comparing the definitions does not assume the two `N`s are literally identical.

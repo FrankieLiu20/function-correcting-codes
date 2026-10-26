@@ -110,7 +110,9 @@ def drm {k : ℕ} {ι : Type*} (f : Word F k → α) (t : ℕ) (u : ι → Word 
 `p₁,…,p_M` of words such that `d(p_i, p_j) ≥ [D]_{i,j}` for all `i ≠ j` (the
 paper's "there is an ordering of `P`" is the indexing of this family).  The
 index type is an arbitrary `ι`; the DRM is indexed by `Fin M` and the FDM by the
-image values, and `#theorem 1#` relates the two, so `N` must accept both. -/
+image values, and `#theorem 1#` relates the two, so `N` must accept both.  Note: the
+family is **not** required to be injective, while the paper's `P` is a set of distinct
+words — a deliberate, harmless generalisation, `ISSUES.md` §28. -/
 def IsDCode {ι : Type*} (D : ι → ι → ℕ) (r : ℕ) : Prop :=
   ∃ p : ι → Word F r, ∀ i j, i ≠ j → D i j ≤ hammingDist (p i) (p j)
 
